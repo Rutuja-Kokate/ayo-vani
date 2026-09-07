@@ -6,6 +6,9 @@ import '../../../app/theme/app_typography.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
+import 'explore_find_quest_game.dart';
+import 'food_power_sorting_game.dart';
+import 'handy_actions_match_game.dart';
 
 class GameItem {
   GameItem({
@@ -138,6 +141,32 @@ class _GamesScreenState extends State<GamesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.chapterName == 'Two Little Hands') {
+      return HandyActionsMatchGame(
+        className: widget.className,
+        chapterNumber: widget.chapterNumber,
+        chapterName: widget.chapterName,
+        onBack: widget.onBack,
+        onNavigateTab: widget.onNavigateTab,
+      );
+    } else if (widget.chapterName == 'The Food We Eat') {
+      return FoodPowerSortingGame(
+        className: widget.className,
+        chapterNumber: widget.chapterNumber,
+        chapterName: widget.chapterName,
+        onBack: widget.onBack,
+        onNavigateTab: widget.onNavigateTab,
+      );
+    } else if (widget.chapterName == 'Life Around Us') {
+      return ExploreFindQuestGame(
+        className: widget.className,
+        chapterNumber: widget.chapterNumber,
+        chapterName: widget.chapterName,
+        onBack: widget.onBack,
+        onNavigateTab: widget.onNavigateTab,
+      );
+    }
+
     final isTablet = Responsive.isTabletOrLarger(context);
     final allSorted = _items.every((it) => it.isSorted);
 

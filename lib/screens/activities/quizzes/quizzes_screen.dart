@@ -3,6 +3,7 @@ import '../../../app/responsive/responsive.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimens.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../data/english_activities_data.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
@@ -13,12 +14,16 @@ class QuizQuestion {
     required this.options,
     required this.correctIndex,
     required this.explanation,
+    this.questionOdia,
+    this.optionsOdia,
   });
 
   final String question;
   final List<String> options;
   final int correctIndex;
   final String explanation;
+  final String? questionOdia;
+  final List<String>? optionsOdia;
 }
 
 /// Reusable Quizzes Screen for ANY chapter of ANY class.
@@ -58,6 +63,20 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
   }
 
   List<QuizQuestion> _generateQuestions() {
+    final hardcodedQuizzes = EnglishActivitiesData.getQuizQuestions(widget.chapterName);
+    if (hardcodedQuizzes != null && hardcodedQuizzes.isNotEmpty) {
+      return hardcodedQuizzes.map((q) {
+        return QuizQuestion(
+          question: q.question,
+          questionOdia: q.questionOdia,
+          options: q.options,
+          optionsOdia: q.optionsOdia,
+          correctIndex: q.correctIndex,
+          explanation: q.explanation,
+        );
+      }).toList();
+    }
+
     final lower = widget.chapterName.toLowerCase();
     if (lower.contains('fruit') || lower.contains('color')) {
       return const [
@@ -361,15 +380,32 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Question Title
-          Text(
-            currentQ.question,
-            style: TextStyle(
-              fontFamily: AppTypography.headingFontFamily,
-              fontSize: isTablet ? 24.0 : 20.0,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+          // Question Title & Odia Translation
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                currentQ.question,
+                style: TextStyle(
+                  fontFamily: AppTypography.headingFontFamily,
+                  fontSize: isTablet ? 22.0 : 18.0,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (currentQ.questionOdia != null && currentQ.questionOdia!.isNotEmpty) ...[
+                const SizedBox(height: 4.0),
+                Text(
+                  currentQ.questionOdia!,
+                  style: TextStyle(
+                    fontFamily: 'NotoSansOriya',
+                    fontSize: isTablet ? 18.0 : 15.0,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryBurgundy,
+                  ),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 22.0),
 
@@ -378,6 +414,9 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
             _buildOptionTile(
               index: i,
               text: currentQ.options[i],
+              textOdia: (currentQ.optionsOdia != null && currentQ.optionsOdia!.length > i)
+                  ? currentQ.optionsOdia![i]
+                  : null,
               isCorrect: i == currentQ.correctIndex,
               isSelected: _selectedAnswerIndex == i,
               isTablet: isTablet,
@@ -394,25 +433,58 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                 borderRadius: BorderRadius.circular(12.0),
                 border: Border.all(color: const Color(0xFFE8DECF)),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    _selectedAnswerIndex == currentQ.correctIndex
-                        ? Icons.check_circle_rounded
-                        : Icons.info_rounded,
-                    color: _selectedAnswerIndex == currentQ.correctIndex
-                        ? const Color(0xFF385E32)
-                        : const Color(0xFFB33222),
-                  ),
-                  const SizedBox(width: 10.0),
-                  Expanded(
-                    child: Text(
-                      currentQ.explanation,
-                      style: TextStyle(
-                        fontFamily: AppTypography.bodyFontFamily,
-                        fontSize: 12.5,
-                        color: AppColors.textPrimary,
+                  Row(
+                    children: [
+                      Icon(
+                        _selectedAnswerIndex == currentQ.correctIndex
+                            ? Icons.check_circle_rounded
+                            : Icons.info_rounded,
+                        color: _selectedAnswerIndex == currentQ.correctIndex
+                            ? const Color(0xFF385E32)
+                            : const Color(0xFFB33222),
                       ),
+                      const SizedBox(width: 8.0),
+                      Flexible(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Correct answer: ${currentQ.options[currentQ.correctIndex]}',
+                                style: const TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              if (currentQ.optionsOdia != null &&
+                                  currentQ.optionsOdia!.length > currentQ.correctIndex) ...[
+                                TextSpan(
+                                  text: ' (${currentQ.optionsOdia![currentQ.correctIndex]})',
+                                  style: const TextStyle(
+                                    fontFamily: 'NotoSansOriya',
+                                    fontSize: 13.0,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primaryBurgundy,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6.0),
+                  Text(
+                    currentQ.explanation,
+                    style: TextStyle(
+                      fontFamily: AppTypography.bodyFontFamily,
+                      fontSize: 12.5,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],
@@ -444,6 +516,7 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
   Widget _buildOptionTile({
     required int index,
     required String text,
+    String? textOdia,
     required bool isCorrect,
     required bool isSelected,
     required bool isTablet,
@@ -492,13 +565,30 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
               ),
               const SizedBox(width: 14.0),
               Expanded(
-                child: Text(
-                  text,
-                  style: TextStyle(
-                    fontFamily: AppTypography.bodyFontFamily,
-                    fontSize: isTablet ? 15.0 : 14.0,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: AppColors.textPrimary,
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: text,
+                        style: TextStyle(
+                          fontFamily: AppTypography.bodyFontFamily,
+                          fontSize: isTablet ? 15.0 : 14.0,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      if (textOdia != null && textOdia.isNotEmpty) ...[
+                        TextSpan(
+                          text: ' ($textOdia)',
+                          style: TextStyle(
+                            fontFamily: 'NotoSansOriya',
+                            fontSize: isTablet ? 15.0 : 14.0,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                            color: AppColors.primaryBurgundy,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
