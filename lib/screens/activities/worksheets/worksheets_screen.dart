@@ -1,11 +1,20 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../app/responsive/responsive.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimens.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../data/english_activities_data.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
+
+class OddOneOutRow {
+  final List<EnglishMundariWord> items;
+  final int oddIndex;
+
+  const OddOneOutRow({required this.items, required this.oddIndex});
+}
 
 /// Reusable Worksheets Screen for ANY chapter of ANY class.
 class WorksheetsScreen extends StatefulWidget {
@@ -228,7 +237,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
     final sheets = [
       '1. Tracing & Writing',
       '2. Matching & Drawing',
-      '3. Coloring Practice',
+      '3. Riddles',
+      '4. Odd One Out',
     ];
 
     return Wrap(
@@ -259,7 +269,138 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
     );
   }
 
+  List<EnglishMundariWord> _getChapterWords() {
+    final words = EnglishActivitiesData.getWords(widget.chapterName);
+    if (words != null && words.isNotEmpty) {
+      return words;
+    }
+    return const [
+      EnglishMundariWord(
+        english: 'Banana',
+        mundariRoman: 'Kela',
+        mundariOdia: 'କେଲା',
+        meaning: 'Yellow fruit',
+        pronunciation: 'buh-nan-uh',
+        emoji: '🍌',
+        syllables: ['Ba', 'na', 'na'],
+      ),
+      EnglishMundariWord(
+        english: 'Apple',
+        mundariRoman: 'Seb',
+        mundariOdia: 'ସେବ',
+        meaning: 'Red fruit',
+        pronunciation: 'ap-uhl',
+        emoji: '🍎',
+        syllables: ['Ap', 'ple'],
+      ),
+      EnglishMundariWord(
+        english: 'Grapes',
+        mundariRoman: 'Angoor',
+        mundariOdia: 'ଅଙ୍ଗୁର',
+        meaning: 'Purple fruit',
+        pronunciation: 'grayps',
+        emoji: '🍇',
+        syllables: ['Grapes'],
+      ),
+    ];
+  }
+
+  List<OddOneOutRow> _getOddOneOutRowsForChapter(String chapterName) {
+    final bodyWords = EnglishActivitiesData.getWords('Two Little Hands') ?? [];
+    final animalWords = EnglishActivitiesData.getWords('Life Around Us') ?? [];
+    final foodWords = EnglishActivitiesData.getWords('The Food We Eat') ?? [];
+
+    final bodyMap = {for (var w in bodyWords) w.english: w};
+    final animalMap = {for (var w in animalWords) w.english: w};
+    final foodMap = {for (var w in foodWords) w.english: w};
+
+    if (chapterName == 'Two Little Hands') {
+      return [
+        OddOneOutRow(
+          items: [
+            bodyMap['Hand']!,
+            bodyMap['Leg']!,
+            animalMap['Lion']!,
+          ],
+          oddIndex: 2,
+        ),
+        OddOneOutRow(
+          items: [
+            bodyMap['Eye']!,
+            foodMap['Roti']!,
+            bodyMap['Ear']!,
+          ],
+          oddIndex: 1,
+        ),
+        OddOneOutRow(
+          items: [
+            foodMap['Mango']!,
+            bodyMap['Nose']!,
+            bodyMap['Mouth']!,
+          ],
+          oddIndex: 0,
+        ),
+      ];
+    } else if (chapterName == 'Life Around Us') {
+      return [
+        OddOneOutRow(
+          items: [
+            animalMap['Lion']!,
+            animalMap['Monkey']!,
+            foodMap['Milk']!,
+          ],
+          oddIndex: 2,
+        ),
+        OddOneOutRow(
+          items: [
+            bodyMap['Hand']!,
+            animalMap['Fish']!,
+            animalMap['Elephant']!,
+          ],
+          oddIndex: 0,
+        ),
+        OddOneOutRow(
+          items: [
+            animalMap['Frog']!,
+            foodMap['Carrot']!,
+            animalMap['Rabbit']!,
+          ],
+          oddIndex: 1,
+        ),
+      ];
+    } else {
+      return [
+        OddOneOutRow(
+          items: [
+            foodMap['Roti']!,
+            foodMap['Milk']!,
+            bodyMap['Leg']!,
+          ],
+          oddIndex: 2,
+        ),
+        OddOneOutRow(
+          items: [
+            animalMap['Frog']!,
+            foodMap['Mango']!,
+            foodMap['Carrot']!,
+          ],
+          oddIndex: 0,
+        ),
+        OddOneOutRow(
+          items: [
+            foodMap['Butter']!,
+            bodyMap['Ear']!,
+            foodMap['Fruits']!,
+          ],
+          oddIndex: 1,
+        ),
+      ];
+    }
+  }
+
   Widget _buildWorksheetPreview(bool isTablet) {
+    final words = _getChapterWords();
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -281,56 +422,774 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Sheet Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'AYOVAANI Classroom Worksheet',
-                style: TextStyle(
-                  fontFamily: AppTypography.headingFontFamily,
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryBurgundy,
+          // Sheet Header with Stacked Bilingual Label
+          if (isTablet)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'AYOVAANI Classroom Worksheet',
+                      style: TextStyle(
+                        fontFamily: AppTypography.headingFontFamily,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryBurgundy,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      worksheetLabels['AYOVAANI Classroom Worksheet']!,
+                      style: const TextStyle(
+                        fontFamily: 'NotoSansOriya',
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryBurgundy,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Text(
-                'Name: ____________  Date: ______',
-                style: TextStyle(
-                  fontFamily: AppTypography.bodyFontFamily,
-                  fontSize: 12.0,
-                  color: AppColors.textSecondary,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Name: ____________  Date: ______',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 12.0,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      '${worksheetLabels['Name:']} ____________  ${worksheetLabels['Date:']} ______',
+                      style: const TextStyle(
+                        fontFamily: 'NotoSansOriya',
+                        fontSize: 11.0,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
+              ],
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'AYOVAANI Classroom Worksheet',
+                  style: TextStyle(
+                    fontFamily: AppTypography.headingFontFamily,
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryBurgundy,
+                  ),
+                ),
+                const SizedBox(height: 2.0),
+                Text(
+                  worksheetLabels['AYOVAANI Classroom Worksheet']!,
+                  style: const TextStyle(
+                    fontFamily: 'NotoSansOriya',
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryBurgundy,
+                  ),
+                ),
+                const SizedBox(height: 6.0),
+                Text(
+                  'Name: ____________  Date: ______',
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 11.5,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 2.0),
+                Text(
+                  '${worksheetLabels['Name:']} ____________  ${worksheetLabels['Date:']} ______',
+                  style: const TextStyle(
+                    fontFamily: 'NotoSansOriya',
+                    fontSize: 11.0,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           const Divider(height: 24.0, thickness: 1.0, color: Color(0xFFE2D4C0)),
 
-          Text(
-            'Exercise: Trace and write the words below',
-            style: TextStyle(
-              fontFamily: AppTypography.bodyFontFamily,
-              fontSize: 13.5,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 16.0),
-
-          // Guided Tracing Lines for the Chapter
-          _buildSampleTracingRow('Banana', '🍌'),
-          const SizedBox(height: 16.0),
-          _buildSampleTracingRow('Apple', '🍎'),
-          const SizedBox(height: 16.0),
-          _buildSampleTracingRow('Grapes', '🍇'),
+          if (_selectedWorksheet == 0)
+            _buildTracingAndWritingPreview(words, isTablet)
+          else if (_selectedWorksheet == 1)
+            _buildMatchingAndDrawingPreview(words, isTablet)
+          else if (_selectedWorksheet == 2)
+            _buildRiddlesPreview(words, isTablet)
+          else
+            _buildOddOneOutPreview(words, isTablet),
         ],
       ),
     );
   }
 
-  Widget _buildSampleTracingRow(String word, String emoji) {
+  Widget _buildTracingAndWritingPreview(
+    List<EnglishMundariWord> words,
+    bool isTablet,
+  ) {
+    final tracingWords = words.take(3).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Exercise: Trace and write the words below',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 2.0),
+            Text(
+              worksheetLabels['Exercise: Trace and write the words below']!,
+              style: const TextStyle(
+                fontFamily: 'NotoSansOriya',
+                fontSize: 12.0,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryBurgundy,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16.0),
+
+        for (int i = 0; i < tracingWords.length; i++) ...[
+          if (i > 0) const SizedBox(height: 16.0),
+          _buildSampleTracingRow(
+            tracingWords[i].english,
+            tracingWords[i].mundariRoman,
+            tracingWords[i].mundariOdia,
+            tracingWords[i].emoji,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildMatchingAndDrawingPreview(
+    List<EnglishMundariWord> words,
+    bool isTablet,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSentenceMatchingExercise(words, isTablet),
+        const SizedBox(height: 24.0),
+        const Divider(height: 1.0, thickness: 1.0, color: Color(0xFFE2D4C0)),
+        const SizedBox(height: 20.0),
+        _buildFunWithWordsExercise(words, isTablet),
+      ],
+    );
+  }
+
+  Widget _buildSentenceMatchingExercise(
+    List<EnglishMundariWord> words,
+    bool isTablet,
+  ) {
+    final sentences = EnglishActivitiesData.getSentences(widget.chapterName) ?? [];
+    if (sentences.isEmpty) return const SizedBox.shrink();
+
+    final wordMap = {for (var w in words) w.english: w};
+
+    // Deterministic shuffle for right column matching
+    final shuffledSentences = List<BilingualSentence>.from(sentences)
+      ..shuffle(Random(widget.chapterNumber + 42));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Exercise 1: Draw lines to match each picture to its sentence',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 2.0),
+            Text(
+              worksheetLabels['Exercise 1: Draw lines to match each picture to its sentence']!,
+              style: const TextStyle(
+                fontFamily: 'NotoSansOriya',
+                fontSize: 12.0,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryBurgundy,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14.0),
+        for (int i = 0; i < sentences.length; i++) ...[
+          if (i > 0) const SizedBox(height: 12.0),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Left: Emoji Image Box
+              Container(
+                width: isTablet ? 52.0 : 44.0,
+                height: isTablet ? 52.0 : 44.0,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFAF7F2),
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: Border.all(color: const Color(0xFFC88A22), width: 1.2),
+                ),
+                child: Center(
+                  child: Text(
+                    wordMap[sentences[i].relatedWord]?.emoji ?? '📖',
+                    style: TextStyle(fontSize: isTablet ? 26.0 : 22.0),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6.0),
+              const Text(
+                '•',
+                style: TextStyle(
+                  color: Color(0xFFC88A22),
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              // Middle: Dotted connecting line space
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 6.0),
+                  height: 1.5,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE5DACB),
+                  ),
+                ),
+              ),
+
+              // Right: Shuffled Sentence Box with Odia script sentence
+              const Text(
+                '•',
+                style: TextStyle(
+                  color: Color(0xFFC88A22),
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 6.0),
+              Flexible(
+                flex: 5,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFAF7F2),
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(color: const Color(0xFFEDE4D7), width: 1.2),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        shuffledSentences[i].englishSentence,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: isTablet ? 13.0 : 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2.0),
+                      Text(
+                        shuffledSentences[i].mundariOdia,
+                        style: TextStyle(
+                          fontFamily: 'NotoSansOriya',
+                          fontSize: isTablet ? 12.0 : 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryBurgundy,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildFunWithWordsExercise(
+    List<EnglishMundariWord> words,
+    bool isTablet,
+  ) {
+    final sampleWords = words.take(5).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Exercise 2: Fun with Words - Read the syllables',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 2.0),
+            Text(
+              worksheetLabels['Exercise 2: Fun with Words - Read the syllables']!,
+              style: const TextStyle(
+                fontFamily: 'NotoSansOriya',
+                fontSize: 12.0,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryBurgundy,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14.0),
+        for (int i = 0; i < sampleWords.length; i++) ...[
+          if (i > 0) const SizedBox(height: 10.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFAF7F2),
+              borderRadius: BorderRadius.circular(12.0),
+              border: Border.all(color: const Color(0xFFEDE4D7)),
+            ),
+            child: Row(
+              children: [
+                // Syllable boxes
+                Wrap(
+                  spacing: 6.0,
+                  runSpacing: 4.0,
+                  children: sampleWords[i].syllables.map((syl) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(
+                          color: const Color(0xFFC88A22),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Text(
+                        syl.toLowerCase(),
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: isTablet ? 14.0 : 13.0,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(width: 10.0),
+
+                // Arrow / Connector
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 16.0,
+                  color: Color(0xFFC88A22),
+                ),
+                const SizedBox(width: 10.0),
+
+                // Bilingual Mundari Translation
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '( ${sampleWords[i].mundariRoman} / ',
+                          style: TextStyle(
+                            fontFamily: AppTypography.bodyFontFamily,
+                            fontSize: isTablet ? 13.0 : 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryBurgundy,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '${sampleWords[i].mundariOdia} )',
+                          style: TextStyle(
+                            fontFamily: 'NotoSansOriya',
+                            fontSize: isTablet ? 13.0 : 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryBurgundy,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildRiddlesPreview(
+    List<EnglishMundariWord> words,
+    bool isTablet,
+  ) {
+    final riddles = EnglishActivitiesData.getRiddles(widget.chapterName) ?? [];
+    if (riddles.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Exercise: Read the riddles and write the answers below',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 2.0),
+            Text(
+              worksheetLabels['Exercise: Read the riddles and write the answers below']!,
+              style: const TextStyle(
+                fontFamily: 'NotoSansOriya',
+                fontSize: 12.0,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryBurgundy,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16.0),
+        for (int i = 0; i < riddles.length; i++) ...[
+          if (i > 0) const SizedBox(height: 14.0),
+          Container(
+            padding: EdgeInsets.all(isTablet ? 16.0 : 12.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFAF7F2),
+              borderRadius: BorderRadius.circular(14.0),
+              border: Border.all(color: const Color(0xFFEDE4D7)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFC88A22),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Text(
+                        'Riddle ${i + 1}',
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10.0),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            riddles[i].englishRiddle,
+                            style: TextStyle(
+                              fontFamily: AppTypography.headingFontFamily,
+                              fontSize: isTablet ? 15.0 : 13.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 3.0),
+                          Text(
+                            riddles[i].mundariOdia,
+                            style: TextStyle(
+                              fontFamily: 'NotoSansOriya',
+                              fontSize: isTablet ? 13.0 : 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryBurgundy,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10.0),
+
+                // Student Answer Line with Stacked Odia Label
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Answer: _______________________',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF8B7361),
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      '${worksheetLabels['Answer:']} _______________________',
+                      style: const TextStyle(
+                        fontFamily: 'NotoSansOriya',
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primaryBurgundy,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6.0),
+
+                // Teacher/Parent Answer Key
+                Row(
+                  children: [
+                    const Text(
+                      'Answer key: ',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF9E8B7A),
+                      ),
+                    ),
+                    Text(
+                      '${riddles[i].answerEnglish} ',
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF9E8B7A),
+                      ),
+                    ),
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '( ${riddles[i].answerMundariRoman} / ',
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 11.0,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF9E8B7A),
+                            ),
+                          ),
+                          TextSpan(
+                            text: '${riddles[i].answerMundariOdia} )',
+                            style: const TextStyle(
+                              fontFamily: 'NotoSansOriya',
+                              fontSize: 11.0,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF9E8B7A),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildOddOneOutPreview(
+    List<EnglishMundariWord> words,
+    bool isTablet,
+  ) {
+    final rows = _getOddOneOutRowsForChapter(widget.chapterName);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Exercise: Circle the odd one out in each row below',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 2.0),
+            Text(
+              worksheetLabels['Exercise: Circle the odd one out in each row below']!,
+              style: const TextStyle(
+                fontFamily: 'NotoSansOriya',
+                fontSize: 12.0,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryBurgundy,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16.0),
+        for (int r = 0; r < rows.length; r++) ...[
+          if (r > 0) const SizedBox(height: 14.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFAF7F2),
+              borderRadius: BorderRadius.circular(14.0),
+              border: Border.all(color: const Color(0xFFEDE4D7)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Row ${r + 1}:',
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFC88A22),
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    for (int itemIndex = 0; itemIndex < 3; itemIndex++) ...[
+                      _buildOddOneOutItemBox(
+                        rows[r].items[itemIndex],
+                        isTablet,
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildOddOneOutItemBox(
+    EnglishMundariWord word,
+    bool isTablet,
+  ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      width: isTablet ? 110.0 : 92.0,
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: const Color(0xFFE2D4C0), width: 1.2),
+      ),
+      child: Column(
+        children: [
+          // Emoji
+          Text(
+            word.emoji,
+            style: TextStyle(fontSize: isTablet ? 28.0 : 22.0),
+          ),
+          const SizedBox(height: 4.0),
+
+          // English Word
+          Text(
+            word.english,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: isTablet ? 12.5 : 11.0,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2.0),
+
+          // Bilingual Mundari
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '( ${word.mundariRoman} / ',
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: isTablet ? 10.5 : 9.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryBurgundy,
+                  ),
+                ),
+                TextSpan(
+                  text: '${word.mundariOdia} )',
+                  style: TextStyle(
+                    fontFamily: 'NotoSansOriya',
+                    fontSize: isTablet ? 10.5 : 9.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryBurgundy,
+                  ),
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6.0),
+
+          // Printable Circle / Checkbox
+          Container(
+            width: 18.0,
+            height: 18.0,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFC88A22), width: 1.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSampleTracingRow(
+    String word,
+    String mundariRoman,
+    String mundariOdia,
+    String emoji,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: const Color(0xFFFAF7F2),
         borderRadius: BorderRadius.circular(12.0),
@@ -338,33 +1197,73 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
       ),
       child: Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 26.0)),
-          const SizedBox(width: 14.0),
-          Text(
-            word,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 17.0,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+          Text(emoji, style: const TextStyle(fontSize: 24.0)),
+          const SizedBox(width: 10.0),
+          Flexible(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  word,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                if (mundariRoman.isNotEmpty || mundariOdia.isNotEmpty) ...[
+                  const SizedBox(height: 1.0),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '( $mundariRoman / ',
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryBurgundy,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '$mundariOdia )',
+                          style: const TextStyle(
+                            fontFamily: 'NotoSansOriya',
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryBurgundy,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-          const SizedBox(width: 20.0),
+          const SizedBox(width: 12.0),
           Expanded(
+            flex: 3,
             child: Container(
               height: 2.0,
               color: const Color(0xFFD4C7B5),
             ),
           ),
-          const SizedBox(width: 12.0),
-          Text(
-            word,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 17.0,
-              fontWeight: FontWeight.w300,
-              letterSpacing: 2.0,
-              color: Color(0xFFB0A294),
+          const SizedBox(width: 10.0),
+          Flexible(
+            flex: 2,
+            child: Text(
+              word,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 15.0,
+                fontWeight: FontWeight.w300,
+                letterSpacing: 1.5,
+                color: Color(0xFFB0A294),
+              ),
             ),
           ),
         ],
