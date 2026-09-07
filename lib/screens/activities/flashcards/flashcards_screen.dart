@@ -3,6 +3,7 @@ import '../../../app/responsive/responsive.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimens.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../data/english_activities_data.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
@@ -14,12 +15,23 @@ class FlashcardItem {
     required this.meaning,
     required this.pronunciation,
     required this.emoji,
+    this.mundariRoman,
+    this.mundariOdia,
   });
 
   final String word;
   final String meaning;
   final String pronunciation;
   final String emoji;
+  final String? mundariRoman;
+  final String? mundariOdia;
+
+  String? get mundariDisplay {
+    if (mundariRoman != null && mundariOdia != null) {
+      return '( $mundariRoman / $mundariOdia )';
+    }
+    return null;
+  }
 }
 
 /// Reusable Flashcards Screen for ANY chapter of ANY class.
@@ -57,6 +69,20 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
   }
 
   List<FlashcardItem> _generateCards() {
+    final hardcodedWords = EnglishActivitiesData.getWords(widget.chapterName);
+    if (hardcodedWords != null && hardcodedWords.isNotEmpty) {
+      return hardcodedWords.map((w) {
+        return FlashcardItem(
+          word: w.english,
+          meaning: '${w.meaning} ${w.mundariDisplay}',
+          mundariRoman: w.mundariRoman,
+          mundariOdia: w.mundariOdia,
+          pronunciation: w.pronunciation,
+          emoji: w.emoji,
+        );
+      }).toList();
+    }
+
     final lowerName = widget.chapterName.toLowerCase();
     if (lowerName.contains('fruit') || lowerName.contains('color')) {
       return const [
@@ -327,7 +353,7 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
 
   Widget _buildCardFront(FlashcardItem item, bool isTablet) {
     final width = isTablet ? 420.0 : double.infinity;
-    final height = isTablet ? 300.0 : 260.0;
+    final height = isTablet ? 320.0 : 280.0;
 
     return Container(
       key: const ValueKey('front'),
@@ -348,42 +374,75 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            item.emoji,
-            style: TextStyle(fontSize: isTablet ? 84.0 : 72.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+      child: Center(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                item.emoji,
+                style: TextStyle(fontSize: isTablet ? 72.0 : 58.0),
+              ),
+              const SizedBox(height: 10.0),
+              Text(
+                item.word,
+                style: TextStyle(
+                  fontFamily: AppTypography.headingFontFamily,
+                  fontSize: isTablet ? 28.0 : 24.0,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (item.mundariRoman != null && item.mundariOdia != null) ...[
+                const SizedBox(height: 4.0),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '( ${item.mundariRoman} / ',
+                        style: TextStyle(
+                          fontFamily: AppTypography.bodyFontFamily,
+                          fontSize: isTablet ? 19.0 : 16.0,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryBurgundy,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '${item.mundariOdia} )',
+                        style: TextStyle(
+                          fontFamily: 'NotoSansOriya',
+                          fontSize: isTablet ? 19.0 : 16.0,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryBurgundy,
+                        ),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              const SizedBox(height: 8.0),
+              Text(
+                'Tap to reveal meaning / translation',
+                style: TextStyle(
+                  fontFamily: AppTypography.bodyFontFamily,
+                  fontSize: 12.0,
+                  color: AppColors.textSecondary,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 14.0),
-          Text(
-            item.word,
-            style: TextStyle(
-              fontFamily: AppTypography.headingFontFamily,
-              fontSize: isTablet ? 30.0 : 26.0,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          Text(
-            'Tap to reveal meaning / translation',
-            style: TextStyle(
-              fontFamily: AppTypography.bodyFontFamily,
-              fontSize: 12.0,
-              color: AppColors.textSecondary,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildCardBack(FlashcardItem item, bool isTablet) {
     final width = isTablet ? 420.0 : double.infinity;
-    final height = isTablet ? 300.0 : 260.0;
+    final height = isTablet ? 320.0 : 280.0;
 
     return Container(
       key: const ValueKey('back'),
@@ -404,48 +463,53 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            item.meaning,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: AppTypography.headingFontFamily,
-              fontSize: isTablet ? 22.0 : 19.0,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12.0),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5ECE1),
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Text(
-              'Pronunciation: /${item.pronunciation}/',
-              style: TextStyle(
-                fontFamily: AppTypography.bodyFontFamily,
-                fontSize: 13.0,
-                color: const Color(0xFF765E49),
-                fontWeight: FontWeight.w500,
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+      child: Center(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                item.meaning,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: AppTypography.headingFontFamily,
+                  fontSize: isTablet ? 21.0 : 18.0,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
-            ),
+              const SizedBox(height: 10.0),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5ECE1),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Text(
+                  'Pronunciation: /${item.pronunciation}/',
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 12.5,
+                    color: const Color(0xFF765E49),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12.0),
+              Text(
+                'Tap to flip back',
+                style: TextStyle(
+                  fontFamily: AppTypography.bodyFontFamily,
+                  fontSize: 12.0,
+                  color: AppColors.textSecondary,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16.0),
-          Text(
-            'Tap to flip back',
-            style: TextStyle(
-              fontFamily: AppTypography.bodyFontFamily,
-              fontSize: 12.0,
-              color: AppColors.textSecondary,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

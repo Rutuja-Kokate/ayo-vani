@@ -24,79 +24,25 @@ class FirstEnglishChaptersScreen extends StatefulWidget {
   final VoidCallback? onBack;
   final ValueChanged<int>? onNavigateTab;
 
-  /// Full 12 Class 1 English Curriculum chapters
+  /// Class 1 English Curriculum prototype chapters (3 chapters for hackathon)
   static const List<BalvatikaChapter> englishChapters = [
     BalvatikaChapter(
       number: 1,
-      title: 'Myself',
-      description: "Let's learn about ourselves and introduction",
-      icon: Icons.child_care_rounded,
-    ),
-    BalvatikaChapter(
-      number: 2,
-      title: 'My Family',
-      description: "Let's learn about family members and home",
-      icon: Icons.diversity_3_rounded,
-    ),
-    BalvatikaChapter(
-      number: 3,
-      title: 'My School',
-      description: "Let's explore our classroom and friends",
-      icon: Icons.school_rounded,
-    ),
-    BalvatikaChapter(
-      number: 4,
-      title: 'Numbers Around Us',
-      description: "Let's count and identify numbers 1 to 20",
-      icon: Icons.format_list_numbered_rounded,
-    ),
-    BalvatikaChapter(
-      number: 5,
-      title: 'Shapes and Colors',
-      description: "Let's recognize vibrant colors and basic shapes",
-      icon: Icons.category_rounded,
-    ),
-    BalvatikaChapter(
-      number: 6,
-      title: 'Animals Around Us',
-      description: "Let's learn names and sounds of animals",
-      icon: Icons.pets_rounded,
-    ),
-    BalvatikaChapter(
-      number: 7,
-      title: 'Plants and Nature',
-      description: "Let's explore trees, flowers, and greenery",
-      icon: Icons.park_rounded,
-    ),
-    BalvatikaChapter(
-      number: 8,
-      title: 'My Body',
-      description: "Let's discover parts of our body and senses",
+      title: 'Two Little Hands',
+      description: "Let's learn the parts of our body",
       icon: Icons.accessibility_new_rounded,
     ),
     BalvatikaChapter(
-      number: 9,
-      title: 'Food and Health',
-      description: 'Healthy foods, fruits, and daily habits',
+      number: 2,
+      title: 'Life Around Us',
+      description: "Let's learn about animals around us",
+      icon: Icons.pets_rounded,
+    ),
+    BalvatikaChapter(
+      number: 3,
+      title: 'The Food We Eat',
+      description: "Let's learn about the food we eat",
       icon: Icons.restaurant_rounded,
-    ),
-    BalvatikaChapter(
-      number: 10,
-      title: 'Water and Air',
-      description: 'Essential resources and natural surroundings',
-      icon: Icons.water_drop_rounded,
-    ),
-    BalvatikaChapter(
-      number: 11,
-      title: 'Community Helpers',
-      description: 'People who help and protect our village & town',
-      icon: Icons.handshake_rounded,
-    ),
-    BalvatikaChapter(
-      number: 12,
-      title: 'Stories and Rhymes',
-      description: 'Engaging folk stories, poems, and musical rhymes',
-      icon: Icons.auto_stories_rounded,
     ),
   ];
 
@@ -563,7 +509,7 @@ class _FirstEnglishChaptersScreenState
                   ),
                 ),
                 Text(
-                  '12',
+                  '${FirstEnglishChaptersScreen.englishChapters.length}',
                   style: TextStyle(
                     fontFamily: AppTypography.headingFontFamily,
                     fontSize: isTablet ? 21.0 : 19.0,
