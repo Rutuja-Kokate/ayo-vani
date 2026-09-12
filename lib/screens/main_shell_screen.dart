@@ -5,10 +5,12 @@ import 'balvatika/balvatika_screen.dart';
 import 'first/first_screen.dart';
 import 'home/home_screen.dart';
 import 'learn/learn_screen.dart';
+import 'learn/student_levels_screen.dart';
 import 'live_translate/live_translate_screen.dart';
 import 'profile/profile_screen.dart';
 import 'second/second_screen.dart';
 import 'third/third_screen.dart';
+import 'tools/tools_screen.dart';
 
 /// Main adaptive navigation shell for AYOVAANI.
 ///
@@ -40,6 +42,19 @@ class _MainShellScreenState extends State<MainShellScreen> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => BalvatikaScreen(
+          onNavigateTab: (index) {
+            _onDestinationSelected(index);
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+    );
+  }
+
+  void _navigateToStudentLevels() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => StudentLevelsScreen(
           onNavigateTab: (index) {
             _onDestinationSelected(index);
             Navigator.of(context).pop();
@@ -88,6 +103,16 @@ class _MainShellScreenState extends State<MainShellScreen> {
     );
   }
 
+  void _navigateToTeacherTools() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => ToolsScreen(
+          onNavigateToLiveTranslate: _navigateToLiveTranslate,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screens = <Widget>[
@@ -103,6 +128,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
       LearnScreen(
         isShellTab: true,
         onBack: () => _onDestinationSelected(0),
+        onNavigateToTeacher: _navigateToTeacherTools,
+        onNavigateToStudent: _navigateToStudentLevels,
         onNavigateToBalvatika: _navigateToBalvatika,
         onNavigateToFirst: _navigateToFirst,
         onNavigateToSecond: _navigateToSecond,

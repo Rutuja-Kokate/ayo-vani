@@ -78,17 +78,15 @@ void main() {
     // Tap Learn tab
     await tester.tap(find.text('Learn').first);
     await tester.pumpAndSettle();
-    expect(find.text('Class Selection'), findsOneWidget);
+    expect(find.text('Learning'), findsOneWidget);
     expect(
-      find.text('Select your classroom stage to start learning'),
+      find.text('Choose how you want to learn today'),
       findsOneWidget,
     );
-    expect(find.text('Balvatika'), findsOneWidget);
-    expect(find.text('First'), findsOneWidget);
-    expect(find.text('Second'), findsOneWidget);
-    expect(find.text('Third'), findsOneWidget);
-    expect(find.text('Lessons'), findsNothing);
-    expect(find.text('Offline Content'), findsNothing);
+    expect(find.text('For Teachers'), findsOneWidget);
+    expect(find.text('For Students'), findsOneWidget);
+    expect(find.text('Explore'), findsOneWidget);
+    expect(find.text('Start Learning'), findsOneWidget);
 
     // Tap Translate tab
     await tester.tap(find.text('Translate').first);
@@ -368,6 +366,7 @@ void main() {
       // 2. First -> English (Tap Available English subject)
       final englishCard = find.text('English');
       expect(englishCard, findsOneWidget);
+      await tester.ensureVisible(englishCard);
       await tester.tap(englishCard);
       await tester.pumpAndSettle();
 
@@ -376,18 +375,16 @@ void main() {
       expect(find.text('Grade 1 | Learn, Listen, Speak'), findsOneWidget);
       expect(find.text('Chapters'), findsOneWidget);
       expect(find.text('Search chapters...'), findsOneWidget);
-      expect(find.text('Myself'), findsOneWidget);
-      expect(find.text('My Family'), findsOneWidget);
-      expect(find.text('My School'), findsOneWidget);
-      expect(find.text('Numbers Around Us'), findsOneWidget);
-      expect(find.text('Shapes and Colors'), findsOneWidget);
+      expect(find.text('Two Little Hands'), findsOneWidget);
+      expect(find.text('Life Around Us'), findsOneWidget);
+      expect(find.text('The Food We Eat'), findsOneWidget);
 
-      // 4. Select Chapter (Tap "Myself") -> opens Chapter Options Screen
-      await tester.tap(find.text('Myself'));
+      // 4. Select Chapter (Tap "Two Little Hands") -> opens Chapter Options Screen
+      await tester.tap(find.text('Two Little Hands'));
       await tester.pumpAndSettle();
 
       // 5. Chapter Options Screen
-      expect(find.text('Myself'), findsWidgets);
+      expect(find.text('Two Little Hands'), findsWidgets);
       expect(find.text('Flashcards'), findsOneWidget);
       expect(find.text('Worksheets'), findsOneWidget);
       expect(find.text('Games'), findsOneWidget);
@@ -410,7 +407,7 @@ void main() {
       // 8. Test Games
       await tester.tap(find.text('Games'));
       await tester.pumpAndSettle();
-      expect(find.text('Score: 0'), findsOneWidget);
+      expect(find.text('⭐ 0'), findsOneWidget);
       await tester.tap(find.byIcon(Icons.arrow_back_rounded));
       await tester.pumpAndSettle();
 
@@ -432,7 +429,9 @@ void main() {
       expect(find.text('Subjects'), findsOneWidget);
 
       // 12. Back to Home
-      await tester.tap(find.byIcon(Icons.chevron_left_rounded));
+      final homeBack = find.byIcon(Icons.chevron_left_rounded);
+      await tester.ensureVisible(homeBack);
+      await tester.tap(homeBack);
       await tester.pumpAndSettle();
       expect(find.text('Hello, Teacher'), findsOneWidget);
     },
@@ -559,7 +558,7 @@ void main() {
   );
 
   testWidgets(
-    'Learn Tab Flow: Bottom Nav Learn -> Class Selection -> First -> English -> Chapter Options -> Back navigation',
+    'Learn Tab Flow: Bottom Nav Learn -> Student Levels Screen -> Phase Selection Popup',
     (WidgetTester tester) async {
       tester.view.physicalSize = const Size(393 * 2.75, 851 * 2.75);
       tester.view.devicePixelRatio = 2.75;
@@ -578,64 +577,53 @@ void main() {
       await tester.tap(find.text('Learn').first);
       await tester.pumpAndSettle();
 
-      // Verify Class Selection screen is shown
-      expect(find.text('Class Selection'), findsOneWidget);
+      // Verify Learning screen is shown
+      expect(find.text('Learning'), findsOneWidget);
       expect(
-        find.text('Select your classroom stage to start learning'),
+        find.text('Choose how you want to learn today'),
         findsOneWidget,
       );
-      expect(find.text('Balvatika'), findsOneWidget);
-      expect(find.text('First'), findsOneWidget);
-      expect(find.text('Second'), findsOneWidget);
-      expect(find.text('Third'), findsOneWidget);
+      expect(find.text('For Students'), findsOneWidget);
 
-      // 2. Select First
-      await tester.tap(find.text('First'));
+      // 2. Tap Start Learning on Students card -> goes to StudentLevelsScreen
+      await tester.tap(find.text('Start Learning'));
       await tester.pumpAndSettle();
 
-      // Verify Grade 1 Subject Selection
-      expect(find.text('Grade 1 | Learn, Listen, Speak'), findsOneWidget);
-      expect(find.text('English'), findsOneWidget);
-      expect(find.text('Available'), findsWidgets);
+      // Verify StudentLevelsScreen is shown (English – First Standard)
+      expect(find.text('English – First Standard'), findsOneWidget);
+      expect(find.text('Learn, practice & grow'), findsOneWidget);
 
-      // 3. Select English
-      await tester.tap(find.text('English'));
+      // 3. Level 1 is at the bottom of the scrollable path; scroll down to reveal it.
+      await tester.scrollUntilVisible(
+        find.text('1'),
+        200.0,
+        scrollable: find.byType(Scrollable).last,
+      );
       await tester.pumpAndSettle();
 
-      // Verify Chapter list
-      expect(find.text('Chapters'), findsOneWidget);
-      expect(find.text('Myself'), findsOneWidget);
+      // Tap Level 1 circle -> Phase selection popup should appear
+      await tester.tap(find.text('1'));
+      await tester.pump(const Duration(milliseconds: 300));
 
-      // 4. Select Chapter 1 "Myself"
-      await tester.tap(find.text('Myself'));
+      // Verify PhaseSelectionDialog content
+      expect(find.text('Choose a Phase'), findsOneWidget);
+      expect(find.text('Phase 1'), findsOneWidget);
+      expect(find.text('Phase 2'), findsOneWidget);
+      expect(find.text('Phase 3'), findsOneWidget);
+      expect(find.text('5 Questions'), findsWidgets);
+
+      // 4. Close the popup via X button
+      await tester.tap(find.byIcon(Icons.close_rounded));
       await tester.pumpAndSettle();
 
-      // Verify Chapter Options Screen
-      expect(find.text('Flashcards'), findsOneWidget);
-      expect(find.text('Worksheets'), findsOneWidget);
-      expect(find.text('Games'), findsOneWidget);
-      expect(find.text('Quizes'), findsOneWidget);
+      // Verify back to level map
+      expect(find.text('English – First Standard'), findsOneWidget);
+      expect(find.text('Choose a Phase'), findsNothing);
 
-      // 5. Back navigation: Chapter Options -> Chapters -> First Subjects -> Class Selection
+      // 5. Back from StudentLevelsScreen -> returns to LearnScreen
       await tester.tap(find.byIcon(Icons.arrow_back_rounded));
       await tester.pumpAndSettle();
-      expect(find.text('Chapters'), findsOneWidget);
-
-      await tester.tap(find.byIcon(Icons.chevron_left_rounded));
-      await tester.pumpAndSettle();
-      expect(find.text('Grade 1 | Learn, Listen, Speak'), findsOneWidget);
-
-      await tester.tap(find.byIcon(Icons.chevron_left_rounded));
-      await tester.pumpAndSettle();
-      expect(find.text('Class Selection'), findsOneWidget);
-
-      // 6. Back from Class Selection (tapping top-left chevron) -> returns to Home
-      final classSelectionBack = find.byIcon(Icons.chevron_left_rounded);
-      expect(classSelectionBack, findsOneWidget);
-      await tester.tap(classSelectionBack);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Hello, Teacher'), findsOneWidget);
+      expect(find.text('Learning'), findsOneWidget);
     },
   );
 }
