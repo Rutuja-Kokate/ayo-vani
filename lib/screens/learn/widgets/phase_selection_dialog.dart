@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_typography.dart';
-import '../../activities/quizzes/quizzes_screen.dart';
+import '../../first/phase1_question1_screen.dart';
+import '../../first/phase2_question_screen.dart';
+import '../../first/phase3_question_screen.dart';
 
 /// Interactive Phase Selection Dialog matching the AyoVaani visual design reference.
 ///
@@ -72,45 +74,39 @@ class PhaseSelectionDialog extends StatelessWidget {
     } else {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (context) => QuizzesScreen(
-            className: 'First',
-            chapterNumber: levelNumber,
-            chapterName: levelTitle.isNotEmpty ? levelTitle : 'Level $levelNumber',
-          ),
+          builder: (context) => const Phase1Question1Screen(),
         ),
       );
     }
   }
 
-  void _handleLockedPhaseTap(BuildContext context, int phaseNumber) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.primaryBurgundy,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
+  void _handlePhase2Tap(BuildContext context) {
+    Navigator.of(context).pop();
+    if (onStartPhase != null) {
+      onStartPhase!(2);
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (context) => const Phase2QuestionScreen(),
         ),
-        content: Row(
-          children: [
-            const Icon(Icons.lock_rounded, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Complete Phase ${phaseNumber - 1} to unlock this!',
-                style: const TextStyle(
-                  fontFamily: 'Inter',
-                  color: Colors.white,
-                  fontSize: 13.5,
-                ),
-              ),
-            ),
-          ],
-        ),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+      );
+    }
   }
+
+  void _handlePhase3Tap(BuildContext context) {
+    Navigator.of(context).pop();
+    if (onStartPhase != null) {
+      onStartPhase!(3);
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (context) => const Phase3QuestionScreen(),
+        ),
+      );
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -307,25 +303,25 @@ class PhaseSelectionDialog extends StatelessWidget {
                       ),
                       const SizedBox(height: 12.0),
 
-                      // PHASE 2 CARD (Locked)
+                      // PHASE 2 CARD (Unlocked)
                       _buildPhaseCard(
                         context: context,
-                        isUnlocked: false,
+                        isUnlocked: true,
                         phaseNumber: 2,
                         questionCount: '5 Questions',
                         iconWidget: const _PencilPhaseIcon(),
-                        onTap: () => _handleLockedPhaseTap(context, 2),
+                        onTap: () => _handlePhase2Tap(context),
                       ),
                       const SizedBox(height: 12.0),
 
-                      // PHASE 3 CARD (Locked)
+                      // PHASE 3 CARD (Unlocked)
                       _buildPhaseCard(
                         context: context,
-                        isUnlocked: false,
+                        isUnlocked: true,
                         phaseNumber: 3,
                         questionCount: '5 Questions',
                         iconWidget: const _TrophyPhaseIcon(),
-                        onTap: () => _handleLockedPhaseTap(context, 3),
+                        onTap: () => _handlePhase3Tap(context),
                       ),
                     ],
                   ),

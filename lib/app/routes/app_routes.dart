@@ -15,6 +15,9 @@ abstract final class AppRoutes {
   static const String second = '/second';
   static const String third = '/third';
   static const String chapterOptions = '/chapter-options';
+  static const String phase1Question1 = '/phase1-question1';
+  static const String phase2Question1 = '/phase2-question1';
+  static const String phase3Question1 = '/phase3-question1';
 
   /// 4 Core Destinations for bottom navigation & tablet side rail.
   static const List<String> mainNavTitles = [
