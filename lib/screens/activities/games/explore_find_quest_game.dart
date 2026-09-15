@@ -617,9 +617,9 @@ class _ExploreFindQuestGameState extends State<ExploreFindQuestGame> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: '${w.mundariOdia} )',
+                                  text: '${w.mundariDevanagari} )',
                                   style: TextStyle(
-                                    fontFamily: 'NotoSansOriya',
+                                    fontFamily: AppTypography.bodyFontFamily,
                                     fontSize: 10.0,
                                     color: isFound ? const Color(0xFF385E32) : AppColors.primaryBurgundy,
                                   ),

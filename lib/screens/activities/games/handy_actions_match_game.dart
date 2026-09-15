@@ -452,9 +452,9 @@ class _HandyActionsMatchGameState extends State<HandyActionsMatchGame> {
                         ),
                       ),
                       TextSpan(
-                        text: '${optionWord.mundariOdia} )',
+                        text: '${optionWord.mundariDevanagari} )',
                         style: TextStyle(
-                          fontFamily: 'NotoSansOriya',
+                          fontFamily: AppTypography.bodyFontFamily,
                           fontSize: isTablet ? 17.0 : 15.0,
                           fontWeight: FontWeight.w600,
                           color: textColor,

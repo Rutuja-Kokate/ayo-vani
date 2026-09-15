@@ -12,6 +12,7 @@ import '../activities/quizzes/quizzes_screen.dart';
 import '../activities/worksheets/worksheets_screen.dart';
 import 'widgets/activity_card_illustrations.dart';
 import 'widgets/learning_option_card.dart';
+import '../../services/content_generation_service.dart';
 
 /// Screen: Reusable Chapter Options Screen for AYOVAANI.
 ///
@@ -29,6 +30,7 @@ class ChapterOptionsScreen extends StatefulWidget {
     required this.className,
     required this.chapterNumber,
     required this.chapterName,
+    this.subject = 'Hindi',
     this.chapterDescription = "Let's learn and practice.",
     this.topic = "Fruits & colors.",
     this.lesson = "Basic vocabulary.",
@@ -46,6 +48,9 @@ class ChapterOptionsScreen extends StatefulWidget {
 
   /// The chapter name: "Fruits and Colors", "Numbers Around Us", etc.
   final String chapterName;
+
+  /// The subject: "English", "Hindi", "Math", etc.
+  final String subject;
 
   /// Subtitle or encouraging description
   final String chapterDescription;
@@ -74,6 +79,31 @@ class ChapterOptionsScreen extends StatefulWidget {
 
 class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
   int _navIndex = 1; // Highlight 'Learn' tab by default
+  final ContentGenerationService _contentGenerationService = ContentGenerationService();
+  bool _isGenerating = false;
+  
+  bool _hasFlashcardsCached = false;
+  bool _hasQuizzesCached = false;
+  bool _hasWorksheetsCached = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkCacheStatus();
+  }
+
+  Future<void> _checkCacheStatus() async {
+    final fc = await _contentGenerationService.isCached(widget.chapterName, GenerationArtifactType.flashcard);
+    final qz = await _contentGenerationService.isCached(widget.chapterName, GenerationArtifactType.quiz);
+    final ws = await _contentGenerationService.isCached(widget.chapterName, GenerationArtifactType.worksheet);
+    if (mounted) {
+      setState(() {
+        _hasFlashcardsCached = fc;
+        _hasQuizzesCached = qz;
+        _hasWorksheetsCached = ws;
+      });
+    }
+  }
 
   void _handleBack() {
     if (widget.onBack != null) {
@@ -101,6 +131,7 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
       MaterialPageRoute<void>(
         builder: (context) => FlashcardsScreen(
           className: widget.className,
+          subject: widget.subject,
           chapterNumber: widget.chapterNumber,
           chapterName: widget.chapterName,
           onNavigateTab: widget.onNavigateTab,
@@ -146,6 +177,87 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _showGenerateBottomSheet() async {
+    final result = await showModalBottomSheet<GenerationArtifactType>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Generate AI Content',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.style, color: AppColors.primaryBurgundy),
+                title: const Text('Flashcards'),
+                onTap: () => Navigator.pop(context, GenerationArtifactType.flashcard),
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit_document, color: AppColors.primaryBurgundy),
+                title: const Text('Worksheets'),
+                onTap: () => Navigator.pop(context, GenerationArtifactType.worksheet),
+              ),
+              ListTile(
+                leading: const Icon(Icons.quiz, color: AppColors.primaryBurgundy),
+                title: const Text('Quizzes'),
+                onTap: () => Navigator.pop(context, GenerationArtifactType.quiz),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        _isGenerating = true;
+      });
+
+      try {
+        if (result == GenerationArtifactType.flashcard) {
+          await _contentGenerationService.generateFlashcards(widget.chapterName, widget.className, forceRefresh: true, subject: widget.subject);
+        } else if (result == GenerationArtifactType.worksheet) {
+          await _contentGenerationService.generateWorksheet(widget.chapterName, widget.className, forceRefresh: true);
+        } else if (result == GenerationArtifactType.quiz) {
+          await _contentGenerationService.generateQuiz(widget.chapterName, widget.className, forceRefresh: true);
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Content generated successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error generating content: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isGenerating = false;
+          });
+          _checkCacheStatus();
+        }
+      }
+    }
   }
 
   @override
@@ -560,22 +672,55 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
       ),
     );
 
+    final generateButton = Padding(
+      padding: const EdgeInsets.only(top: 12.0),
+      child: ElevatedButton.icon(
+        onPressed: _isGenerating ? null : _showGenerateBottomSheet,
+        icon: _isGenerating
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.auto_awesome),
+        label: Text(_isGenerating ? 'Generating...' : '✨ Generate Content'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryBurgundy,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: Colors.grey.shade400,
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          minimumSize: const Size(double.infinity, 44),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+      ),
+    );
+
     if (isTablet) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(child: titleBlock),
+          Expanded(flex: 3, child: titleBlock),
           const SizedBox(width: 18.0),
-          infoCard,
+          Expanded(
+            flex: 2,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [infoCard, generateButton],
+            ),
+          ),
         ],
       );
     } else {
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           titleBlock,
           const SizedBox(height: 12.0),
           infoCard,
+          generateButton,
         ],
       );
     }
