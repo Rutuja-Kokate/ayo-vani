@@ -12,7 +12,8 @@ class FoodCategory {
   final String id;
   final String title;
   final String mundariRoman;
-  final String mundariOdia;
+  final String mundariDevanagari;
+  String get mundariOdia => mundariDevanagari;
   final IconData icon;
   final Color color;
 
@@ -20,7 +21,7 @@ class FoodCategory {
     required this.id,
     required this.title,
     required this.mundariRoman,
-    required this.mundariOdia,
+    required this.mundariDevanagari,
     required this.icon,
     required this.color,
   });
@@ -64,7 +65,7 @@ class _FoodPowerSortingGameState extends State<FoodPowerSortingGame> {
       id: 'grains',
       title: 'Grains & Bread',
       mundariRoman: 'Lad',
-      mundariOdia: 'ଲାଦ',
+      mundariDevanagari: 'लाद',
       icon: Icons.bakery_dining_rounded,
       color: Color(0xFFC88A22),
     ),
@@ -72,7 +73,7 @@ class _FoodPowerSortingGameState extends State<FoodPowerSortingGame> {
       id: 'fruits',
       title: 'Fruits & Sweets',
       mundariRoman: 'Jo',
-      mundariOdia: 'ଜୋ',
+      mundariDevanagari: 'जो',
       icon: Icons.apple_rounded,
       color: Color(0xFFD34836),
     ),
@@ -80,7 +81,7 @@ class _FoodPowerSortingGameState extends State<FoodPowerSortingGame> {
       id: 'dairy',
       title: 'Milk & Dairy',
       mundariRoman: 'Toa',
-      mundariOdia: 'ତୋଆ',
+      mundariDevanagari: 'तोआ',
       icon: Icons.local_drink_rounded,
       color: Color(0xFF2980B9),
     ),
@@ -88,7 +89,7 @@ class _FoodPowerSortingGameState extends State<FoodPowerSortingGame> {
       id: 'veggies',
       title: 'Vegetables',
       mundariRoman: 'Gajra',
-      mundariOdia: 'ଗାଜରା',
+      mundariDevanagari: 'गाजरा',
       icon: Icons.eco_rounded,
       color: Color(0xFF27AE60),
     ),
@@ -476,9 +477,9 @@ class _FoodPowerSortingGameState extends State<FoodPowerSortingGame> {
                             ),
                           ),
                           TextSpan(
-                            text: '${item.mundariOdia} )',
-                            style: const TextStyle(
-                              fontFamily: 'NotoSansOriya',
+                            text: '${item.mundariDevanagari} )',
+                            style: TextStyle(
+                              fontFamily: AppTypography.bodyFontFamily,
                               fontSize: 10.5,
                               color: AppColors.primaryBurgundy,
                             ),
@@ -569,9 +570,9 @@ class _FoodPowerSortingGameState extends State<FoodPowerSortingGame> {
                           ),
                         ),
                         TextSpan(
-                          text: '${cat.mundariOdia} )',
+                          text: '${cat.mundariDevanagari} )',
                           style: TextStyle(
-                            fontFamily: 'NotoSansOriya',
+                            fontFamily: AppTypography.bodyFontFamily,
                             fontSize: 11.0,
                             fontWeight: FontWeight.w600,
                             color: cat.color.withValues(alpha: 0.8),
