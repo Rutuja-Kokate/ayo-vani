@@ -8,6 +8,8 @@ import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
 
+import '../../../services/content_generation_service.dart';
+
 class QuizQuestion {
   const QuizQuestion({
     required this.question,
@@ -24,6 +26,10 @@ class QuizQuestion {
   final String explanation;
   final String? questionOdia;
   final List<String>? optionsOdia;
+
+  /// Aliases using Devanagari naming
+  String? get questionDevanagari => questionOdia;
+  List<String>? get optionsDevanagari => optionsOdia;
 }
 
 /// Reusable Quizzes Screen for ANY chapter of ANY class.
@@ -53,13 +59,49 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
   int? _selectedAnswerIndex;
   bool _isAnswerSubmitted = false;
   int _score = 0;
+  bool _isLoading = true;
+  final ContentGenerationService _ragService = ContentGenerationService();
 
-  late final List<QuizQuestion> _questions;
+  List<QuizQuestion> _questions = [];
 
   @override
   void initState() {
     super.initState();
-    _questions = _generateQuestions();
+    _loadQuestions();
+  }
+
+  Future<void> _loadQuestions() async {
+    final cached = await _ragService.isCached(widget.chapterName, GenerationArtifactType.quiz);
+    if (cached) {
+      try {
+        final ragQuiz = await _ragService.generateQuiz(widget.chapterName, widget.className);
+        final ragItems = ragQuiz.questions.map((q) => QuizQuestion(
+          question: q.questionHindi,
+          options: q.optionsHindi,
+          correctIndex: q.answerIndex,
+          explanation: q.explanationHindi,
+          questionOdia: q.questionMundari,
+          optionsOdia: q.optionsMundari,
+        )).toList();
+        
+        if (mounted) {
+          setState(() {
+            _questions = ragItems;
+            _isLoading = false;
+          });
+        }
+        return;
+      } catch (e) {
+        debugPrint('[RAG] Failed to load cached quiz: $e');
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _questions = _generateQuestions();
+        _isLoading = false;
+      });
+    }
   }
 
   List<QuizQuestion> _generateQuestions() {
@@ -178,6 +220,14 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    
     final isTablet = Responsive.isTabletOrLarger(context);
     final isQuizFinished = _currentQuestionIndex >= _questions.length;
 
@@ -398,7 +448,7 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                 Text(
                   currentQ.questionOdia!,
                   style: TextStyle(
-                    fontFamily: 'NotoSansOriya',
+                    fontFamily: AppTypography.bodyFontFamily,
                     fontSize: isTablet ? 18.0 : 15.0,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryBurgundy,
@@ -460,12 +510,12 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                                   color: AppColors.textPrimary,
                                 ),
                               ),
-                              if (currentQ.optionsOdia != null &&
-                                  currentQ.optionsOdia!.length > currentQ.correctIndex) ...[
+                              if (currentQ.optionsDevanagari != null &&
+                                  currentQ.optionsDevanagari!.length > currentQ.correctIndex) ...[
                                 TextSpan(
-                                  text: ' (${currentQ.optionsOdia![currentQ.correctIndex]})',
-                                  style: const TextStyle(
-                                    fontFamily: 'NotoSansOriya',
+                                  text: ' (${currentQ.optionsDevanagari![currentQ.correctIndex]})',
+                                  style: TextStyle(
+                                    fontFamily: AppTypography.bodyFontFamily,
                                     fontSize: 13.0,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.primaryBurgundy,
@@ -581,7 +631,7 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                         TextSpan(
                           text: ' ($textOdia)',
                           style: TextStyle(
-                            fontFamily: 'NotoSansOriya',
+                            fontFamily: AppTypography.bodyFontFamily,
                             fontSize: isTablet ? 15.0 : 14.0,
                             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                             color: AppColors.primaryBurgundy,
