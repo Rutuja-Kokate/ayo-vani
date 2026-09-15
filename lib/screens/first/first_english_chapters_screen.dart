@@ -119,6 +119,7 @@ class _FirstEnglishChaptersScreenState
           className: 'First',
           chapterNumber: chapter.number,
           chapterName: chapter.title,
+          subject: 'English',
           chapterDescription: "Let's learn and practice.",
           topic: chapter.topic ??
               ChapterRepository.getTopic(
