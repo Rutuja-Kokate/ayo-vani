@@ -8,6 +8,7 @@ import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
 import '../../services/tts_service.dart';
+import '../learn/widgets/phase_selection_dialog.dart';
 
 /// Data model representing an Activity Picture Question in Phase 2.
 class Phase2QuestionData {
@@ -241,7 +242,12 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
 
   void _handleCheckOrContinue() {
     if (_isChecked && _isCorrect) {
-      _advanceToNextQuestion();
+      final isLastQuestion = _currentQuestionIndex == widget.questions.length - 1;
+      if (isLastQuestion) {
+        _finishPhase();
+      } else {
+        _advanceToNextQuestion();
+      }
       return;
     }
 
@@ -289,14 +295,17 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
         _setupQuestion();
       });
     } else {
-      if (widget.onCompletePhase != null) {
-        widget.onCompletePhase!();
-      } else if (widget.onNextQuestion != null) {
-        widget.onNextQuestion!();
-      } else {
-        _showPhaseCompletionDialog();
-      }
+      _finishPhase();
     }
+  }
+
+  void _finishPhase() {
+    PhaseSelectionDialog.showAfterPhaseCompletion(
+      context: context,
+      levelNumber: 1,
+      levelTitle: 'Level 1',
+      onCompletePhase: widget.onCompletePhase,
+    );
   }
 
   void _showPhaseCompletionDialog() {
@@ -975,6 +984,15 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
   // ---------------------------------------------------------------------------
   Widget _buildCheckButton(bool isTablet) {
     final isCompleted = _isChecked && _isCorrect;
+    final isLastQuestion = _currentQuestionIndex == widget.questions.length - 1;
+    final String buttonLabel;
+    if (!isCompleted) {
+      buttonLabel = 'CHECK';
+    } else if (isLastQuestion) {
+      buttonLabel = 'FINISH';
+    } else {
+      buttonLabel = 'CONTINUE';
+    }
 
     return Container(
       height: isTablet ? 56.0 : 52.0,
@@ -997,7 +1015,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
           splashColor: Colors.white.withValues(alpha: 0.20),
           child: Center(
             child: Text(
-              isCompleted ? 'CONTINUE' : 'CHECK',
+              buttonLabel,
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: isTablet ? 17.0 : 16.0,

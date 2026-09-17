@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ayo_vani/screens/first/phase2_question_screen.dart';
 
@@ -166,16 +166,20 @@ void main() {
         await tapVisiblePump(tester, find.text(answers[i]));
         await tapVisiblePump(tester, find.text('CHECK'));
         await tester.pump(const Duration(milliseconds: 100));
-        expect(find.text('CONTINUE'), findsOneWidget);
-        await tapVisiblePump(tester, find.text('CONTINUE'));
-        await tester.pump(const Duration(milliseconds: 200));
-        if (i == 4) {
-          expect(find.text('Phase 2 Completed!'), findsOneWidget);
+        if (i < 4) {
+          expect(find.text('CONTINUE'), findsOneWidget);
+          await tapVisiblePump(tester, find.text('CONTINUE'));
+        } else {
+          expect(find.text('FINISH'), findsOneWidget);
+          await tapVisiblePump(tester, find.text('FINISH'));
+          await tester.pump(const Duration(milliseconds: 300));
+          expect(find.text('Choose a Phase'), findsOneWidget);
         }
+        await tester.pump(const Duration(milliseconds: 200));
       }
     });
 
-    testWidgets('onCompletePhase callback fires after Q5 CONTINUE', (tester) async {
+    testWidgets('onCompletePhase callback fires after Q5 FINISH', (tester) async {
       tester.view.physicalSize = const Size(393, 851);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -208,7 +212,12 @@ void main() {
         await tapVisiblePump(tester, find.text(answers[i]));
         await tapVisiblePump(tester, find.text('CHECK'));
         await tester.pump(const Duration(milliseconds: 100));
-        await tapVisiblePump(tester, find.text('CONTINUE'));
+        // Q1–Q4 show CONTINUE; Q5 (last question) shows FINISH
+        if (i < 4) {
+          await tapVisiblePump(tester, find.text('CONTINUE'));
+        } else {
+          await tapVisiblePump(tester, find.text('FINISH'));
+        }
         await tester.pump(const Duration(milliseconds: 200));
       }
 
