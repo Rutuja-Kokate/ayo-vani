@@ -49,6 +49,7 @@ dependencies:
   record: ^7.1.1
   pdf: ^3.13.0
   printing: ^5.15.0
+  video_player: ^2.9.2
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +80,9 @@ flutter:
     - assets/models/
     - assets/models/mt/
     - assets/models/tts/
+    - assets/resources/
+    - assets/resources/first standard/english/chapter 1/
+    - assets/resources/first_standard/english/chapter_1/
 
   fonts:
     - family: NotoSansOriya

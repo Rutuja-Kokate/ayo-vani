@@ -671,3 +671,211 @@ class QuizzesIllustration extends StatelessWidget {
     );
   }
 }
+
+/// 5. Resources Visual Illustration (Organized curriculum folder with lesson guides & audio notes)
+class ResourcesIllustration extends StatelessWidget {
+  const ResourcesIllustration({
+    super.key,
+    this.chapterNumber = 1,
+    this.isCompact = false,
+  });
+
+  final int chapterNumber;
+  final bool isCompact;
+
+  @override
+  Widget build(BuildContext context) {
+    final cardWidth = isCompact ? 100.0 : 124.0;
+    final cardHeight = isCompact ? 130.0 : 158.0;
+
+    return SizedBox(
+      width: cardWidth + 36.0,
+      height: cardHeight + 10.0,
+      child: Stack(
+        alignment: Alignment.centerRight,
+        children: [
+          // Background tilted folder leaf
+          Positioned(
+            left: 2.0,
+            top: 14.0,
+            child: Transform.rotate(
+              angle: -0.14,
+              child: Container(
+                width: cardWidth * 0.92,
+                height: cardHeight * 0.92,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF2EADC),
+                  borderRadius: BorderRadius.circular(16.0),
+                  border: Border.all(
+                    color: const Color(0xFF3B5A82).withValues(alpha: 0.35),
+                    width: 1.5,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x0A251E11),
+                      blurRadius: 6,
+                      offset: Offset(-2, 3),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Icon(
+                      Icons.folder_shared_rounded,
+                      size: isCompact ? 20.0 : 26.0,
+                      color: const Color(0xFF3B5A82),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Foreground main resources folder card
+          Positioned(
+            right: 4.0,
+            top: 4.0,
+            child: Container(
+              width: cardWidth,
+              height: cardHeight,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18.0),
+                border: Border.all(
+                  color: const Color(0xFFE2D4C0),
+                  width: 1.5,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x104A3B32),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: isCompact ? 8.0 : 12.0,
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: cardWidth - 16.0,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Header badge pill
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 2.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF3B5A82).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Text(
+                            'MATERIALS',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: isCompact ? 8.5 : 10.0,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF3B5A82),
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: isCompact ? 5.0 : 8.0),
+
+                      // Resource preview line 1: Lesson Plan
+                      _buildPreviewRow(
+                        icon: Icons.menu_book_rounded,
+                        iconColor: const Color(0xFF671D21),
+                        label: 'Lesson Plan',
+                        isCompact: isCompact,
+                      ),
+                      SizedBox(height: isCompact ? 4.0 : 6.0),
+
+                      // Resource preview line 2: Audio Guide
+                      _buildPreviewRow(
+                        icon: Icons.audiotrack_rounded,
+                        iconColor: const Color(0xFFD49B2A),
+                        label: 'Audio Guide',
+                        isCompact: isCompact,
+                      ),
+                      SizedBox(height: isCompact ? 4.0 : 6.0),
+
+                      // Resource preview line 3: Printable Chart
+                      _buildPreviewRow(
+                        icon: Icons.picture_as_pdf_rounded,
+                        iconColor: const Color(0xFF526B4F),
+                        label: 'Printables',
+                        isCompact: isCompact,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Golden bookmark ribbon on top-right
+          Positioned(
+            top: -2.0,
+            right: 18.0,
+            child: Icon(
+              Icons.bookmark_rounded,
+              size: isCompact ? 22.0 : 26.0,
+              color: const Color(0xFFC88A22),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewRow({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required bool isCompact,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isCompact ? 5.0 : 6.0,
+        vertical: isCompact ? 3.5 : 5.0,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAF7F2),
+        borderRadius: BorderRadius.circular(7.0),
+        border: Border.all(color: const Color(0xFFEDE4D8), width: 1.0),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: isCompact ? 11.0 : 13.0, color: iconColor),
+          SizedBox(width: isCompact ? 4.0 : 6.0),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: isCompact ? 9.0 : 10.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
