@@ -1,23 +1,23 @@
 /// Hardcoded English-Mundari vocabulary and quiz data for Class 1 English prototype.
-/// NCERT Textbook verified content for hackathon demo (no RAG/external dependencies).
+/// Devanagari script for Mundari language.
 library;
 
 const Map<String, String> worksheetLabels = {
-  'AYOVAANI Classroom Worksheet': 'ଆୟୋୱାଣି ଶ୍ରେଣୀ କାର୍ଯ୍ୟଫର',
-  'Name:': 'ନୁତୁମ:',
-  'Date:': 'ତିତି:',
-  'Exercise: Trace and write the words below': 'ଅଭ୍ୟାସ: ନିଚେତ ଶବ୍ଦ କୋ ତ୍ରେସ୍ ଓଡ଼ୋଃ ଓଲା ମେ',
-  'Exercise 1: Draw lines to match each picture to its sentence': 'ଅଭ୍ୟାସ ୧: ଛବି ଓଡ଼ୋଃ ଜଗର ମିଲା ଲାଗି ରେଖା ଟାଣ ମେ',
-  'Exercise 2: Fun with Words - Read the syllables': 'ଅଭ୍ୟାସ ୨: ଶବ୍ଦ ରା ରସିକା - ବର୍ଣ୍ଣାଂଶ ପଢ଼ ମେ',
-  'Exercise: Read the riddles and write the answers below': 'ଅଭ୍ୟାସ: ଦାୟେ ପଢ଼ ଓଡ଼ୋଃ ଜାବାବ ଓଲା ମେ',
-  'Answer:': 'ଜାବାବ:',
-  'Exercise: Circle the odd one out in each row below': 'ଅଭ୍ୟାସ: ଧାଡ଼ି ରେ ଅଲଗା ଗୋଲ କର ମେ',
+  'AYOVAANI Classroom Worksheet': 'आयोवाणी श्रेणी कार्यपत्र',
+  'Name:': 'नुतुम:',
+  'Date:': 'तिति:',
+  'Exercise: Trace and write the words below': 'अभ्यास: निचेत शब्द को त्रेस ओड़ोः ओला मे',
+  'Exercise 1: Draw lines to match each picture to its sentence': 'अभ्यास १: छवि ओड़ोः जगर मिला लागि रेखा ताण मे',
+  'Exercise 2: Fun with Words - Read the syllables': 'अभ्यास २: शब्द रा रसिका - वर्णांश पढ़ मे',
+  'Exercise: Read the riddles and write the answers below': 'अभ्यास: दाये पढ़ ओड़ोः जाबाब ओला मे',
+  'Answer:': 'जाबाब:',
+  'Exercise: Circle the odd one out in each row below': 'अभ्यास: धाड़ि रे अलग गोल कर मे',
 };
 
 class EnglishMundariWord {
   final String english;
   final String mundariRoman;
-  final String mundariOdia;
+  final String mundariDevanagari;
   final String meaning;
   final String pronunciation;
   final String emoji;
@@ -26,65 +26,79 @@ class EnglishMundariWord {
   const EnglishMundariWord({
     required this.english,
     required this.mundariRoman,
-    required this.mundariOdia,
+    required this.mundariDevanagari,
     required this.meaning,
     required this.pronunciation,
     required this.emoji,
     required this.syllables,
   });
 
-  /// Combined formatted display string e.g. "( Tii / ତୀ )"
-  String get mundariDisplay => '( $mundariRoman / $mundariOdia )';
+  /// Alias for backward compatibility
+  String get mundariOdia => mundariDevanagari;
+
+  /// Combined formatted display string e.g. "( Tii / ती )"
+  String get mundariDisplay => '( $mundariRoman / $mundariDevanagari )';
 }
 
 class EnglishQuizQuestion {
   final String question;
-  final String questionOdia;
+  final String questionDevanagari;
   final List<String> options;
-  final List<String> optionsOdia;
+  final List<String> optionsDevanagari;
   final int correctIndex;
   final String explanation;
 
   const EnglishQuizQuestion({
     required this.question,
-    required this.questionOdia,
+    required this.questionDevanagari,
     required this.options,
-    required this.optionsOdia,
+    required this.optionsDevanagari,
     required this.correctIndex,
     required this.explanation,
   });
+
+  /// Aliases for backward compatibility
+  String get questionOdia => questionDevanagari;
+  List<String> get optionsOdia => optionsDevanagari;
 }
 
 class BilingualSentence {
   final String englishSentence;
   final String mundariRoman;
-  final String mundariOdia;
+  final String mundariDevanagari;
   final String relatedWord;
 
   const BilingualSentence({
     required this.englishSentence,
     required this.mundariRoman,
-    required this.mundariOdia,
+    required this.mundariDevanagari,
     required this.relatedWord,
   });
+
+  /// Alias for backward compatibility
+  String get mundariOdia => mundariDevanagari;
 }
 
 class BilingualRiddle {
   final String englishRiddle;
   final String mundariRoman;
-  final String mundariOdia;
+  final String mundariDevanagari;
   final String answerEnglish;
   final String answerMundariRoman;
-  final String answerMundariOdia;
+  final String answerMundariDevanagari;
 
   const BilingualRiddle({
     required this.englishRiddle,
     required this.mundariRoman,
-    required this.mundariOdia,
+    required this.mundariDevanagari,
     required this.answerEnglish,
     required this.answerMundariRoman,
-    required this.answerMundariOdia,
+    required this.answerMundariDevanagari,
   });
+
+  /// Aliases for backward compatibility
+  String get mundariOdia => mundariDevanagari;
+  String get answerMundariOdia => answerMundariDevanagari;
 }
 
 class EnglishActivitiesData {
@@ -94,7 +108,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Hand',
         mundariRoman: 'Tii',
-        mundariOdia: 'ତୀ',
+        mundariDevanagari: 'ती',
         meaning: 'Used to hold, write, and clap.',
         pronunciation: 'hand',
         emoji: '✋',
@@ -103,7 +117,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Leg',
         mundariRoman: 'Kata',
-        mundariOdia: 'କଟା',
+        mundariDevanagari: 'कटा',
         meaning: 'Used to walk and run.',
         pronunciation: 'leg',
         emoji: '🦵',
@@ -112,7 +126,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Head',
         mundariRoman: 'Boo',
-        mundariOdia: 'ବୋ',
+        mundariDevanagari: 'बो',
         meaning: 'Top part of body with hair and brain.',
         pronunciation: 'hed',
         emoji: '🗣️',
@@ -121,7 +135,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Eye',
         mundariRoman: 'Med',
-        mundariOdia: 'ମେଦ',
+        mundariDevanagari: 'मेद',
         meaning: 'Used to see colors and shapes.',
         pronunciation: 'ai',
         emoji: '👁️',
@@ -130,7 +144,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Ear',
         mundariRoman: 'Lutur',
-        mundariOdia: 'ଲୁତୁର',
+        mundariDevanagari: 'लुतुर',
         meaning: 'Used to hear sounds and music.',
         pronunciation: 'eer',
         emoji: '👂',
@@ -139,7 +153,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Nose',
         mundariRoman: 'Muhu',
-        mundariOdia: 'ମୁହୁ',
+        mundariDevanagari: 'मुहु',
         meaning: 'Used to smell flowers and food.',
         pronunciation: 'nohz',
         emoji: '👃',
@@ -148,7 +162,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Mouth',
         mundariRoman: 'Moca',
-        mundariOdia: 'ମୋଚା',
+        mundariDevanagari: 'मोचा',
         meaning: 'Used to speak and eat food.',
         pronunciation: 'mowth',
         emoji: '👄',
@@ -157,7 +171,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Skin',
         mundariRoman: 'Uru',
-        mundariOdia: 'ଉରୁ',
+        mundariDevanagari: 'उरु',
         meaning: 'Covers body and feels touch.',
         pronunciation: 'skin',
         emoji: '🖐️',
@@ -166,7 +180,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Arm',
         mundariRoman: 'Kidi',
-        mundariOdia: 'କୀଡ଼ୀ',
+        mundariDevanagari: 'कीड़ी',
         meaning: 'Upper limb between shoulder and hand.',
         pronunciation: 'aarm',
         emoji: '💪',
@@ -175,7 +189,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Foot',
         mundariRoman: 'Kata',
-        mundariOdia: 'କଟା',
+        mundariDevanagari: 'कटा',
         meaning: 'Bottom part of leg used for standing.',
         pronunciation: 'fut',
         emoji: '🦶',
@@ -184,7 +198,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Shoulder',
         mundariRoman: 'Taran',
-        mundariOdia: 'ତାରନ',
+        mundariDevanagari: 'तारन',
         meaning: 'Joint connecting arm to body.',
         pronunciation: 'shohl-der',
         emoji: '👕',
@@ -193,7 +207,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Knee',
         mundariRoman: 'Mukuni',
-        mundariOdia: 'ମୁକୁନୀ',
+        mundariDevanagari: 'मुकुनी',
         meaning: 'Middle joint of the leg.',
         pronunciation: 'nee',
         emoji: '🦵',
@@ -202,7 +216,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Toe',
         mundariRoman: 'Daro',
-        mundariOdia: 'ଦାରୋ',
+        mundariDevanagari: 'दारो',
         meaning: 'One of five small digits on foot.',
         pronunciation: 'toh',
         emoji: '🦶',
@@ -211,7 +225,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Cheek',
         mundariRoman: 'Jowa',
-        mundariOdia: 'ଜୋବା',
+        mundariDevanagari: 'जोबा',
         meaning: 'Side of face below the eye.',
         pronunciation: 'cheek',
         emoji: '😊',
@@ -220,7 +234,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Tongue',
         mundariRoman: 'Alang',
-        mundariOdia: 'ଆଲାଙ୍ଗ',
+        mundariDevanagari: 'आलांग',
         meaning: 'Used inside mouth to taste food.',
         pronunciation: 'tung',
         emoji: '👅',
@@ -232,7 +246,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Lion',
         mundariRoman: 'Kula',
-        mundariOdia: 'କୁଲା',
+        mundariDevanagari: 'कुला',
         meaning: 'King of the jungle that roars loud.',
         pronunciation: 'lai-un',
         emoji: '🦁',
@@ -241,7 +255,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Monkey',
         mundariRoman: 'Gari',
-        mundariOdia: 'ଗଡ଼ି',
+        mundariDevanagari: 'गड़ि',
         meaning: 'Playful animal that jumps on trees.',
         pronunciation: 'mung-kee',
         emoji: '🐒',
@@ -250,7 +264,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Fish',
         mundariRoman: 'Hai',
-        mundariOdia: 'ହାଇ',
+        mundariDevanagari: 'हाइ',
         meaning: 'Swims in water using fins.',
         pronunciation: 'fish',
         emoji: '🐟',
@@ -259,7 +273,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Elephant',
         mundariRoman: 'Hati',
-        mundariOdia: 'ହାତି',
+        mundariDevanagari: 'हाति',
         meaning: 'Huge animal with long trunk and big ears.',
         pronunciation: 'el-uh-funt',
         emoji: '🐘',
@@ -268,7 +282,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Frog',
         mundariRoman: 'Choke',
-        mundariOdia: 'ଚୋକେ',
+        mundariDevanagari: 'चोके',
         meaning: 'Green animal that hops near ponds.',
         pronunciation: 'frog',
         emoji: '🐸',
@@ -277,7 +291,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Rabbit',
         mundariRoman: 'Kulai',
-        mundariOdia: 'କୁଲାଇ',
+        mundariDevanagari: 'कुलइ',
         meaning: 'Small fluffy animal with long ears.',
         pronunciation: 'rab-it',
         emoji: '🐰',
@@ -289,7 +303,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Roti',
         mundariRoman: 'Lad',
-        mundariOdia: 'ଲାଦ',
+        mundariDevanagari: 'लाद',
         meaning: 'Round flatbread made from wheat flour.',
         pronunciation: 'roh-tee',
         emoji: '🫓',
@@ -298,7 +312,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Poori',
         mundariRoman: 'Puri',
-        mundariOdia: 'ପୁରୀ',
+        mundariDevanagari: 'पुरी',
         meaning: 'Deep-fried puffy Indian bread.',
         pronunciation: 'poo-ree',
         emoji: '🍞',
@@ -307,7 +321,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Idli',
         mundariRoman: 'Idli',
-        mundariOdia: 'ଇଡ଼ଲି',
+        mundariDevanagari: 'इड़लि',
         meaning: 'Soft steamed rice cake.',
         pronunciation: 'id-lee',
         emoji: '🍚',
@@ -316,7 +330,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Chutney',
         mundariRoman: 'Catni',
-        mundariOdia: 'ଚାଟନୀ',
+        mundariDevanagari: 'चाटनी',
         meaning: 'Tasty sauce made from herbs or coconut.',
         pronunciation: 'chut-nee',
         emoji: '🥣',
@@ -325,7 +339,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Paratha',
         mundariRoman: 'Paratha',
-        mundariOdia: 'ପରାଠା',
+        mundariDevanagari: 'पराठा',
         meaning: 'Layered flatbread cooked with ghee.',
         pronunciation: 'puh-rah-thuh',
         emoji: '🥞',
@@ -334,7 +348,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Chilla',
         mundariRoman: 'Cila',
-        mundariOdia: 'ଚିଲା',
+        mundariDevanagari: 'चिला',
         meaning: 'Savory pancake made from gram flour.',
         pronunciation: 'chil-lah',
         emoji: '🥞',
@@ -343,7 +357,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Fruits',
         mundariRoman: 'Jo',
-        mundariOdia: 'ଜୋ',
+        mundariDevanagari: 'जो',
         meaning: 'Sweet and juicy natural food like apples.',
         pronunciation: 'froots',
         emoji: '🍎',
@@ -352,7 +366,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Milk',
         mundariRoman: 'Toa',
-        mundariOdia: 'ତୋଆ',
+        mundariDevanagari: 'तोआ',
         meaning: 'White healthy drink given by cows.',
         pronunciation: 'milk',
         emoji: '🥛',
@@ -361,7 +375,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Honey',
         mundariRoman: 'Nili Da',
-        mundariOdia: 'ନିଲି ଦଃ',
+        mundariDevanagari: 'निलि दः',
         meaning: 'Sweet liquid made by honeybees.',
         pronunciation: 'hun-ee',
         emoji: '🍯',
@@ -370,7 +384,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Cow',
         mundariRoman: 'Gai',
-        mundariOdia: 'ଗାଇ',
+        mundariDevanagari: 'गाइ',
         meaning: 'Domestic animal that gives fresh milk.',
         pronunciation: 'kow',
         emoji: '🐄',
@@ -379,7 +393,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Curd',
         mundariRoman: 'Dahi',
-        mundariOdia: 'ଦହି',
+        mundariDevanagari: 'दहि',
         meaning: 'Creamy food made from fermented milk.',
         pronunciation: 'kurd',
         emoji: '🥛',
@@ -388,7 +402,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Butter',
         mundariRoman: 'Gotom',
-        mundariOdia: 'ଗୋତୋମ',
+        mundariDevanagari: 'गोतोम',
         meaning: 'Yellow dairy spread made from milk cream.',
         pronunciation: 'but-er',
         emoji: '🧈',
@@ -397,7 +411,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Farmer',
         mundariRoman: 'Casi horo',
-        mundariOdia: 'ଚାଷୀ ହୋଡ଼ୋ',
+        mundariDevanagari: 'चाषी होड़ो',
         meaning: 'Person who grows crops and food on farms.',
         pronunciation: 'farm-er',
         emoji: '👨‍🌾',
@@ -406,7 +420,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Carrot',
         mundariRoman: 'Gajra',
-        mundariOdia: 'ଗାଜରା',
+        mundariDevanagari: 'गाजरा',
         meaning: 'Crunchy orange root vegetable.',
         pronunciation: 'kair-ut',
         emoji: '🥕',
@@ -415,7 +429,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Market',
         mundariRoman: 'Pitha',
-        mundariOdia: 'ପିଠା',
+        mundariDevanagari: 'पिठा',
         meaning: 'Place where fresh food and goods are sold.',
         pronunciation: 'mar-kit',
         emoji: '🏪',
@@ -424,7 +438,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Brinjal',
         mundariRoman: 'Janum Toko',
-        mundariOdia: 'ଜନୁମ ଟୋକୋ',
+        mundariDevanagari: 'जनुम टोको',
         meaning: 'Purple vegetable also called eggplant.',
         pronunciation: 'brin-jahl',
         emoji: '🍆',
@@ -433,7 +447,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Mango',
         mundariRoman: 'Uli',
-        mundariOdia: 'ଉଲି',
+        mundariDevanagari: 'उलि',
         meaning: 'Sweet yellow king of fruits.',
         pronunciation: 'mang-goh',
         emoji: '🥭',
@@ -442,7 +456,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Breakfast',
         mundariRoman: 'Setahak mandi',
-        mundariOdia: 'ସେତାଃଆଃ ମାଣ୍ଡି',
+        mundariDevanagari: 'सेताःआः माण्डि',
         meaning: 'First meal of the day eaten in morning.',
         pronunciation: 'brek-fust',
         emoji: '🍳',
@@ -451,7 +465,7 @@ class EnglishActivitiesData {
       EnglishMundariWord(
         english: 'Dinner',
         mundariRoman: 'Ayubak mandi',
-        mundariOdia: 'ଆୟୁବାଃ ମାଣ୍ଡି',
+        mundariDevanagari: 'आय्युबाः माण्डि',
         meaning: 'Night meal eaten before sleep.',
         pronunciation: 'din-er',
         emoji: '🍲',
@@ -466,31 +480,31 @@ class EnglishActivitiesData {
       BilingualSentence(
         englishSentence: 'I have two Hands.',
         mundariRoman: 'Aingya baria ti menah-a.',
-        mundariOdia: 'ଆଇଁୟାଃ ବାରିଆ ତି ମେନାଃ-ଆ ।',
+        mundariDevanagari: 'आईंयाः बारिआ ति मेनाः-आ ।',
         relatedWord: 'Hand',
       ),
       BilingualSentence(
         englishSentence: 'I walk with my Legs.',
         mundariRoman: "Aing kata te'iñ senoh-a.",
-        mundariOdia: 'ଆଇଁ କାଟା ତେଇଁ ସେନୋଃ-ଆ ।',
+        mundariDevanagari: 'आईं काटा तेईं सेनोः-आ ।',
         relatedWord: 'Leg',
       ),
       BilingualSentence(
         englishSentence: 'I see with my Eyes.',
         mundariRoman: "Aing med te'iñ nel tana.",
-        mundariOdia: 'ଆଇଁ ମେଦ ତେଇଁ ନେଲ୍ ତାନା ।',
+        mundariDevanagari: 'आईं मेद तेईं नेल् ताना ।',
         relatedWord: 'Eye',
       ),
       BilingualSentence(
         englishSentence: 'I hear with my Ears.',
         mundariRoman: "Aing lutur te'iñ ayum tana.",
-        mundariOdia: 'ଆଇଁ ଲୁତୁର ତେଇଁ ଆୟୁମ୍ ତାନା ।',
+        mundariDevanagari: 'आईं लुतुर तेईं आयुम् ताना ।',
         relatedWord: 'Ear',
       ),
       BilingualSentence(
         englishSentence: 'I smell with my Nose.',
         mundariRoman: "Aing muh te'iñ si tana.",
-        mundariOdia: 'ଆଇଁ ମୁଃ ତେଇଁ ସି ତାନା ।',
+        mundariDevanagari: 'आईं मुः तेईं सि ताना ।',
         relatedWord: 'Nose',
       ),
     ],
@@ -499,31 +513,31 @@ class EnglishActivitiesData {
       BilingualSentence(
         englishSentence: 'This is a roaring Lion.',
         mundariRoman: 'Neah garajau tan kula ge.',
-        mundariOdia: 'ନେଆଃ ଗରଜାଉ ତାନ କୁଲା ଗେ ।',
+        mundariDevanagari: 'नेआः गरजाउ तान कुला गे ।',
         relatedWord: 'Lion',
       ),
       BilingualSentence(
         englishSentence: 'The Monkey jumps on trees.',
         mundariRoman: 'Gadhi subung daru kore hechoh-a.',
-        mundariOdia: 'ଗାଢ଼ି ସୁବୁଂ ଦାରୁ କୋରେ ହେଚୋଃ-ଆ ।',
+        mundariDevanagari: 'गाढ़ि सुबुं दारु कोरे हेचोः-आ ।',
         relatedWord: 'Monkey',
       ),
       BilingualSentence(
         englishSentence: 'The Fish swims in water.',
         mundariRoman: "Hai ko dah re ko pai'ñ-a.",
-        mundariOdia: 'ହାଇ କୋ ଦାଃ ରେ କୋ ପାଈଁ-ଆ ।',
+        mundariDevanagari: 'हाइ को दाः रे को पाईं-आ ।',
         relatedWord: 'Fish',
       ),
       BilingualSentence(
         englishSentence: 'The Elephant has a long trunk.',
         mundariRoman: 'Hati ah jiling shund menah-a.',
-        mundariOdia: 'ହାତୀ ଆଃ ଜିଲିଂ ଶୁଣ୍ଡ ମେନାଃ-ଆ ।',
+        mundariDevanagari: 'हाती आः जिलिंग शुण्ड मेनाः-आ ।',
         relatedWord: 'Elephant',
       ),
       BilingualSentence(
         englishSentence: 'The Frog hops near the pond.',
         mundariRoman: "Choche bandha adere don tanai'ñ.",
-        mundariOdia: 'ଚୋଚେ ବାନ୍ଧା ଆଡ଼େରେ ଡୋନ୍ ତାନାଈଁ ।',
+        mundariDevanagari: 'चोचे बान्धा आड़ेरे डोन तानाईं ।',
         relatedWord: 'Frog',
       ),
     ],
@@ -532,31 +546,31 @@ class EnglishActivitiesData {
       BilingualSentence(
         englishSentence: 'We eat hot Roti for lunch.',
         mundariRoman: 'Abu tikin jom re lolo roti bu joma.',
-        mundariOdia: 'ଆବୁ ଟିକିନ୍ ଜୋମ୍ ରେ ଲୋଲୋ ରୋଟି ବୁ ଜୋମା ।',
+        mundariDevanagari: 'आबु टिकिन जोम् रे लोलो रोटी बु जोमा ।',
         relatedWord: 'Roti',
       ),
       BilingualSentence(
         englishSentence: 'I drink fresh Milk every day.',
         mundariRoman: "Aing din ge toa'iñ nuia.",
-        mundariOdia: 'ଆଇଁ ଦିନ୍ ଗେ ତୋଆଁଈଁ ନୁଇଆ ।',
+        mundariDevanagari: 'आईं दिन गे तोआंईं नुइआ ।',
         relatedWord: 'Milk',
       ),
       BilingualSentence(
         englishSentence: 'Mango is a sweet yellow fruit.',
         mundariRoman: 'Uli med sukul sasang jo ge.',
-        mundariOdia: 'ଉଲି ମେଦ୍ ସୁକୁଲ୍ ଶାସାଂ ଜୋ ଗେ ।',
+        mundariDevanagari: 'उलि मेद् सुकुल शास्रां जो गे ।',
         relatedWord: 'Mango',
       ),
       BilingualSentence(
         englishSentence: 'The Farmer grows good food.',
         mundariRoman: "Chasi hodo bugin jom jinish omeai'ñ.",
-        mundariOdia: 'ଚାଷୀ ହୋଡ଼ୋ ବୁଗିନ୍ ଜୋମ୍ ଜିନିଷ ଓମେଆଈଁ ।',
+        mundariDevanagari: 'चाषी होड़ो बुगिन जोम् जिनिष ओमेआईं ।',
         relatedWord: 'Farmer',
       ),
       BilingualSentence(
         englishSentence: 'Carrot is a healthy vegetable.',
         mundariRoman: 'Gajar bugin jilu-utu (sabji) ge.',
-        mundariOdia: 'ଗାଜର ବୁଗିନ୍ ଜିଲୁ-ଉତୁ (ସବଜି) ଗେ ।',
+        mundariDevanagari: 'गाजर बुगिन जिलु-उतु (सबजि) गे ।',
         relatedWord: 'Carrot',
       ),
     ],
@@ -568,34 +582,34 @@ class EnglishActivitiesData {
       BilingualRiddle(
         englishRiddle: 'I am on your face. I help you smell sweet flowers. What am I?',
         mundariRoman: "Aing amah muhang re menai'ñ. Baha cheke re aing so meai'ñ. Aing chili ge?",
-        mundariOdia: 'ଆଇଁ ଆମାଃ ମୁହଁ ରେ ମେନାଈଁ । ବାହା ଚେକେ ରେ ଆଇଁ ସୋ ମେଆଈଁ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं आमाः मुहँ रे मेनाईं । बाहा चेके रे आईं सो मेआईं । आईं चिलि गे?',
         answerEnglish: 'Nose',
         answerMundariRoman: 'Muh',
-        answerMundariOdia: 'ମୁଃ',
+        answerMundariDevanagari: 'मुः',
       ),
       BilingualRiddle(
         englishRiddle: 'I am open during the day and closed when you sleep. I help you see. What am I?',
         mundariRoman: "Aing singi bela neloh-a, durum bela sing ai'ñ. Aing nel re menai'ñ. Aing chili ge?",
-        mundariOdia: 'ଆଇଁ ସିଂଗୀ ବେଳା ନେଲୋଃ-ଆ, ଦୁରୁମ୍ ବେଳା ସିଂଗ୍ ଆଈଁ । ଆଇଁ ନେଲ୍ ରେ ମେନାଈଁ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं सिंगी बेळा नेलोः-आ, दुरुम् बेळा सिंग् आईं । आईं नेल् रे मेनाईं । आईं चिलि गे?',
         answerEnglish: 'Eye',
         answerMundariRoman: 'Med',
-        answerMundariOdia: 'ମେଦ୍',
+        answerMundariDevanagari: 'मेद्',
       ),
       BilingualRiddle(
         englishRiddle: 'I am on the side of your head. I help you listen to music. What am I?',
         mundariRoman: "Aing amah boh dhare re menai'ñ. Durang ayum re aing godo meai'ñ. Aing chili ge?",
-        mundariOdia: 'ଆଇଁ ଆମାଃ ବୋଃ ଧାରେ ରେ ମେନାଈଁ । ଦୁରଂ ଆୟୁମ୍ ରେ ଆଇଁ ଗୋଡ଼ୋ ମେଆଈଁ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं आमाः बोः धारे रे मेनाईं । दुरंग आयुम् रे आईं गोड़ो मेआईं । आईं चिलि गे?',
         answerEnglish: 'Ear',
         answerMundariRoman: 'Lutur',
-        answerMundariOdia: 'ଲୁତୁର',
+        answerMundariDevanagari: 'लुतुर',
       ),
       BilingualRiddle(
         englishRiddle: 'I am at the bottom of your body. I help you walk and run. What am I?',
         mundariRoman: "Aing amah latar re menai'ñ. Senoh ado nir re menai'ñ. Aing chili ge?",
-        mundariOdia: 'ଆଇଁ ଆମାଃ ଲାତାର୍ ରେ ମେନାଈଁ । ସେନୋଃ ଆଡ଼ୋ ନିର୍ ରେ ମେନାଈଁ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं आमाः लातार् रे मेनाईं । सेनोः आड़ो निर् रे मेनाईं । आईं चिलि गे?',
         answerEnglish: 'Leg',
         answerMundariRoman: 'Kata',
-        answerMundariOdia: 'କାଟା',
+        answerMundariDevanagari: 'काटा',
       ),
     ],
 
@@ -603,34 +617,34 @@ class EnglishActivitiesData {
       BilingualRiddle(
         englishRiddle: 'I have a big mane and I am called the King of the Jungle. Who am I?',
         mundariRoman: 'Aingyah marang ub menah-a, ado aing bir ren raja ge. Aing chili ge?',
-        mundariOdia: 'ଆଇଁୟାଃ ମାରାଂ ଉବ୍ ମେନାଃ-ଆ, ଆଡ଼ୋ ଆଇଁ ବିର୍ ରେନ୍ ରାଜା ଗେ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईंयाः मारां उब् मेनाः-आ, आड़ो आईं बिर् रेन् राजा गे । आईं चिलि गे?',
         answerEnglish: 'Lion',
         answerMundariRoman: 'Kula',
-        answerMundariOdia: 'କୁଲା',
+        answerMundariDevanagari: 'कुला',
       ),
       BilingualRiddle(
         englishRiddle: 'I love swinging on tree branches and eating bananas. Who am I?',
         mundariRoman: "Aing daru kota re hechoh sukui'ñ-a, ado kera'iñ joma. Aing chili ge?",
-        mundariOdia: 'ଆଇଁ ଦାରୁ କୋଟା ରେ ହେଚୋଃ ସୁକୁଇଁ-ଆ, ଆଡ଼ୋ କେରାଁଈଁ ଜୋମା । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं दारु कोटा रे हेचोः सुकुईं-आ, आड़ो केरांईं जोमा । आईं चिलि गे?',
         answerEnglish: 'Monkey',
         answerMundariRoman: 'Gadhi',
-        answerMundariOdia: 'ଗାଢ଼ି',
+        answerMundariDevanagari: 'गाढ़ि',
       ),
       BilingualRiddle(
         englishRiddle: 'I live in water and swim using my fins. Who am I?',
         mundariRoman: "Aing dah re'iñ taen-a, ado pai'ñ geai'ñ. Aing chili ge?",
-        mundariOdia: 'ଆଇଁ ଦାଃ ରେଈଁ ତାଏନ୍-ଆ, ଆଡ଼ୋ ପାଈଁ ଗେଆଈଁ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं दाः रेईं ताएन्-आ, आड़ो पाईं गेआईं । आईं चिलि गे?',
         answerEnglish: 'Fish',
         answerMundariRoman: 'Hai',
-        answerMundariOdia: 'ହାଇ',
+        answerMundariDevanagari: 'हाइ',
       ),
       BilingualRiddle(
         englishRiddle: 'I am a huge animal with a long trunk and big ears. Who am I?',
         mundariRoman: 'Aing marang jib ge, aingyah jiling shund ado marang lutur menah-a. Aing chili ge?',
-        mundariOdia: 'ଆଇଁ ମାରାଂ ଜୀବ ଗେ, ଆଇଁୟାଃ ଜିଲିଂ ଶୁଣ୍ଡ ଆଡ଼ୋ ମାରାଂ ଲୁତୁର ମେନାଃ-ଆ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं मारां जीव गे, आईंयाः जिलिंग शुण्ड आड़ो मारां लुतुर मेनाः-आ । आईं चिलि गे?',
         answerEnglish: 'Elephant',
         answerMundariRoman: 'Hati',
-        answerMundariOdia: 'ହାତୀ',
+        answerMundariDevanagari: 'हाती',
       ),
     ],
 
@@ -638,34 +652,34 @@ class EnglishActivitiesData {
       BilingualRiddle(
         englishRiddle: 'I am a healthy white drink given by cows. What am I?',
         mundariRoman: "Aing pundi nui jinish ge, gai omeai'ñ. Aing chili ge?",
-        mundariOdia: 'ଆଇଁ ପୁଣ୍ଡି ନୁଇ ଜିନିଷ ଗେ, ଗାଈ ଓମେଆଈଁ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं पुण्डि नुइ जिनिष गे, गाइ ओमेआईं । आईं चिलि गे?',
         answerEnglish: 'Milk',
         answerMundariRoman: 'Toa',
-        answerMundariOdia: 'ତୋଆଁ',
+        answerMundariDevanagari: 'तोआं',
       ),
       BilingualRiddle(
         englishRiddle: 'I am sweet, yellow, and known as the King of Fruits. What am I?',
         mundariRoman: 'Aing sibil sasang jo ge, jo koah raja ge aing. Aing chili ge?',
-        mundariOdia: 'ଆଇଁ ସିବିଲ୍ ଶାସାଂ ଜୋ ଗେ, ଜୋ କୋଆଃ ରାଜା ଗେ ଆଇଁ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं सिबिल् शास्रां जो गे, जो कोआः राजा गे आईं । आईं चिलि गे?',
         answerEnglish: 'Mango',
         answerMundariRoman: 'Uli',
-        answerMundariOdia: 'ଉଲି',
+        answerMundariDevanagari: 'उलि',
       ),
       BilingualRiddle(
         englishRiddle: 'I am a round flatbread made from wheat flour. What am I?',
         mundariRoman: 'Aing gol roti ge, gaham holong te baiyoh-a. Aing chili ge?',
-        mundariOdia: 'ଆଇଁ ଗୋଲ୍ ରୋଟି ଗେ, ଗହମ ହୋଲୋଂ ତେ ବାଈୟୋଃ-ଆ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं गोल् रोटी गे, गहम होलों ते बाईयोः-आ । आईं चिलि गे?',
         answerEnglish: 'Roti',
         answerMundariRoman: 'Roti',
-        answerMundariOdia: 'ରୋଟି',
+        answerMundariDevanagari: 'रोटी',
       ),
       BilingualRiddle(
         englishRiddle: 'I am a crunchy orange vegetable that rabbits love. What am I?',
         mundariRoman: 'Aing kulai sukuan sasang-ora sabji ge. Aing chili ge?',
-        mundariOdia: 'ଆଇଁ କୁଲାଇ ସୁକୁଆନ୍ ସାସାଂ-ଅରା ସବଜି ଗେ । ଆଇଁ ଚିଲି ଗେ?',
+        mundariDevanagari: 'आईं कुलइ सुकुआन शास्रां-ओरा सबजि गे । आईं चिलि गे?',
         answerEnglish: 'Carrot',
         answerMundariRoman: 'Gajar',
-        answerMundariOdia: 'ଗାଜର',
+        answerMundariDevanagari: 'गाजर',
       ),
     ],
   };
@@ -675,41 +689,41 @@ class EnglishActivitiesData {
     'Two Little Hands': [
       EnglishQuizQuestion(
         question: 'What do we smell pleasant flowers with?',
-        questionOdia: 'ଆବୁ ସୋଆନ୍ ବାହା କୋ ଚେନାଃ ତେବୁ ସୋଆନେଆ?',
+        questionDevanagari: 'आबु सोआन बाहा को चेनाः तेबु सोआनेआ?',
         options: ['Nose', 'Ear', 'Hand', 'Foot'],
-        optionsOdia: ['ମୁଆଁ', 'ଲୁତୁର', 'ତି', 'କାଟା'],
+        optionsDevanagari: ['मुआं', 'लुतुर', 'ति', 'काटा'],
         correctIndex: 0,
         explanation: 'We use our Nose to smell things around us.',
       ),
       EnglishQuizQuestion(
         question: 'Which body part do we use to see colors and pictures?',
-        questionOdia: 'ରଙ୍ଗ ଓଡ଼ୋଃ ଛବି କୋ ନେଲ ଲାଗି ଆବୁ ଚେନ୍ ହଡ଼ମୋ ହିସା ଇସ୍ତେମାଲ ଏଆବୁ?',
+        questionDevanagari: 'रंग ओड़ोः छवि को नेल लागि आबु चेन हड़मो हिसा इस्तेमाल एआबु?',
         options: ['Ear', 'Eye', 'Leg', 'Cheek'],
-        optionsOdia: ['ଲୁତୁର', 'ମେଦ', 'କାଟା', 'ଜୋଆ'],
+        optionsDevanagari: ['लुतुर', 'मेद', 'काटा', 'जोआ'],
         correctIndex: 1,
         explanation: 'We see the world around us using our Eyes.',
       ),
       EnglishQuizQuestion(
         question: 'What do we use to walk and run in the park?',
-        questionOdia: 'ପାର୍କ ରେ ସେନ୍ ଓଡ଼ୋଃ ନିର ଲାଗି ଆବୁ ଚେନାଃ ଇସ୍ତେମାଲ ଏଆବୁ?',
+        questionDevanagari: 'पार्क रे सेन ओड़ोः निर लागि आबु चेनाः इस्तेमाल एआबु?',
         options: ['Head', 'Nose', 'Leg', 'Tongue'],
-        optionsOdia: ['ବୋଃ', 'ମୁଆଁ', 'କାଟା', 'ଆଲାଙ୍ଗ'],
+        optionsDevanagari: ['बोः', 'मुआं', 'काटा', 'आलांग'],
         correctIndex: 2,
         explanation: 'Our Legs help us walk, run, and jump.',
       ),
       EnglishQuizQuestion(
         question: 'What body part inside our mouth helps us taste sweet food?',
-        questionOdia: 'ମୋଚା ଭିତର ରେ ଚେନ୍ ହଡ଼ମୋ ହିସା ଆବୁକେ ସିବିଲ ଜୋମ୍ ରେ ସାହାଯ୍ୟ ଏଆବୁ?',
+        questionDevanagari: 'मोचा भितर रे चेन हड़मो हिसा आबुके सिबिल जोम रे साहाय्य एआबु?',
         options: ['Skin', 'Tongue', 'Knee', 'Arm'],
-        optionsOdia: ['ହର୍ତା', 'ଆଲାଙ୍ଗ', 'ମୁକୁଡ଼ି', 'ଗୋସୋ'],
+        optionsDevanagari: ['हर्ता', 'आलांग', 'मुकुड़ि', 'गोसो'],
         correctIndex: 1,
         explanation: 'Our Tongue tastes sweet, salty, and sour flavors.',
       ),
       EnglishQuizQuestion(
         question: 'What do we use to clap when we hear good music?',
-        questionOdia: 'ବୁଗିନ୍ ଦୁରଙ୍ଗ ଆୟୁମ କେତେ ଥାପ୍‌ଡ଼ି ଲାଗି ଆବୁ ଚେନାଃ ଇସ୍ତେମାଲ ଏଆବୁ?',
+        questionDevanagari: 'बुगिन दुरंग आयुम केते थापड़ि लागि आबु चेनाः इस्तेमाल एआबु?',
         options: ['Foot', 'Hand', 'Ear', 'Nose'],
-        optionsOdia: ['କାଟା', 'ତି', 'ଲୁତୁର', 'ମୁଆଁ'],
+        optionsDevanagari: ['काटा', 'ति', 'लुतुर', 'मुआं'],
         correctIndex: 1,
         explanation: 'We clap together using both our Hands.',
       ),
@@ -718,49 +732,49 @@ class EnglishActivitiesData {
     'Life Around Us': [
       EnglishQuizQuestion(
         question: 'Which grand animal has a big mane and is called King of the Jungle?',
-        questionOdia: 'ଚେନ୍ ମାରାଙ୍ଗ ଜୀବୁ ଗାଡ଼ା ଜଙ୍ଗଲ ରା ରାଜା ମେନ୍ତେ କାଜିଓଆ?',
+        questionDevanagari: 'चेन मारांग जीवु गाड़ा जंगल रा राजा मेन्ते काजिओआ?',
         options: ['Lion', 'Rabbit', 'Frog', 'Fish'],
-        optionsOdia: ['କୁଲା', 'କୁଲୁ', 'ଚୋକେ', 'ହାଇ'],
+        optionsDevanagari: ['कुला', 'कुलु', 'चोके', 'हाइ'],
         correctIndex: 0,
         explanation: 'The Lion is known as the King of the Jungle.',
       ),
       EnglishQuizQuestion(
         question: 'Which playful animal loves jumping from tree to tree?',
-        questionOdia: 'ଚେନ୍ ଇନୁଙ୍ଗ ଜୀବୁ ମିଆଦ ଦାରୁ ଏତେ ଏଟାଃ ଦାରୁ ତେ କୁଦାଉ ଖୁସିଓଆ?',
+        questionDevanagari: 'चेन इनुंग जीवु मिआद दारु एते एटाः दारु ते कुदाउ खुसिओआ?',
         options: ['Fish', 'Monkey', 'Elephant', 'Frog'],
-        optionsOdia: ['ହାଇ', 'ଗାଡ଼ି', 'ହାତୀ', 'ଚୋକେ'],
+        optionsDevanagari: ['हाइ', 'गाड़ि', 'हाती', 'चोके'],
         correctIndex: 1,
         explanation: 'Monkeys swing and jump playful across tree branches.',
       ),
       EnglishQuizQuestion(
         question: 'Which animal lives in water and swims using fins?',
-        questionOdia: 'ଚେନ୍ ଜୀବୁ ଦାଃ ରେ ତାହେନ୍ ଆୟ ଓଡ଼ୋଃ ପାଖନା ତେ ଉୟୁଙ୍ଗ ଏଆ?',
+        questionDevanagari: 'चेन जीवु दाः रे ताहेन आय ओड़ोः पाखना ते उयुंग एआ?',
         options: ['Rabbit', 'Lion', 'Fish', 'Elephant'],
-        optionsOdia: ['କୁଲୁ', 'କୁଲା', 'ହାଇ', 'ହାତୀ'],
+        optionsDevanagari: ['कुलु', 'कुला', 'हाइ', 'हाती'],
         correctIndex: 2,
         explanation: 'Fish live in water and swim using their fins.',
       ),
       EnglishQuizQuestion(
         question: 'Which huge animal has a long trunk and big fan ears?',
-        questionOdia: 'ଚେନ୍ ମାରାଙ୍ଗ ଜୀବୁ ରା ଜେଲେଙ୍ଗ ସୁଣ୍ଢ ଓଡ଼ୋଃ ବିଞ୍ଚଣା ଲେକାନ୍ ଲୁତୁର ମେନାଃ?',
+        questionDevanagari: 'चेन मारांग जीवु रा जेलेंग सुण्ढ ओड़ोः बिंचणा लेकान लुतुर मेनाः?',
         options: ['Elephant', 'Frog', 'Monkey', 'Lion'],
-        optionsOdia: ['ହାତୀ', 'ଚୋକେ', 'ଗାଡ଼ି', 'କୁଲା'],
+        optionsDevanagari: ['हाती', 'चोके', 'गाड़ि', 'कुला'],
         correctIndex: 0,
         explanation: 'Elephants are huge animals with long trunks.',
       ),
       EnglishQuizQuestion(
         question: 'Which green animal hops around ponds and makes "croak" sounds?',
-        questionOdia: 'ଚେନ୍ ହାରିଆର୍ ଜୀବୁ ବାନ୍ଧା ଚାରିପାଖେ ରେ କୁଦାଉଆ ଓଡ଼ୋଃ \'କ୍ରୋକ୍\' ଶବ୍ଦ ଏଆ?',
+        questionDevanagari: 'चेन हरियार जीवु बान्धा चारिपाखे रे कुदाउआ ओड़ोः \'क्रोक\' शब्द एआ?',
         options: ['Rabbit', 'Frog', 'Lion', 'Elephant'],
-        optionsOdia: ['କୁଲୁ', 'ଚୋକେ', 'କୁଲା', 'ହାତୀ'],
+        optionsDevanagari: ['कुलु', 'चोके', 'कुला', 'हाती'],
         correctIndex: 1,
         explanation: 'Frogs hop around ponds and croak.',
       ),
       EnglishQuizQuestion(
         question: 'Which small fluffy animal has long ears and soft fur?',
-        questionOdia: 'ଚେନ୍ ହୁଡିଙ୍ଗ ଲୁମାମ୍ ଜୀବୁ ରା ଜେଲେଙ୍ଗ ଲୁତୁର ଓଡ଼ୋଃ ଲୁମାମ୍ ଉବ୍ ମେନାଃ?',
+        questionDevanagari: 'चेन हुडिंग लुमाम जीवु रा जेलेंग लुतुर ओड़ोः लुमाम उब मेनाः?',
         options: ['Elephant', 'Fish', 'Monkey', 'Rabbit'],
-        optionsOdia: ['ହାତୀ', 'ହାଇ', 'ଗାଡ଼ି', 'କୁଲୁ'],
+        optionsDevanagari: ['हाती', 'हाइ', 'गाड़ि', 'कुलु'],
         correctIndex: 3,
         explanation: 'Rabbits are soft, fluffy animals with long ears.',
       ),
@@ -769,41 +783,41 @@ class EnglishActivitiesData {
     'The Food We Eat': [
       EnglishQuizQuestion(
         question: 'What healthy white drink do cows give us?',
-        questionOdia: 'ଗାଇ କୋ ଆବୁକେ ଚେନ୍ ବୁଗିନ୍ ପୁଣ୍ଡି ନୁ ଦାଃ କୋ ଏମାବୁଆ?',
+        questionDevanagari: 'गाइ को आबुके चेन बुगिन पुण्डि नु दाः को एमाबुआ?',
         options: ['Milk', 'Honey', 'Chutney', 'Juice'],
-        optionsOdia: ['ତୋଆ', 'ମହୁ', 'ଚଟଣି', 'ରସ'],
+        optionsDevanagari: ['तोआ', 'महु', 'चटणि', 'रस'],
         correctIndex: 0,
         explanation: 'Cows give us fresh and healthy Milk.',
       ),
       EnglishQuizQuestion(
         question: 'Which sweet yellow fruit is known as the king of fruits?',
-        questionOdia: 'ଚେନ୍ ସିବିଲ ସାସାଙ୍ଗ ଜୋ ଜୋ କୋ ରା ରାଜା ମେନ୍ତେ ସେବାସେଡ଼ାଓଆ?',
+        questionDevanagari: 'चेन सिबिल सासांग जो जो को रा राजा मेन्ते सेबासेड़ाओआ?',
         options: ['Carrot', 'Mango', 'Brinjal', 'Roti'],
-        optionsOdia: ['ଗାଜର', 'ଉଲି', 'ବାଇଗଣ', 'ରୁଟି'],
+        optionsDevanagari: ['गाजर', 'उलि', 'बाइगण', 'रुटि'],
         correctIndex: 1,
         explanation: 'Mango is a delicious yellow fruit known as the king of fruits.',
       ),
       EnglishQuizQuestion(
         question: 'Who grows crops and food for everyone on the farm?',
-        questionOdia: 'ଫାର୍ମ ରେ ସବେନ୍ କୋ ଲାଗି ଚାଷ ଓଡ଼ୋଃ ଜୋମ୍‌ଆ ଚିମିନ୍ ଓଲାଆ?',
+        questionDevanagari: 'फार्म रे सबेन को लागि चाष ओड़ोः जोमआ चिमिन ओलाआ?',
         options: ['Doctor', 'Teacher', 'Farmer', 'Pilot'],
-        optionsOdia: ['ଡାକ୍ତର', 'ମାଷ୍ଟର', 'ଚାଷୀ', 'ପାଇଲଟ୍'],
+        optionsDevanagari: ['डाक्टर', 'मास्टर', 'चाषी', 'पाइलट'],
         correctIndex: 2,
         explanation: 'Farmers grow food crops and vegetables on farms.',
       ),
       EnglishQuizQuestion(
         question: 'What sweet food do honeybees make in beehives?',
-        questionOdia: 'ଶୁଦ୍ଧ ଜୋମ୍‌ଆ ନେଲ୍ ଶୁଟି କୋ ଶୁଟି ଗୁଡ଼ା ରେ ଚିମିନ୍ ବେନାଓଆ?',
+        questionDevanagari: 'शुद्ध जोमआ नेल शुटि को शुटि गुड़ा रे चिमिन बेनाओआ?',
         options: ['Curd', 'Butter', 'Honey', 'Idli'],
-        optionsOdia: ['ଦହି', 'ଗୋତୋମ', 'ମହୁ', 'ଇଡ୍‌ଲି'],
+        optionsDevanagari: ['दहि', 'गोतोम', 'महु', 'इड्लि'],
         correctIndex: 2,
         explanation: 'Honeybees make sweet natural Honey.',
       ),
       EnglishQuizQuestion(
         question: 'What meal do we eat in the morning when we wake up?',
-        questionOdia: 'ସେତାଃ ରେ ଆବୁ ଏଭେନ୍ କେତେ ଚେନ୍ ଜୋମ୍‌ଆ ବୁ ଜୋମେଆ?',
+        questionDevanagari: 'सेताः रे आबु एभेन केते चेन जोमआ बु जोमेआ?',
         options: ['Dinner', 'Breakfast', 'Snack', 'Lunch'],
-        optionsOdia: ['ଆୟୁବ ଜୋମ୍', 'ସେତାଃ ଜୋମ୍', 'ଜଲ୍‌ଖିଆ', 'ଟିକିନ୍ ଜୋମ୍'],
+        optionsDevanagari: ['आय्युब जोम', 'सेताः जोम', 'जलखिआ', 'टिकिन जोम'],
         correctIndex: 1,
         explanation: 'Breakfast is the first meal of the day eaten in the morning.',
       ),
