@@ -8,6 +8,7 @@ import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
+import '../../services/tts_service.dart';
 import 'widgets/winding_levels_path.dart';
 
 /// Data structure for bilingual word and sentence pairs.
@@ -140,8 +141,7 @@ class _TeacherPhaseScreenState extends State<TeacherPhaseScreen> {
     if (widget.onPlayAudio != null) {
       widget.onPlayAudio!(mundariText);
     } else {
-      // Future audio service hook: audio player will play pronunciation
-      debugPrint('Playing Mundari pronunciation: $mundariText');
+      TtsService().speakCodeMixedClassroomScript(mundariText);
     }
   }
 
@@ -194,18 +194,21 @@ class _TeacherPhaseScreenState extends State<TeacherPhaseScreen> {
                 ),
 
                 // Main Layout
-                Column(
-                  children: [
-                    // Fixed Header
-                    _buildHeader(context, isTablet),
+                Positioned.fill(
+                  child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    child: Column(
+                      children: [
+                        // Header
+                        _buildHeader(context, isTablet),
 
-                    // Scrollable Learning Content
-                    Expanded(
-                      child: widget.phaseNumber == 1
-                          ? _buildLearningPhaseBody(isTablet)
-                          : _buildPlaceholderBody(isTablet),
+                        // Learning Content
+                        widget.phaseNumber == 1
+                            ? _buildLearningPhaseBody(isTablet)
+                            : _buildPlaceholderBody(isTablet),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -492,24 +495,21 @@ class _TeacherPhaseScreenState extends State<TeacherPhaseScreen> {
                 ),
                 const SizedBox(height: 4.0),
 
-                // Internally scrollable list of 10 Word or Sentence Pairs
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Column(
-                      children: [
-                        for (var index = 0; index < pairs.length; index++) ...[
-                          if (index > 0) const SizedBox(height: 7.0),
-                          _buildPairRow(
-                            pair: pairs[index],
-                            isSentence: isSentencePage,
-                            isTablet: isTablet,
-                            index: index,
-                          ),
-                        ],
+                // List of 10 Word or Sentence Pairs
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Column(
+                    children: [
+                      for (var index = 0; index < pairs.length; index++) ...[
+                        if (index > 0) const SizedBox(height: 7.0),
+                        _buildPairRow(
+                          pair: pairs[index],
+                          isSentence: isSentencePage,
+                          isTablet: isTablet,
+                          index: index,
+                        ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12.0),
