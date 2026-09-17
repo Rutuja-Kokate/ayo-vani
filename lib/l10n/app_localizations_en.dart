@@ -829,6 +829,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msgShared => 'Sharing translation...';
 
   @override
+  String get msgTtsNotAvailable =>
+      'Voice playback is not available for this language';
+
+  @override
   String get toolsTitle => 'Teacher Tools';
 
   @override
