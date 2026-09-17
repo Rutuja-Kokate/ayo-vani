@@ -52,14 +52,15 @@ class AyoClassSelectionGrid extends StatelessWidget {
           SizedBox(height: tablet ? 12.0 : 12.0),
         ],
 
-        // 2 × 2 Grid Layout
+        // 2 × 2 Grid Layout with Unified Material Vector Icons & Subtitles
         Row(
           children: [
             Expanded(
               child: _buildQuickToolCard(
                 context: context,
                 label: l10n?.classBalvatika ?? 'Balvatika',
-                icon: Icons.g_translate_rounded,
+                subtitle: l10n?.classSubtitleBalvatika ?? '3 Modules',
+                icon: Icons.child_care_rounded,
                 iconColor: const Color(0xFF8B4B3E),
                 iconBgColor: const Color(0xFFF7EBE7),
                 onTap: () {
@@ -81,7 +82,8 @@ class AyoClassSelectionGrid extends StatelessWidget {
               child: _buildQuickToolCard(
                 context: context,
                 label: l10n?.classFirst ?? 'First',
-                icon: Icons.description_outlined,
+                subtitle: l10n?.classSubtitleFirst ?? '12 Lessons',
+                icon: Icons.auto_stories_rounded,
                 iconColor: const Color(0xFF5A7854),
                 iconBgColor: const Color(0xFFEFF5ED),
                 onTap: () {
@@ -107,7 +109,8 @@ class AyoClassSelectionGrid extends StatelessWidget {
               child: _buildQuickToolCard(
                 context: context,
                 label: l10n?.classSecond ?? 'Second',
-                icon: Icons.style_outlined,
+                subtitle: l10n?.classSubtitleSecond ?? '12 Lessons',
+                icon: Icons.menu_book_rounded,
                 iconColor: const Color(0xFF756E4E),
                 iconBgColor: const Color(0xFFF7F6EB),
                 onTap: () {
@@ -129,7 +132,8 @@ class AyoClassSelectionGrid extends StatelessWidget {
               child: _buildQuickToolCard(
                 context: context,
                 label: l10n?.classThird ?? 'Third',
-                icon: Icons.sports_esports_rounded,
+                subtitle: l10n?.classSubtitleThird ?? '12 Lessons',
+                icon: Icons.school_rounded,
                 iconColor: const Color(0xFF8C3238),
                 iconBgColor: const Color(0xFFF8EBEB),
                 onTap: () {
@@ -155,6 +159,7 @@ class AyoClassSelectionGrid extends StatelessWidget {
   Widget _buildQuickToolCard({
     required BuildContext context,
     required String label,
+    required String subtitle,
     required IconData icon,
     required Color iconColor,
     required Color iconBgColor,
@@ -167,12 +172,12 @@ class AyoClassSelectionGrid extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16.0),
-        splashColor: iconColor.withValues(alpha: 0.1),
-        highlightColor: iconColor.withValues(alpha: 0.05),
+        splashColor: iconColor.withValues(alpha: 0.08),
+        highlightColor: iconColor.withValues(alpha: 0.04),
         child: Container(
           padding: EdgeInsets.symmetric(
             horizontal: isTablet ? 16.0 : 14.0,
-            vertical: isTablet ? 18.0 : 14.0,
+            vertical: isTablet ? 16.0 : 13.0,
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16.0),
@@ -183,7 +188,7 @@ class AyoClassSelectionGrid extends StatelessWidget {
             boxShadow: const [
               BoxShadow(
                 color: Color(0x064A3B32),
-                blurRadius: 8,
+                blurRadius: 6,
                 offset: Offset(0, 2),
               ),
             ],
@@ -191,8 +196,8 @@ class AyoClassSelectionGrid extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: isTablet ? 40.0 : 36.0,
-                height: isTablet ? 40.0 : 36.0,
+                width: isTablet ? 42.0 : 38.0,
+                height: isTablet ? 42.0 : 38.0,
                 decoration: BoxDecoration(
                   color: iconBgColor,
                   borderRadius: BorderRadius.circular(10.0),
@@ -205,16 +210,34 @@ class AyoClassSelectionGrid extends StatelessWidget {
               ),
               SizedBox(width: isTablet ? 12.0 : 10.0),
               Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: AppTypography.bodyFontFamily,
-                    fontSize: isTablet ? 14.5 : 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: isTablet ? 14.5 : 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 1.0),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: isTablet ? 11.5 : 11.0,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
