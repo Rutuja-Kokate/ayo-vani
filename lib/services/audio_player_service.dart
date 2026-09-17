@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'speech_to_speech_service.dart';
-import 'tts_service.dart';
 
 class S2SAudioPlayerService {
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -25,42 +24,37 @@ class S2SAudioPlayerService {
       await stop(); // Ensure previous is stopped
       await _audioPlayer.setPlaybackRate(_currentSpeed);
 
+      final completer = Completer<void>();
+
+      // Listen for completion
+      StreamSubscription? stateSub;
+      stateSub = _audioPlayer.onPlayerStateChanged.listen((state) {
+        if (state == PlayerState.completed || state == PlayerState.stopped) {
+          if (!completer.isCompleted) completer.complete();
+          stateSub?.cancel();
+        }
+      });
+
       if (result.isCacheHit && result.audioPath != null) {
         String path = result.audioPath!;
         if (path.startsWith('assets/')) {
           path = path.substring(7);
         }
         debugPrint('[AudioPlayer] Playing asset: $path');
-
-        final completer = Completer<void>();
-        StreamSubscription? stateSub;
-        stateSub = _audioPlayer.onPlayerStateChanged.listen((state) {
-          if (state == PlayerState.completed || state == PlayerState.stopped) {
-            if (!completer.isCompleted) completer.complete();
-            stateSub?.cancel();
-          }
-        });
-
         await _audioPlayer.play(AssetSource(path));
-        await completer.future;
-      } else if (result.isRealTime && result.audioBytes != null && result.audioBytes!.isNotEmpty) {
+      } else if (result.isRealTime && result.audioBytes != null) {
         debugPrint('[AudioPlayer] Playing from bytes (${result.audioBytes!.length} bytes)');
         await _audioPlayer.play(BytesSource(result.audioBytes!));
       } else {
-        debugPrint('[AudioPlayer] Synthesizing via TtsService for: "${result.hindiText}"');
-        final tts = TtsService();
-        await tts.speakWordAndMundari(result.hindiText, result.mundariText);
+        debugPrint('[AudioPlayer] No audio found in result');
+        if (!completer.isCompleted) completer.complete();
       }
+
+      // Wait for playback to actually finish
+      await completer.future;
+
     } catch (e) {
       debugPrint('[AudioPlayer] Error playing audio: $e');
-      // Fallback to TTS service on audio player exception
-      try {
-        final tts = TtsService();
-        await tts.speakWordAndMundari(result.hindiText, result.mundariText);
-      } catch (ttsErr) {
-        debugPrint('[AudioPlayer] TTS fallback error: $ttsErr');
-        rethrow;
-      }
     }
   }
 
