@@ -3,21 +3,13 @@ import '../../app/responsive/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_dimens.dart';
 import '../../app/theme/app_typography.dart';
-import '../../widgets/ayo_logo.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/ayo_class_selection_grid.dart';
+import '../../widgets/ayo_logo.dart';
 import '../live_translate/live_translate_screen.dart';
+import '../settings/settings_screen.dart';
 
 /// Screen 03 — Home / Dashboard for AYOVAANI Teacher App.
-///
-/// Strictly reproduces the visual design, structure, and spacing of:
-/// - Screen 03: Home (Dashboard)
-/// - Master Visual Design Reference
-///
-/// Component Structure:
-/// 1. Top Header Area (Compact AyoVaani logo, greeting, and subtitle)
-/// 2. Offline Status Card ("Offline Ready" with soft green/olive styling)
-/// 3. Today's Lesson Section ("Mathematics", "Numbers 1–20", thumbnail, "Start Classroom →")
-/// 4. Quick Tools Section (2 × 2 grid: Translate, Worksheet, Flashcards, Games)
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
     super.key,
@@ -49,7 +41,7 @@ class HomeScreen extends StatelessWidget {
 
     return Stack(
       children: [
-        // Decorative Corner Ornaments (Behind content, pointer-events: none equivalent)
+        // Decorative Corner Ornaments
         Positioned(
           top: 0,
           left: 0,
@@ -68,109 +60,98 @@ class HomeScreen extends StatelessWidget {
         // Main Home Screen Content
         LayoutBuilder(
           builder: (context, constraints) {
-        final availableHeight = constraints.maxHeight;
+            final availableHeight = constraints.maxHeight;
+            final isCompactHeight = availableHeight < 700.0;
 
-        // Responsive vertical spacing and sizing adapting naturally to available height
-        final isCompactHeight = availableHeight < 700.0;
+            final topSpacing = isTablet
+                ? (isCompactHeight ? 14.0 : 20.0)
+                : (isCompactHeight ? 14.0 : (availableHeight * 0.032).clamp(20.0, 30.0));
 
-        // Shift components lower on mobile (Pixel 4)
-        final topSpacing = isTablet
-            ? (isCompactHeight ? 14.0 : 20.0)
-            : (isCompactHeight ? 14.0 : (availableHeight * 0.032).clamp(20.0, 30.0));
+            final logoHeight = isTablet
+                ? (isCompactHeight ? 115.0 : 130.0)
+                : (isCompactHeight ? 88.0 : (availableHeight * 0.14).clamp(98.0, 108.0));
 
-        // Increased AyoVaani logo sizes for both Tablet and Mobile
-        final logoHeight = isTablet
-            ? (isCompactHeight ? 115.0 : 130.0)
-            : (isCompactHeight ? 88.0 : (availableHeight * 0.14).clamp(98.0, 108.0));
+            final logoToGreetingSpacing = isTablet
+                ? (isCompactHeight ? 18.0 : 24.0)
+                : (isCompactHeight ? 20.0 : (availableHeight * 0.046).clamp(30.0, 42.0));
 
-        // Moves the main content block downward naturally towards the bottom on mobile
-        final logoToGreetingSpacing = isTablet
-            ? (isCompactHeight ? 18.0 : 24.0)
-            : (isCompactHeight ? 20.0 : (availableHeight * 0.046).clamp(30.0, 42.0));
+            final greetingToOfflineSpacing = isTablet
+                ? (isCompactHeight ? 14.0 : 18.0)
+                : (isCompactHeight ? 14.0 : (availableHeight * 0.026).clamp(18.0, 24.0));
 
-        final greetingToOfflineSpacing = isTablet
-            ? (isCompactHeight ? 14.0 : 18.0)
-            : (isCompactHeight ? 14.0 : (availableHeight * 0.026).clamp(18.0, 24.0));
+            final offlineToContentSpacing = isTablet
+                ? (isCompactHeight ? 20.0 : 26.0)
+                : (isCompactHeight ? 16.0 : (availableHeight * 0.030).clamp(20.0, 26.0));
 
-        final offlineToContentSpacing = isTablet
-            ? (isCompactHeight ? 20.0 : 26.0)
-            : (isCompactHeight ? 16.0 : (availableHeight * 0.030).clamp(20.0, 26.0));
+            final lessonToToolsSpacing = isCompactHeight
+                ? 16.0
+                : (availableHeight * 0.030).clamp(20.0, 26.0);
 
-        final lessonToToolsSpacing = isCompactHeight
-            ? 16.0
-            : (availableHeight * 0.030).clamp(20.0, 26.0);
+            final bottomSpacing = isTablet
+                ? (isCompactHeight ? 16.0 : 24.0)
+                : (isCompactHeight ? 12.0 : (availableHeight * 0.020).clamp(14.0, 22.0));
 
-        final bottomSpacing = isTablet
-            ? (isCompactHeight ? 16.0 : 24.0)
-            : (isCompactHeight ? 12.0 : (availableHeight * 0.020).clamp(14.0, 22.0));
-
-        return SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: EdgeInsets.only(
-            left: isTablet ? 48.0 : AppSpacing.lg,
-            right: isTablet ? 48.0 : AppSpacing.lg,
-            top: topSpacing,
-            bottom: bottomSpacing,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: isTablet ? 1060.0 : double.infinity,
+            return SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.only(
+                left: isTablet ? 48.0 : AppSpacing.lg,
+                right: isTablet ? 48.0 : AppSpacing.lg,
+                top: topSpacing,
+                bottom: bottomSpacing,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 1. Top Center: Prominently Sized Official AyoVaani Logo
-                  _buildTopLogo(logoHeight),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: isTablet ? 1060.0 : double.infinity,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1. Top Center: Logo
+                      _buildTopLogo(logoHeight),
 
-                  SizedBox(height: logoToGreetingSpacing),
+                      SizedBox(height: logoToGreetingSpacing),
 
-                  // 2. Teacher Greeting + Subtitle (Main Content Start)
-                  _buildGreeting(isTablet),
+                      // 2. Teacher Greeting + Settings Entry Point
+                      _buildGreeting(context, isTablet),
 
-                  SizedBox(height: greetingToOfflineSpacing),
+                      SizedBox(height: greetingToOfflineSpacing),
 
-                  // 3. Offline Status Card (spans full width of tablet content)
-                  _buildOfflineStatusCard(),
+                      // 3. Offline Status Card
+                      _buildOfflineStatusCard(context),
 
-                  SizedBox(height: offlineToContentSpacing),
+                      SizedBox(height: offlineToContentSpacing),
 
-                  // 4. Main Content: 2-Column on Tablet, Single-Column on Mobile
-                  if (isTablet)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Left Column: Let's Start / Today's Lesson
-                        Expanded(
-                          child: _buildTodaysLessonSection(context, isTablet: true),
-                        ),
-                        const SizedBox(width: 24.0),
-                        // Right Column: Classes (2 × 2 Grid)
-                        Expanded(
-                          child: _buildQuickToolsSection(context, isTablet: true),
-                        ),
+                      // 4. Main Content: 2-Column on Tablet, Single-Column on Mobile
+                      if (isTablet)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: _buildTodaysLessonSection(context, isTablet: true),
+                            ),
+                            const SizedBox(width: 24.0),
+                            Expanded(
+                              child: _buildQuickToolsSection(context, isTablet: true),
+                            ),
+                          ],
+                        )
+                      else ...[
+                        _buildTodaysLessonSection(context, isTablet: false),
+                        SizedBox(height: lessonToToolsSpacing),
+                        _buildQuickToolsSection(context, isTablet: false),
                       ],
-                    )
-                  else ...[
-                    // Mobile: Preserves exact original single-column flow
-                    _buildTodaysLessonSection(context, isTablet: false),
-                    SizedBox(height: lessonToToolsSpacing),
-                    _buildQuickToolsSection(context, isTablet: false),
-                  ],
-                ],
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-        );
-      },
-    ),
-  ],
-);
+            );
+          },
+        ),
+      ],
+    );
   }
 
-  /// Decorative Warli corner ornament using corner-desing.png.
-  /// Top-left: normal orientation.
-  /// Top-right: horizontally mirrored/flipped so the decoration faces inward correctly.
   Widget _buildCornerDecoration({
     required bool isRight,
     required double size,
@@ -196,7 +177,6 @@ class HomeScreen extends StatelessWidget {
         : imageWidget;
   }
 
-  /// 1. Top Area: Prominently Sized Centered AyoVaani Logo
   Widget _buildTopLogo(double logoHeight) {
     return SizedBox(
       width: double.infinity,
@@ -208,48 +188,85 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// 2. Teacher Greeting + Subtitle
-  Widget _buildGreeting(bool isTablet) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Warm dark brown/maroon heading
-        Text(
-          'Hello, Teacher',
-          style: TextStyle(
-            fontFamily: AppTypography.headingFontFamily,
-            fontSize: isTablet ? 25.0 : 22.0,
-            fontWeight: FontWeight.w400,
-            color: AppColors.primaryBurgundy,
-            letterSpacing: -0.2,
-            height: 1.25,
-          ),
-        ),
-        const SizedBox(height: 4.0),
+  Widget _buildGreeting(BuildContext context, bool isTablet) {
+    final l10n = AppLocalizations.of(context);
 
-        // Elegant subtitle
-        Text(
-          'Ready to inspire today?',
-          style: TextStyle(
-            fontFamily: AppTypography.bodyFontFamily,
-            fontSize: 14.0,
-            fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary,
-            height: 1.35,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n?.homeGreeting ?? 'Hello, Teacher',
+              style: TextStyle(
+                fontFamily: AppTypography.headingFontFamily,
+                fontSize: isTablet ? 25.0 : 22.0,
+                fontWeight: FontWeight.w400,
+                color: AppColors.primaryBurgundy,
+                letterSpacing: -0.2,
+                height: 1.25,
+              ),
+            ),
+            const SizedBox(height: 4.0),
+            Text(
+              l10n?.homeSubGreeting ?? 'Ready to inspire today?',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: 14.0,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSecondary,
+                height: 1.35,
+              ),
+            ),
+          ],
+        ),
+
+        Tooltip(
+          message: l10n?.profileTitle ?? 'Teacher Profile & Settings',
+          child: Material(
+            color: const Color(0xFFFDFBF7),
+            borderRadius: BorderRadius.circular(20.0),
+            child: InkWell(
+              onTap: () => SettingsScreen.show(context),
+              borderRadius: BorderRadius.circular(20.0),
+              child: Container(
+                width: 42.0,
+                height: 42.0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  border: Border.all(color: const Color(0xFFE8DECF)),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x084A3B32),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.settings_rounded,
+                  size: 22.0,
+                  color: AppColors.primaryBurgundy,
+                ),
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  /// 2. Offline Status Card ("Offline Ready" with soft green/olive styling)
-  Widget _buildOfflineStatusCard() {
+  Widget _buildOfflineStatusCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F9F5), // Light cream with very soft green tint
+        color: const Color(0xFFF7F9F5),
         borderRadius: BorderRadius.circular(14.0),
         border: Border.all(
-          color: const Color(0xFFD6E3D4), // Subtle soft green/olive border
+          color: const Color(0xFFD6E3D4),
           width: 1.0,
         ),
         boxShadow: const [
@@ -263,7 +280,6 @@ class HomeScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
       child: Row(
         children: [
-          // Soft green/olive status icon circle
           Container(
             width: 32.0,
             height: 32.0,
@@ -278,8 +294,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12.0),
-
-          // Status Information
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,19 +303,18 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        'Offline Ready',
+                        l10n?.labelOfflineReady ?? 'Offline Ready',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: AppTypography.bodyFontFamily,
                           fontSize: 13.5,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF2C4A26), // Deep soft olive
+                          color: const Color(0xFF2C4A26),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8.0),
-                    // 24 lessons badge
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8.0,
@@ -325,7 +338,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Content synced today.',
+                  l10n?.homeContentSynced ?? 'Content synced today.',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 12.0,
@@ -341,14 +354,14 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// 3. Let's Start Section with Lesson Card and "Translate →" Button
   Widget _buildTodaysLessonSection(BuildContext context, {bool isTablet = false}) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Title
         Text(
-          "Let's Start",
+          l10n?.homeLetsStart ?? "Let's Start",
           style: TextStyle(
             fontFamily: AppTypography.headingFontFamily,
             fontSize: isTablet ? 20.0 : 18.0,
@@ -358,14 +371,12 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         SizedBox(height: isTablet ? 12.0 : 10.0),
-
-        // Lesson Card
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFFDFBF7), // Warm cream card surface
+            color: const Color(0xFFFDFBF7),
             borderRadius: BorderRadius.circular(18.0),
             border: Border.all(
-              color: const Color(0xFFE8DECF), // Subtle warm border
+              color: const Color(0xFFE8DECF),
               width: 1.0,
             ),
             boxShadow: const [
@@ -383,13 +394,12 @@ class HomeScreen extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Lesson Details
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Mathematics',
+                          l10n?.math ?? 'Mathematics',
                           style: TextStyle(
                             fontFamily: AppTypography.headingFontFamily,
                             fontSize: isTablet ? 20.0 : 18.5,
@@ -399,7 +409,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4.0),
                         Text(
-                          'Numbers 1–20',
+                          l10n?.homeFeaturedLessonTitle ?? 'Numbers 1–20',
                           style: TextStyle(
                             fontFamily: AppTypography.bodyFontFamily,
                             fontSize: isTablet ? 15.0 : 14.5,
@@ -409,7 +419,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4.0),
                         Text(
-                          'Class 2 • Santhali',
+                          '${l10n?.labelClassWithNumber('2') ?? 'Class 2'} • Santhali',
                           style: TextStyle(
                             fontFamily: AppTypography.bodyFontFamily,
                             fontSize: isTablet ? 13.5 : 13.0,
@@ -421,8 +431,6 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 14.0),
-
-                  // Culturally inspired lesson thumbnail on the right side
                   Container(
                     width: isTablet ? 78.0 : 72.0,
                     height: isTablet ? 78.0 : 72.0,
@@ -452,8 +460,6 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
               SizedBox(height: isTablet ? 20.0 : 18.0),
-
-              // Primary "Translate →" Button in AyoVaani Maroon Accent
               SizedBox(
                 width: double.infinity,
                 height: 48.0,
@@ -470,7 +476,7 @@ class HomeScreen extends StatelessWidget {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBurgundy, // #671D21
+                    backgroundColor: AppColors.primaryBurgundy,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -482,7 +488,7 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Translate',
+                        l10n?.navTranslate ?? 'Translate',
                         style: TextStyle(
                           fontFamily: AppTypography.bodyFontFamily,
                           fontSize: 15.0,
@@ -506,7 +512,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// 4. Classes Section (2 × 2 Grid: Balvatika, First, Second, Third)
   Widget _buildQuickToolsSection(BuildContext context, {bool isTablet = false}) {
     return AyoClassSelectionGrid(
       onNavigateToBalvatika: onNavigateToBalvatika,
