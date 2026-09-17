@@ -9,6 +9,7 @@ import '../../app/theme/app_typography.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
+import '../../widgets/mundari_audio_text.dart';
 import '../../pipeline/hindi_stt_service.dart';
 import '../../pipeline/demo_cache_manager.dart';
 import '../../pipeline/fuzzy_matcher.dart';
@@ -443,17 +444,28 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 500),
                       opacity: _translatedText.isEmpty ? 0.0 : 1.0,
-                      child: Text(
-                        _translatedText,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: AppTypography.headingFontFamily,
-                          fontSize: isTablet ? 64.0 : 42.0,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                          height: 1.3,
-                        ),
-                      ),
+                      child: _direction == TranslationDirection.hindiToMundari
+                          ? MundariAudioText(
+                              text: _translatedText,
+                              style: TextStyle(
+                                fontFamily: AppTypography.headingFontFamily,
+                                fontSize: isTablet ? 36.0 : 28.0,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryBurgundy,
+                              ),
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              iconSize: 32.0,
+                            )
+                          : Text(
+                              _translatedText,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: AppTypography.headingFontFamily,
+                                fontSize: isTablet ? 36.0 : 28.0,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryBurgundy,
+                              ),
+                            ),
                     ),
                   ),
                 ),

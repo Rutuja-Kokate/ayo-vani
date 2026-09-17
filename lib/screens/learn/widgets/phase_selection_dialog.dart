@@ -162,9 +162,10 @@ class PhaseSelectionDialog extends StatelessWidget {
     final cardWidth = isTablet ? 420.0 : math.min(mediaQuery.size.width - 36.0, 360.0);
 
     return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
+      child: SingleChildScrollView(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
           width: cardWidth,
           margin: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 24.0),
           decoration: BoxDecoration(
@@ -381,8 +382,9 @@ class PhaseSelectionDialog extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   String _getPhaseTitle(int index, int phaseNumber) {
     if (phaseNames != null && index < phaseNames!.length) {

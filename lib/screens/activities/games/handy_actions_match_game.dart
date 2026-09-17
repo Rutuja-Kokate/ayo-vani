@@ -8,6 +8,7 @@ import '../../../data/english_activities_data.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
+import '../../../widgets/mundari_audio_text.dart';
 
 /// Game 1: "Handy Actions Match Game" for Chapter "Two Little Hands"
 class HandyActionsMatchGame extends StatefulWidget {
@@ -466,6 +467,11 @@ class _HandyActionsMatchGameState extends State<HandyActionsMatchGame> {
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                 ),
+              ),
+              const SizedBox(width: 8.0),
+              MundariAudioButton(
+                text: optionWord.mundariDevanagari,
+                iconSize: 20.0,
               ),
               if (_selectedOptionIndex == index && _isSelectionCorrect == true) ...[
                 const SizedBox(width: 8.0),
