@@ -10,6 +10,8 @@ import '../live_translate/live_translate_screen.dart';
 import '../settings/settings_screen.dart';
 
 /// Screen 03 — Home / Dashboard for AYOVAANI Teacher App.
+///
+/// Performance-Optimized for 2GB RAM Target Devices.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
     super.key,
@@ -72,24 +74,10 @@ class HomeScreen extends StatelessWidget {
                 : (isCompactHeight ? 88.0 : (availableHeight * 0.14).clamp(98.0, 108.0));
 
             final logoToGreetingSpacing = isTablet
-                ? (isCompactHeight ? 18.0 : 24.0)
-                : (isCompactHeight ? 20.0 : (availableHeight * 0.046).clamp(30.0, 42.0));
+                ? (isCompactHeight ? 16.0 : 22.0)
+                : (isCompactHeight ? 16.0 : (availableHeight * 0.040).clamp(22.0, 34.0));
 
-            final greetingToOfflineSpacing = isTablet
-                ? (isCompactHeight ? 14.0 : 18.0)
-                : (isCompactHeight ? 14.0 : (availableHeight * 0.026).clamp(18.0, 24.0));
-
-            final offlineToContentSpacing = isTablet
-                ? (isCompactHeight ? 20.0 : 26.0)
-                : (isCompactHeight ? 16.0 : (availableHeight * 0.030).clamp(20.0, 26.0));
-
-            final lessonToToolsSpacing = isCompactHeight
-                ? 16.0
-                : (availableHeight * 0.030).clamp(20.0, 26.0);
-
-            final bottomSpacing = isTablet
-                ? (isCompactHeight ? 16.0 : 24.0)
-                : (isCompactHeight ? 12.0 : (availableHeight * 0.020).clamp(14.0, 22.0));
+            final sectionSpacing = isCompactHeight ? 12.0 : 16.0;
 
             return SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
@@ -97,7 +85,7 @@ class HomeScreen extends StatelessWidget {
                 left: isTablet ? 48.0 : AppSpacing.lg,
                 right: isTablet ? 48.0 : AppSpacing.lg,
                 top: topSpacing,
-                bottom: bottomSpacing,
+                bottom: 24.0,
               ),
               child: Center(
                 child: ConstrainedBox(
@@ -112,17 +100,22 @@ class HomeScreen extends StatelessWidget {
 
                       SizedBox(height: logoToGreetingSpacing),
 
-                      // 2. Teacher Greeting + Settings Entry Point
+                      // 2. Teacher Greeting Header with Option B Sync Info
                       _buildGreeting(context, isTablet),
 
-                      SizedBox(height: greetingToOfflineSpacing),
+                      SizedBox(height: sectionSpacing),
 
-                      // 3. Offline Status Card
+                      // 3. Progress / Stats Row
+                      _buildStatsRow(context, isTablet),
+
+                      SizedBox(height: sectionSpacing),
+
+                      // 4. Offline Status Card
                       _buildOfflineStatusCard(context),
 
-                      SizedBox(height: offlineToContentSpacing),
+                      SizedBox(height: sectionSpacing + 2.0),
 
-                      // 4. Main Content: 2-Column on Tablet, Single-Column on Mobile
+                      // 5. Main Content Layout: 2-Column on Tablet, Single-Column on Mobile
                       if (isTablet)
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                             Expanded(
                               child: _buildTodaysLessonSection(context, isTablet: true),
                             ),
-                            const SizedBox(width: 24.0),
+                            const SizedBox(width: 20.0),
                             Expanded(
                               child: _buildQuickToolsSection(context, isTablet: true),
                             ),
@@ -138,7 +131,7 @@ class HomeScreen extends StatelessWidget {
                         )
                       else ...[
                         _buildTodaysLessonSection(context, isTablet: false),
-                        SizedBox(height: lessonToToolsSpacing),
+                        SizedBox(height: sectionSpacing + 2.0),
                         _buildQuickToolsSection(context, isTablet: false),
                       ],
                     ],
@@ -188,6 +181,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Greeting Header with Option B Whitespace Usage (Last Sync Info)
   Widget _buildGreeting(BuildContext context, bool isTablet) {
     final l10n = AppLocalizations.of(context);
 
@@ -195,32 +189,45 @@ class HomeScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n?.homeGreeting ?? 'Hello, Teacher',
-              style: TextStyle(
-                fontFamily: AppTypography.headingFontFamily,
-                fontSize: isTablet ? 25.0 : 22.0,
-                fontWeight: FontWeight.w400,
-                color: AppColors.primaryBurgundy,
-                letterSpacing: -0.2,
-                height: 1.25,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n?.homeGreeting ?? 'Hello, Teacher',
+                style: TextStyle(
+                  fontFamily: AppTypography.headingFontFamily,
+                  fontSize: isTablet ? 25.0 : 22.0,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.primaryBurgundy,
+                  letterSpacing: -0.2,
+                  height: 1.25,
+                ),
               ),
-            ),
-            const SizedBox(height: 4.0),
-            Text(
-              l10n?.homeSubGreeting ?? 'Ready to inspire today?',
-              style: TextStyle(
-                fontFamily: AppTypography.bodyFontFamily,
-                fontSize: 14.0,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary,
-                height: 1.35,
+              const SizedBox(height: 3.0),
+              Text(
+                l10n?.homeSubGreeting ?? 'Ready to inspire today?',
+                style: TextStyle(
+                  fontFamily: AppTypography.bodyFontFamily,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textSecondary,
+                  height: 1.3,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 2.0),
+              // Option B Header Whitespace: Plain text last sync info
+              Text(
+                l10n?.homeHeaderLastSync ?? 'Last sync: Today 9:00 AM',
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF8B4B3E),
+                ),
+              ),
+            ],
+          ),
         ),
 
         Tooltip(
@@ -239,8 +246,8 @@ class HomeScreen extends StatelessWidget {
                   border: Border.all(color: const Color(0xFFE8DECF)),
                   boxShadow: const [
                     BoxShadow(
-                      color: Color(0x084A3B32),
-                      blurRadius: 6,
+                      color: Color(0x064A3B32),
+                      blurRadius: 4,
                       offset: Offset(0, 2),
                     ),
                   ],
@@ -251,6 +258,92 @@ class HomeScreen extends StatelessWidget {
                   color: AppColors.primaryBurgundy,
                 ),
               ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Section 1: Progress / Stats Row
+  Widget _buildStatsRow(BuildContext context, bool isTablet) {
+    final l10n = AppLocalizations.of(context);
+
+    return Row(
+      children: [
+        // Today's completed lessons
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7EBE7),
+              borderRadius: BorderRadius.circular(12.0),
+              border: Border.all(
+                color: const Color(0xFFE8DECF),
+                width: 1.0,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.task_alt_rounded,
+                  size: 16.0,
+                  color: AppColors.primaryBurgundy,
+                ),
+                const SizedBox(width: 6.0),
+                Expanded(
+                  child: Text(
+                    l10n?.homeStatsTodayCompleted(3) ?? 'Today: 3 lessons completed',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: AppTypography.bodyFontFamily,
+                      fontSize: isTablet ? 12.5 : 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryBurgundy,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 10.0),
+
+        // Weekly count / streak
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7F6EB),
+              borderRadius: BorderRadius.circular(12.0),
+              border: Border.all(
+                color: const Color(0xFFE8DECF),
+                width: 1.0,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.local_fire_department_rounded,
+                  size: 16.0,
+                  color: Color(0xFF756E4E),
+                ),
+                const SizedBox(width: 6.0),
+                Expanded(
+                  child: Text(
+                    l10n?.homeStatsWeeklyTotal(12) ?? 'This week: 12 lessons',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: AppTypography.bodyFontFamily,
+                      fontSize: isTablet ? 12.5 : 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF756E4E),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -272,7 +365,7 @@ class HomeScreen extends StatelessWidget {
         boxShadow: const [
           BoxShadow(
             color: Color(0x062C4A26),
-            blurRadius: 6,
+            blurRadius: 4,
             offset: Offset(0, 2),
           ),
         ],
@@ -354,6 +447,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Section 2: Enhanced "Continue" Card with static progress bar and next lesson preview
   Widget _buildTodaysLessonSection(BuildContext context, {bool isTablet = false}) {
     final l10n = AppLocalizations.of(context);
 
@@ -381,13 +475,13 @@ class HomeScreen extends StatelessWidget {
             ),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x084A3B32),
-                blurRadius: 10,
-                offset: Offset(0, 3),
+                color: Color(0x064A3B32),
+                blurRadius: 6,
+                offset: Offset(0, 2),
               ),
             ],
           ),
-          padding: EdgeInsets.all(isTablet ? 20.0 : 18.0),
+          padding: EdgeInsets.all(isTablet ? 20.0 : 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -417,20 +511,34 @@ class HomeScreen extends StatelessWidget {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 4.0),
+                        const SizedBox(height: 3.0),
                         Text(
                           '${l10n?.labelClassWithNumber('2') ?? 'Class 2'} • Santhali',
                           style: TextStyle(
                             fontFamily: AppTypography.bodyFontFamily,
-                            fontSize: isTablet ? 13.5 : 13.0,
+                            fontSize: isTablet ? 13.0 : 12.5,
                             fontWeight: FontWeight.w400,
                             color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 3.0),
+                        // Next Lesson Preview
+                        Text(
+                          l10n?.homeNextLessonPreview ?? 'Next lesson: Addition Practice',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF8B4B3E),
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 14.0),
+                  // Lightweight illustration asset
                   Container(
                     width: isTablet ? 78.0 : 72.0,
                     height: isTablet ? 78.0 : 72.0,
@@ -459,10 +567,16 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: isTablet ? 20.0 : 18.0),
+              const SizedBox(height: 12.0),
+
+              // Thin Static Progress Bar (60% completion of "Numbers 1-20")
+              _buildStaticProgressBar(0.60),
+
+              SizedBox(height: isTablet ? 16.0 : 14.0),
+
               SizedBox(
                 width: double.infinity,
-                height: 48.0,
+                height: 46.0,
                 child: ElevatedButton(
                   onPressed: () {
                     if (onNavigateToTranslate != null) {
@@ -491,7 +605,7 @@ class HomeScreen extends StatelessWidget {
                         l10n?.navTranslate ?? 'Translate',
                         style: TextStyle(
                           fontFamily: AppTypography.bodyFontFamily,
-                          fontSize: 15.0,
+                          fontSize: 14.5,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.2,
                         ),
@@ -509,6 +623,28 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// Static, non-animated progress bar with zero recomposition or GPU overhead
+  Widget _buildStaticProgressBar(double ratio) {
+    return Container(
+      width: double.infinity,
+      height: 4.0,
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFE8DD),
+        borderRadius: BorderRadius.circular(2.0),
+      ),
+      child: FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: ratio,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.primaryBurgundy,
+            borderRadius: BorderRadius.circular(2.0),
+          ),
+        ),
+      ),
     );
   }
 

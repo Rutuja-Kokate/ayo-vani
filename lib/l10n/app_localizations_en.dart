@@ -303,6 +303,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeFeaturedLessonTitle => 'Numbers 1–20';
 
   @override
+  String homeStatsTodayCompleted(int count) {
+    return 'Today: $count lessons completed';
+  }
+
+  @override
+  String homeStatsWeeklyTotal(int count) {
+    return 'This week: $count lessons';
+  }
+
+  @override
+  String get homeNextLessonPreview => 'Next lesson: Addition Practice';
+
+  @override
+  String get homeHeaderLastSync => 'Last sync: Today 9:00 AM';
+
+  @override
+  String get classSubtitleBalvatika => '3 Modules';
+
+  @override
+  String get classSubtitleFirst => '12 Lessons';
+
+  @override
+  String get classSubtitleSecond => '12 Lessons';
+
+  @override
+  String get classSubtitleThird => '12 Lessons';
+
+  @override
   String get balvatikaSubtitle => 'Foundation Stage | Learn, Listen, Speak';
 
   @override
@@ -762,6 +790,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get translateReplay => 'Replay Audio';
+
+  @override
+  String get translateSourcePlaceholder => 'Speak or type to begin...';
+
+  @override
+  String get translateTargetPlaceholder => 'Translation will appear here...';
+
+  @override
+  String get tagOfflineTranslation => 'Offline Translation';
+
+  @override
+  String get btnCopy => 'Copy';
+
+  @override
+  String get btnShare => 'Share';
+
+  @override
+  String get btnTypeInstead => 'Type Instead';
+
+  @override
+  String get translateRecentTitle => 'Recent Translations';
+
+  @override
+  String get translateRecentPlaceholder =>
+      'Your recent translations will appear here';
+
+  @override
+  String get typeDialogTitle => 'Type Hindi Phrase';
+
+  @override
+  String get typeDialogHint => 'Enter text here...';
+
+  @override
+  String get msgCopied => 'Copied to clipboard';
+
+  @override
+  String get msgShared => 'Sharing translation...';
 
   @override
   String get toolsTitle => 'Teacher Tools';
