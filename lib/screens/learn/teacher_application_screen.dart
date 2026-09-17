@@ -7,21 +7,19 @@ import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
-import '../learn/widgets/phase_selection_dialog.dart';
 
-/// Data model representing an Activity Picture Question in Phase 2.
-class Phase2QuestionData {
-  const Phase2QuestionData({
+/// Data model representing an Application Question in the Teacher Application Phase.
+class TeacherApplicationQuestionData {
+  const TeacherApplicationQuestionData({
     required this.questionNumber,
     required this.totalQuestions,
     required this.progressValue,
     required this.progressPercentText,
-    required this.imageAsset,
-    required this.instruction,
-    required this.englishHelperText,
+    required this.situation,
+    required this.question,
     required this.options,
     required this.correctAnswer,
-    required this.feedbackExplanation,
+    required this.correctMeaning,
     this.chapterLabel = 'First • Ch 1',
     this.levelLabel = 'Level 1',
   });
@@ -30,184 +28,178 @@ class Phase2QuestionData {
   final int totalQuestions;
   final double progressValue;
   final String progressPercentText;
-  final String imageAsset;
-  final String instruction;
-  final String englishHelperText;
+  final String situation;
+  final String question;
   final List<String> options;
   final String correctAnswer;
-  final String feedbackExplanation;
+  final String correctMeaning;
   final String chapterLabel;
   final String levelLabel;
 }
 
-/// Level 1 → Phase 2 Question Flow Screen for AYOVAANI.
+/// Interactive Teacher Application Phase Screen for AyoVani Level 1.
 ///
-/// Activity-picture based question runner:
-/// - Question 1: play.png  → "एक लड़की खेल रही है।"
-/// - Question 2: wakeup.png → "लड़का नींद से उठ रहा है।"
-/// - Question 3: brush.png  → "लड़का अपने दाँत साफ कर रहा है।"
-/// - Question 4: study.png  → "लड़की पढ़ रही है।"
-/// - Question 5: eat.png    → "लड़की खाना खा रही है।"
-///
-/// Follows the canonical AyoVaani design system with warm parchment vignette,
-/// Mundari audio speaker buttons, randomized visual options, and responsive layout.
-class Phase2QuestionScreen extends StatefulWidget {
-  const Phase2QuestionScreen({
+/// Features:
+/// - 5 Situational Classroom Communication Questions:
+///   Q1: Attention in class ("आप पढ़ा रहे हैं...") -> "धेआन ते अयुमेपे।" (ध्यान से सुनो।)
+///   Q2: Asking what student is doing ("आप देखते हैं...") -> "चेनअःम चेकातना?" (क्या कर रहे हो?)
+///   Q3: Checking understanding ("आपने एक छात्र को समझाया...") -> "बुजव जनम?" (समझ आया?)
+///   Q4: Opening books ("आप छात्रों को किताब खोलने...") -> "किताब निइपे।" (किताब खोलो।)
+///   Q5: Repeating a sentence ("आपने एक वाक्य बोला है...") -> "दोहरवएपे।" (दोहराओ।)
+/// - Pure Hindi "स्थिति" and "प्रश्न" inside the decorative question card (no English labels).
+/// - Exactly 3 large selectable Mundari options with clickable deep maroon MundariAudioButtons.
+/// - Dynamic progress header (Q 1/5 .. Q 5/5, progress bar & percentage).
+/// - "CHECK" button for validation; "CONTINUE" for Q1–Q4; "FINISH" on Q5 to return to Phase Popup.
+/// - Responsive on mobile and tablet without overflow.
+class TeacherApplicationScreen extends StatefulWidget {
+  const TeacherApplicationScreen({
     super.key,
+    this.levelNumber = 1,
     this.initialQuestionIndex = 0,
-    this.questions = defaultQuestions,
     this.onBack,
+    this.onFinish,
     this.onNavigateTab,
-    this.onNextQuestion,
-    this.onCompletePhase,
-    this.onPlayMundariAudio,
-    this.randomSeed,
+    this.onPlayAudio,
   });
 
+  final int levelNumber;
   final int initialQuestionIndex;
-  final List<Phase2QuestionData> questions;
   final VoidCallback? onBack;
+  final VoidCallback? onFinish;
   final ValueChanged<int>? onNavigateTab;
-  final VoidCallback? onNextQuestion;
-  final VoidCallback? onCompletePhase;
-  final ValueChanged<String>? onPlayMundariAudio;
-  final int? randomSeed;
-
-  /// Canonical Phase 2 Question dataset (Questions 1 to 5)
-  static const List<Phase2QuestionData> defaultQuestions = [
-    // Question 1
-    Phase2QuestionData(
-      questionNumber: 1,
-      totalQuestions: 5,
-      progressValue: 0.20,
-      progressPercentText: '20%',
-      imageAsset: 'assets/images/play.png',
-      instruction: 'ओमाकन गतिविधि मेनते सही वाक्य सलाएमे',
-      englishHelperText: '(choose the correct sentence for given activity)',
-      options: [
-        'एक लड़की खेल रही है।',
-        'एक लड़की खाना खा रही है।',
-        'एक लड़की सो रही है।',
-      ],
-      correctAnswer: 'एक लड़की खेल रही है।',
-      feedbackExplanation: 'शानदार! चित्र में एक लड़की खेल रही है।',
-    ),
-
-    // Question 2
-    Phase2QuestionData(
-      questionNumber: 2,
-      totalQuestions: 5,
-      progressValue: 0.40,
-      progressPercentText: '40%',
-      imageAsset: 'assets/images/wakeup.png',
-      instruction: 'ओमाकन गतिविधि मेनते सही वाक्य सलाएमे',
-      englishHelperText: '(choose the correct sentence for given activity)',
-      options: [
-        'लड़का अपने दाँत साफ कर रहा है।',
-        'लड़का नींद से उठ रहा है।',
-        'लड़का खाना खा रहा है।',
-      ],
-      correctAnswer: 'लड़का नींद से उठ रहा है।',
-      feedbackExplanation: 'शानदार! चित्र में लड़का नींद से उठ रहा है।',
-    ),
-
-    // Question 3
-    Phase2QuestionData(
-      questionNumber: 3,
-      totalQuestions: 5,
-      progressValue: 0.60,
-      progressPercentText: '60%',
-      imageAsset: 'assets/images/brush.png',
-      instruction: 'ओमाकन गतिविधि मेनते सही वाक्य सलाएमे',
-      englishHelperText: '(choose the correct sentence for given activity)',
-      options: [
-        'लड़का खेल रहा है।',
-        'लड़का पढ़ रहा है।',
-        'लड़का अपने दाँत साफ कर रहा है।',
-      ],
-      correctAnswer: 'लड़का अपने दाँत साफ कर रहा है।',
-      feedbackExplanation: 'शानदार! चित्र में लड़का अपने दाँत साफ कर रहा है।',
-    ),
-
-    // Question 4
-    Phase2QuestionData(
-      questionNumber: 4,
-      totalQuestions: 5,
-      progressValue: 0.80,
-      progressPercentText: '80%',
-      imageAsset: 'assets/images/study.png',
-      instruction: 'ओमाकन गतिविधि मेनते सही वाक्य सलाएमे',
-      englishHelperText: '(choose the correct sentence for given activity)',
-      options: [
-        'लड़की पढ़ रही है।',
-        'लड़की खेल रही है।',
-        'लड़की सो रही है।',
-      ],
-      correctAnswer: 'लड़की पढ़ रही है।',
-      feedbackExplanation: 'शानदार! चित्र में लड़की पढ़ रही है।',
-    ),
-
-    // Question 5
-    Phase2QuestionData(
-      questionNumber: 5,
-      totalQuestions: 5,
-      progressValue: 1.0,
-      progressPercentText: '100%',
-      imageAsset: 'assets/images/eat.png',
-      instruction: 'ओमाकन गतिविधि मेनते सही वाक्य सलाएमे',
-      englishHelperText: '(choose the correct sentence for given activity)',
-      options: [
-        'लड़की पानी पी रही है।',
-        'लड़की खाना खा रही है।',
-        'लड़की पढ़ रही है।',
-      ],
-      correctAnswer: 'लड़की खाना खा रही है।',
-      feedbackExplanation: 'शानदार! चित्र में लड़की खाना खा रही है।',
-    ),
-  ];
+  final ValueChanged<String>? onPlayAudio;
 
   @override
-  State<Phase2QuestionScreen> createState() => _Phase2QuestionScreenState();
+  State<TeacherApplicationScreen> createState() => _TeacherApplicationScreenState();
 }
 
-class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
+class _TeacherApplicationScreenState extends State<TeacherApplicationScreen> {
   int _navIndex = 1; // "Learn" tab active
   late int _currentQuestionIndex;
-  late math.Random _random;
 
-  // Question state
-  late List<String> _shuffledOptions;
+  late List<TeacherApplicationQuestionData> _questions;
   int? _selectedOptionIndex;
   bool _isChecked = false;
   bool _isCorrect = false;
 
-  Phase2QuestionData get _currentQuestion => widget.questions[_currentQuestionIndex];
-
   @override
   void initState() {
     super.initState();
-    _random = widget.randomSeed != null ? math.Random(widget.randomSeed) : math.Random();
-    _currentQuestionIndex = widget.initialQuestionIndex.clamp(
-      0,
-      widget.questions.isNotEmpty ? widget.questions.length - 1 : 0,
-    );
-    _setupQuestion();
+    _currentQuestionIndex = widget.initialQuestionIndex.clamp(0, 4);
+    _initializeQuestions();
   }
 
-  void _setupQuestion() {
-    _selectedOptionIndex = null;
-    _isChecked = false;
-    _isCorrect = false;
-    final opts = List<String>.from(_currentQuestion.options);
-    opts.shuffle(_random);
-    _shuffledOptions = opts;
+  void _initializeQuestions() {
+    _questions = [
+      // -----------------------------------------------------------------------
+      // Question 1
+      // -----------------------------------------------------------------------
+      TeacherApplicationQuestionData(
+        questionNumber: 1,
+        totalQuestions: 5,
+        progressValue: 0.20,
+        progressPercentText: '20%',
+        situation: 'आप पढ़ा रहे हैं, लेकिन एक छात्र ध्यान नहीं दे रहा है।',
+        question: 'आप छात्र से क्या कहेंगे?',
+        options: const [
+          'कजिलेम।',
+          'धेआन ते अयुमेपे।',
+          'लेलेमे।',
+        ],
+        correctAnswer: 'धेआन ते अयुमेपे।',
+        correctMeaning: 'ध्यान से सुनो।',
+        levelLabel: 'Level ${widget.levelNumber}',
+      ),
+
+      // -----------------------------------------------------------------------
+      // Question 2
+      // -----------------------------------------------------------------------
+      TeacherApplicationQuestionData(
+        questionNumber: 2,
+        totalQuestions: 5,
+        progressValue: 0.40,
+        progressPercentText: '40%',
+        situation: 'आप देखते हैं कि एक छात्र कोई काम कर रहा है।',
+        question: 'आप उससे क्या पूछेंगे?',
+        options: const [
+          'चेनअःम चेकातना?',
+          'अम चिलका मेनाःमा?',
+          'नेअ चेकनअः?',
+        ],
+        correctAnswer: 'चेनअःम चेकातना?',
+        correctMeaning: 'क्या कर रहे हो?',
+        levelLabel: 'Level ${widget.levelNumber}',
+      ),
+
+      // -----------------------------------------------------------------------
+      // Question 3
+      // -----------------------------------------------------------------------
+      TeacherApplicationQuestionData(
+        questionNumber: 3,
+        totalQuestions: 5,
+        progressValue: 0.60,
+        progressPercentText: '60%',
+        situation: 'आपने एक छात्र को कुछ समझाया है और अब जानना चाहते हैं कि उसे समझ आया या नहीं।',
+        question: 'आप छात्र से क्या पूछेंगे?',
+        options: const [
+          'बुजव जनम?',
+          'दअः लगतिङअ?',
+          'कोतेमतना?',
+        ],
+        correctAnswer: 'बुजव जनम?',
+        correctMeaning: 'समझ आया?',
+        levelLabel: 'Level ${widget.levelNumber}',
+      ),
+
+      // -----------------------------------------------------------------------
+      // Question 4
+      // -----------------------------------------------------------------------
+      TeacherApplicationQuestionData(
+        questionNumber: 4,
+        totalQuestions: 5,
+        progressValue: 0.80,
+        progressPercentText: '80%',
+        situation: 'आप छात्रों को अपनी किताब खोलने के लिए कहते हैं।',
+        question: 'आप क्या कहेंगे?',
+        options: const [
+          'किताब निइपे।',
+          'दुब मे।',
+          'कजिलेम।',
+        ],
+        correctAnswer: 'किताब निइपे।',
+        correctMeaning: 'किताब खोलो।',
+        levelLabel: 'Level ${widget.levelNumber}',
+      ),
+
+      // -----------------------------------------------------------------------
+      // Question 5
+      // -----------------------------------------------------------------------
+      TeacherApplicationQuestionData(
+        questionNumber: 5,
+        totalQuestions: 5,
+        progressValue: 1.0,
+        progressPercentText: '100%',
+        situation: 'आपने एक वाक्य बोला है और चाहते हैं कि छात्र उसे फिर से बोलें।',
+        question: 'आप छात्रों से क्या कहेंगे?',
+        options: const [
+          'दोहरवएपे।',
+          'बुजव जनम?',
+          'दअः लगतिङअ?',
+        ],
+        correctAnswer: 'दोहरवएपे।',
+        correctMeaning: 'दोहराओ।',
+        levelLabel: 'Level ${widget.levelNumber}',
+      ),
+    ];
   }
+
+  TeacherApplicationQuestionData get _currentQuestion => _questions[_currentQuestionIndex];
 
   void _handleBack() {
     if (widget.onBack != null) {
       widget.onBack!();
     } else {
-      Navigator.of(context).maybePop();
+      Navigator.of(context).maybePop(false);
     }
   }
 
@@ -222,10 +214,10 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
   }
 
   void _playMundariAudio(String text) {
-    if (widget.onPlayMundariAudio != null) {
-      widget.onPlayMundariAudio!(text);
+    if (widget.onPlayAudio != null) {
+      widget.onPlayAudio!(text);
     } else {
-      debugPrint('[AyoVani Audio] Play Mundari pronunciation for: "$text"');
+      debugPrint('Playing Mundari pronunciation: $text');
     }
   }
 
@@ -240,7 +232,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
 
   void _handleCheckOrContinue() {
     if (_isChecked && _isCorrect) {
-      final isLastQuestion = _currentQuestionIndex == widget.questions.length - 1;
+      final isLastQuestion = _currentQuestionIndex == _questions.length - 1;
       if (isLastQuestion) {
         _finishPhase();
       } else {
@@ -273,7 +265,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
       return;
     }
 
-    final selectedText = _shuffledOptions[_selectedOptionIndex!] ;
+    final selectedText = _currentQuestion.options[_selectedOptionIndex!];
     final isAnswerCorrect = (selectedText == _currentQuestion.correctAnswer);
 
     setState(() {
@@ -283,10 +275,12 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
   }
 
   void _advanceToNextQuestion() {
-    if (_currentQuestionIndex < widget.questions.length - 1) {
+    if (_currentQuestionIndex < _questions.length - 1) {
       setState(() {
         _currentQuestionIndex++;
-        _setupQuestion();
+        _selectedOptionIndex = null;
+        _isChecked = false;
+        _isCorrect = false;
       });
     } else {
       _finishPhase();
@@ -294,73 +288,13 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
   }
 
   void _finishPhase() {
-    PhaseSelectionDialog.showAfterPhaseCompletion(
-      context: context,
-      levelNumber: 1,
-      levelTitle: 'Level 1',
-      onCompletePhase: widget.onCompletePhase,
-    );
-  }
-
-  void _showPhaseCompletionDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: const Color(0xFFFCFAF6),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          side: const BorderSide(color: Color(0xFFE5D7C3), width: 1.2),
-        ),
-        title: Row(
-          children: const [
-            Icon(Icons.emoji_events_rounded, color: Color(0xFFC0882A), size: 28.0),
-            SizedBox(width: 10.0),
-            Flexible(
-              child: Text(
-                'Phase 2 Completed!',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF251E11),
-                  fontSize: 18.0,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: const Text(
-          'शानदार! आपने Phase 2 के सभी 5 गतिविधि प्रश्नों को सफलतापूर्वक पूरा कर लिया है!\n(Congratulations! You have completed all 5 activity questions of Phase 2.)',
-          style: TextStyle(
-            fontFamilyFallback: ['Noto Sans Devanagari', 'Mangal', 'sans-serif'],
-            fontSize: 14.0,
-            color: Color(0xFF4A3B32),
-            height: 1.4,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogCtx).pop();
-              Navigator.of(context).maybePop();
-            },
-            child: const Text(
-              'FINISH',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF671D21),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    widget.onFinish?.call();
+    Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenWidth = mediaQuery.size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = Responsive.isTabletOrLarger(context) || screenWidth >= 600;
 
     return AyoScreenBackground(
@@ -370,7 +304,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
           bottom: false,
           child: Stack(
             children: [
-              // 1. Top-Left Warli/Indian Corner Ornament
+              // 1. Top-Left Traditional Warli Corner Ornament
               Positioned(
                 top: 0,
                 left: 0,
@@ -388,7 +322,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
                 ),
               ),
 
-              // 2. Top-Right Warli/Indian Corner Ornament (Flipped)
+              // 2. Top-Right Traditional Warli Corner Ornament (Flipped)
               Positioned(
                 top: 0,
                 right: 0,
@@ -409,12 +343,12 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
                 ),
               ),
 
-              // 3. Subtle Natural Grass Background Foliage Decoration
+              // 3. Natural Grass Background Decoration
               Positioned.fill(
-                child: _Phase2BackgroundDecoration(isTablet: isTablet),
+                child: _AyoQuestionBackgroundDecoration(isTablet: isTablet),
               ),
 
-              // 4. Main Scrollable Page Content
+              // 4. Scrollable Question Content
               SingleChildScrollView(
                 physics: const ClampingScrollPhysics(),
                 padding: EdgeInsets.only(
@@ -431,33 +365,29 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Header: Circular Back Button & Centered AyoVaani Logo
+                        // Header: Circular Back Button & AyoVaani Logo
                         _buildHeader(isTablet),
                         const SizedBox(height: 12.0),
 
                         // Progress Header Card: "First • Ch 1" | "Level 1" | "Q X/5" | Progress%
                         _buildProgressCard(isTablet),
-                        const SizedBox(height: 14.0),
-
-                        // Instruction Section with Speaker Button & English Helper
-                        _buildInstructionSection(isTablet),
-                        const SizedBox(height: 14.0),
-
-                        // Activity Image Section (Prominently displayed, preserves aspect ratio)
-                        _buildActivityImageSection(isTablet),
                         const SizedBox(height: 16.0),
 
-                        // Randomized Answer Options (Questions 1 to 5)
-                        _buildAnswerOptions(isTablet),
-                        const SizedBox(height: 14.0),
+                        // Character + Question Card
+                        _buildCartoonAndQuestionSection(isTablet),
+                        const SizedBox(height: 18.0),
 
-                        // Feedback Message Banner (Shown on check)
+                        // 3 Selectable Option Cards
+                        _buildAnswerOptions(isTablet),
+                        const SizedBox(height: 16.0),
+
+                        // Optional Feedback Message Banner
                         if (_isChecked) ...[
                           _buildFeedbackBanner(isTablet),
                           const SizedBox(height: 14.0),
                         ],
 
-                        // Burgundy "CHECK" / "CONTINUE" Action Button
+                        // Action Button: "CHECK" / "CONTINUE" / "FINISH"
                         _buildCheckButton(isTablet),
                         const SizedBox(height: 12.0),
                       ],
@@ -477,7 +407,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Top Header (Back Button & Official AyoVaani Logo)
+  // Top Header (Back Button & Centered Logo)
   // ---------------------------------------------------------------------------
   Widget _buildHeader(bool isTablet) {
     return SizedBox(
@@ -520,7 +450,6 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
           Center(
             child: AyoLogo(
               height: isTablet ? 80.0 : 66.0,
-              assetPath: 'assets/images/ayovaani_logo.png',
             ),
           ),
         ],
@@ -559,13 +488,14 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
               Expanded(
                 child: Row(
                   children: [
+                    // Green Pill: "First • Ch 1"
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10.0,
                         vertical: 4.0,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF4C6647), // Muted dark olive green
+                        color: const Color(0xFF4C6647),
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                       child: Text(
@@ -580,6 +510,8 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
                       ),
                     ),
                     const SizedBox(width: 10.0),
+
+                    // "Level 1"
                     Flexible(
                       child: Text(
                         currentQ.levelLabel,
@@ -596,6 +528,8 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
                 ),
               ),
               const SizedBox(width: 8.0),
+
+              // "Q X/5"
               Text(
                 'Q ${currentQ.questionNumber}/${currentQ.totalQuestions}',
                 style: TextStyle(
@@ -608,6 +542,8 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
             ],
           ),
           const SizedBox(height: 10.0),
+
+          // Progress Bar + Percentage
           Row(
             children: [
               Expanded(
@@ -618,7 +554,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
                     minHeight: 7.0,
                     backgroundColor: const Color(0xFFE4DCD0),
                     valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color(0xFF671D21), // AyoVaani deep burgundy
+                      Color(0xFF671D21),
                     ),
                   ),
                 ),
@@ -641,119 +577,279 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Instruction Section with Speaker Icon
+  // Cartoon + Question Area
   // ---------------------------------------------------------------------------
-  Widget _buildInstructionSection(bool isTablet) {
-    final currentQ = _currentQuestion;
+  Widget _buildCartoonAndQuestionSection(bool isTablet) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        final cartoonWidth = isTablet
+            ? 230.0
+            : (totalWidth * 0.43).clamp(148.0, 164.0);
+        final cartoonHeight = isTablet ? 215.0 : 158.0;
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isTablet ? 18.0 : 14.0,
-        vertical: isTablet ? 14.0 : 10.0,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFCFAF6),
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(
-          color: const Color(0xFFE8DECF),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF251E11).withValues(alpha: 0.04),
-            blurRadius: 8.0,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Center(
-            child: MundariAudioText(
-              text: currentQ.instruction,
-              onAudioTap: () => _playMundariAudio(currentQ.instruction),
-              iconSize: isTablet ? 24.0 : 20.0,
-              iconColor: const Color(0xFF671D21),
-              spacing: isTablet ? 8.0 : 6.0,
-              style: TextStyle(
-                fontFamilyFallback: const [
-                  'Noto Sans Devanagari',
-                  'Mangal',
-                  'Nirmala UI',
-                  'sans-serif',
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // Speech Bubble + Squirrel Cartoon
+            SizedBox(
+              width: cartoonWidth,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildSpeechBubble(isTablet),
+                  const SizedBox(height: 4.0),
+                  SizedBox(
+                    width: cartoonWidth,
+                    height: cartoonHeight,
+                    child: Image.asset(
+                      'assets/images/cartoon.png',
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  ),
                 ],
-                fontSize: isTablet ? 18.5 : 15.5,
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFF671D21),
-                letterSpacing: -0.2,
               ),
             ),
-          ),
-          const SizedBox(height: 3.0),
-          Text(
-            currentQ.englishHelperText,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: isTablet ? 12.5 : 11.0,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF4A3B32),
+            const SizedBox(width: 8.0),
+
+            // Decorative Question Card (Pure Hindi "स्थिति" and "प्रश्न")
+            Expanded(
+              child: _buildQuestionCard(isTablet),
             ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSpeechBubble(bool isTablet) {
+    return CustomPaint(
+      painter: const _SpeechBubblePainter(),
+      child: Container(
+        padding: EdgeInsets.fromLTRB(
+          isTablet ? 12.0 : 9.0,
+          isTablet ? 9.0 : 7.0,
+          isTablet ? 12.0 : 9.0,
+          isTablet ? 13.0 : 11.0,
+        ),
+        child: Text(
+          "Let's learn\ntogether!",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: isTablet ? 12.5 : 11.0,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF251E11),
+            height: 1.2,
           ),
-        ],
+        ),
       ),
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Activity Image Section (Prominently displayed, authentic aspect ratio)
-  // ---------------------------------------------------------------------------
-  Widget _buildActivityImageSection(bool isTablet) {
+  Widget _buildQuestionCard(bool isTablet) {
     final currentQ = _currentQuestion;
-    final imageHeight = isTablet ? 220.0 : 160.0;
 
     return Container(
-      height: imageHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
       decoration: BoxDecoration(
         color: const Color(0xFFFCFAF6),
         borderRadius: BorderRadius.circular(20.0),
         border: Border.all(
-          color: const Color(0xFF4C6647), // Dark olive green frame
+          color: const Color(0xFF4C6647),
           width: 1.8,
         ),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF251E11).withValues(alpha: 0.08),
-            blurRadius: 12.0,
-            offset: const Offset(0, 4),
+            blurRadius: 10.0,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Center(
-        child: Image.asset(
-          currentQ.imageAsset,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
+        child: Stack(
+          children: [
+            // Mandala Corners
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: CustomPaint(
+                  size: const Size(38.0, 38.0),
+                  painter: const _GreenCornerMandalaPainter(corner: _Corner.topRight),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: IgnorePointer(
+                child: CustomPaint(
+                  size: const Size(38.0, 38.0),
+                  painter: const _GreenCornerMandalaPainter(corner: _Corner.bottomLeft),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: CustomPaint(
+                  size: const Size(38.0, 38.0),
+                  painter: const _GreenCornerMandalaPainter(corner: _Corner.bottomRight),
+                ),
+              ),
+            ),
+
+            // Question Card Content (स्थिति & प्रश्न in Hindi)
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isTablet ? 18.0 : 10.0,
+                vertical: isTablet ? 18.0 : 14.0,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Heading 1: स्थिति
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 2.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFBECEB),
+                          borderRadius: BorderRadius.circular(6.0),
+                          border: Border.all(
+                            color: const Color(0xFFE8C7C9),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Text(
+                          'स्थिति',
+                          style: TextStyle(
+                            fontFamilyFallback: const [
+                              'Noto Sans Devanagari',
+                              'Mangal',
+                              'Nirmala UI',
+                              'sans-serif',
+                            ],
+                            fontSize: isTablet ? 13.5 : 12.0,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF671D21),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5.0),
+
+                  // Situation Text
+                  Text(
+                    currentQ.situation,
+                    style: TextStyle(
+                      fontFamilyFallback: const [
+                        'Noto Sans Devanagari',
+                        'Mangal',
+                        'Nirmala UI',
+                        'sans-serif',
+                      ],
+                      fontSize: isTablet ? 14.5 : 13.0,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF251E11),
+                      height: 1.3,
+                    ),
+                  ),
+
+                  // Visual Divider between Situation and Question
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Container(
+                      height: 1.0,
+                      color: const Color(0xFFEADBCE),
+                    ),
+                  ),
+
+                  // Heading 2: प्रश्न
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 2.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEBF5E7),
+                          borderRadius: BorderRadius.circular(6.0),
+                          border: Border.all(
+                            color: const Color(0xFFB5D4B0),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Text(
+                          'प्रश्न',
+                          style: TextStyle(
+                            fontFamilyFallback: const [
+                              'Noto Sans Devanagari',
+                              'Mangal',
+                              'Nirmala UI',
+                              'sans-serif',
+                            ],
+                            fontSize: isTablet ? 13.5 : 12.0,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF2B5226),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4.0),
+
+                  // Question Text
+                  Text(
+                    currentQ.question,
+                    style: TextStyle(
+                      fontFamilyFallback: const [
+                        'Noto Sans Devanagari',
+                        'Mangal',
+                        'Nirmala UI',
+                        'sans-serif',
+                      ],
+                      fontSize: isTablet ? 17.5 : 15.0,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1E170E),
+                      height: 1.25,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   // ---------------------------------------------------------------------------
-  // Answer Options List
+  // 3 Answer Options List (Mundari Options with Speaker Icons)
   // ---------------------------------------------------------------------------
   Widget _buildAnswerOptions(bool isTablet) {
+    final currentQ = _currentQuestion;
+
     return Column(
       children: [
-        for (int i = 0; i < _shuffledOptions.length; i++) ...[
+        for (int i = 0; i < currentQ.options.length; i++) ...[
           _buildOptionCard(
             index: i,
-            text: _shuffledOptions[i],
+            text: currentQ.options[i],
             isTablet: isTablet,
           ),
-          if (i < _shuffledOptions.length - 1) const SizedBox(height: 10.0),
+          if (i < currentQ.options.length - 1) const SizedBox(height: 10.0),
         ],
       ],
     );
@@ -810,7 +906,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
       );
     }
 
-    final verticalPad = isTablet ? 16.0 : 13.0;
+    final verticalPad = isTablet ? 16.0 : 12.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -836,14 +932,26 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
           splashColor: const Color(0xFF4C6647).withValues(alpha: 0.12),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: 16.0,
+              horizontal: 14.0,
               vertical: verticalPad,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Radio Button Indicator
                 indicatorWidget,
-                const SizedBox(width: 14.0),
+                const SizedBox(width: 10.0),
+
+                // Mundari Clickable Speaker Icon (Deep Maroon)
+                MundariAudioButton(
+                  text: text,
+                  onTap: () => _playMundariAudio(text),
+                  iconSize: isTablet ? 24.0 : 20.0,
+                  color: const Color(0xFF671D21),
+                ),
+                const SizedBox(width: 10.0),
+
+                // Mundari Option Sentence
                 Expanded(
                   child: Text(
                     text,
@@ -854,12 +962,11 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
                         'Nirmala UI',
                         'sans-serif',
                       ],
-                      fontSize: isTablet ? 19.0 : 16.5,
+                      fontSize: isTablet ? 21.0 : 18.0,
                       fontWeight: FontWeight.w700,
                       color: isSelected && !_isChecked
                           ? const Color(0xFF4C6647)
                           : const Color(0xFF251E11),
-                      height: 1.25,
                     ),
                   ),
                 ),
@@ -892,7 +999,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Visual Feedback Banner
+  // Feedback Banner
   // ---------------------------------------------------------------------------
   Widget _buildFeedbackBanner(bool isTablet) {
     final isCorrect = _isCorrect;
@@ -941,7 +1048,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
                 const SizedBox(height: 2.0),
                 Text(
                   isCorrect
-                      ? currentQ.feedbackExplanation
+                      ? '"${currentQ.correctAnswer}" का सही अर्थ "${currentQ.correctMeaning}" है।'
                       : 'कृपया पुनः प्रयास करें। कोई दूसरा विकल्प चुनें।',
                   style: TextStyle(
                     fontFamilyFallback: const [
@@ -965,11 +1072,11 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Check / Continue Button
+  // Check / Continue / Finish Action Button
   // ---------------------------------------------------------------------------
   Widget _buildCheckButton(bool isTablet) {
     final isCompleted = _isChecked && _isCorrect;
-    final isLastQuestion = _currentQuestionIndex == widget.questions.length - 1;
+    final isLastQuestion = _currentQuestionIndex == _questions.length - 1;
     final String buttonLabel;
     if (!isCompleted) {
       buttonLabel = 'CHECK';
@@ -980,15 +1087,15 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
     }
 
     return Container(
-      height: isTablet ? 56.0 : 52.0,
+      height: isTablet ? 56.0 : 50.0,
       decoration: BoxDecoration(
-        color: const Color(0xFF5E171B), // Deep burgundy
+        color: const Color(0xFF671D21),
         borderRadius: BorderRadius.circular(28.0),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF5E171B).withValues(alpha: 0.32),
+            color: const Color(0xFF671D21).withValues(alpha: 0.32),
             blurRadius: 10.0,
-            offset: const Offset(0, 3),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1017,173 +1124,139 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
 }
 
 // ---------------------------------------------------------------------------
-// Subtle Natural Grass Background Foliage for Phase 2
+// Speech Bubble Painter
 // ---------------------------------------------------------------------------
-class _Phase2BackgroundDecoration extends StatelessWidget {
-  const _Phase2BackgroundDecoration({required this.isTablet});
-
-  final bool isTablet;
+class _SpeechBubblePainter extends CustomPainter {
+  const _SpeechBubblePainter();
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final w = constraints.maxWidth;
-        final h = constraints.maxHeight;
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height - 6.0);
+    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(16.0));
 
-        final maxContentWidth = isTablet ? 680.0 : 440.0;
-        final sidePadding = isTablet ? 36.0 : 18.0;
-        final contentWidth = math.min(w - (sidePadding * 2), maxContentWidth);
-        final gutter = math.max(0.0, (w - contentWidth) / 2.0);
+    final fillPaint = Paint()
+      ..color = const Color(0xFFFCFAF6)
+      ..style = PaintingStyle.fill;
 
-        final scale = isTablet ? 1.25 : (w < 370 ? 0.85 : 1.0);
-        final grass1Width = 34.0 * scale;
-        final grass2Width = 36.0 * scale;
-        final smallGrass1Width = 26.0 * scale;
-        final smallGrass2Width = 28.0 * scale;
+    final borderPaint = Paint()
+      ..color = const Color(0xFF4A3B32)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
 
-        final leftEdgeX = isTablet ? math.max(12.0, (gutter - grass1Width) / 2) : 4.0;
-        final rightEdgeX = isTablet ? math.max(12.0, (gutter - grass1Width) / 2) : 4.0;
+    final path = Path();
+    path.addRRect(rrect);
 
-        return IgnorePointer(
-          child: Stack(
-            children: [
-              // Mid-Left Cluster
-              Positioned(
-                left: leftEdgeX,
-                top: h * 0.32,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    _GrassDecoItem(
-                      assetPath: 'assets/images/grass1.png',
-                      width: grass1Width,
-                      opacity: 0.50,
-                    ),
-                    Transform.translate(
-                      offset: const Offset(-8.0, 3.0),
-                      child: _GrassDecoItem(
-                        assetPath: 'assets/images/grass2.png',
-                        width: smallGrass2Width,
-                        opacity: 0.45,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+    final tailPath = Path()
+      ..moveTo(size.width * 0.35, size.height - 6.0)
+      ..lineTo(size.width * 0.24, size.height)
+      ..lineTo(size.width * 0.46, size.height - 6.0)
+      ..close();
 
-              // Mid-Right Cluster (flipped)
-              Positioned(
-                right: rightEdgeX,
-                top: h * 0.34,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    _GrassDecoItem(
-                      assetPath: 'assets/images/grass2.png',
-                      width: smallGrass2Width,
-                      isFlipped: true,
-                      opacity: 0.45,
-                    ),
-                    Transform.translate(
-                      offset: const Offset(-6.0, 0.0),
-                      child: _GrassDecoItem(
-                        assetPath: 'assets/images/grass1.png',
-                        width: smallGrass1Width,
-                        isFlipped: true,
-                        opacity: 0.48,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+    path.addPath(tailPath, Offset.zero);
 
-              // Lower-Left Cluster
-              Positioned(
-                left: leftEdgeX + (isTablet ? 6.0 : 2.0),
-                top: h * 0.64,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    _GrassDecoItem(
-                      assetPath: 'assets/images/grass2.png',
-                      width: grass2Width,
-                      opacity: 0.52,
-                    ),
-                    Transform.translate(
-                      offset: const Offset(-10.0, -5.0),
-                      child: _GrassDecoItem(
-                        assetPath: 'assets/images/grass1.png',
-                        width: smallGrass1Width,
-                        opacity: 0.46,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Lower-Right Cluster
-              Positioned(
-                right: rightEdgeX + (isTablet ? 6.0 : 2.0),
-                top: h * 0.67,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    _GrassDecoItem(
-                      assetPath: 'assets/images/grass1.png',
-                      width: grass1Width,
-                      isFlipped: true,
-                      opacity: 0.50,
-                    ),
-                    Transform.translate(
-                      offset: const Offset(-8.0, 4.0),
-                      child: _GrassDecoItem(
-                        assetPath: 'assets/images/grass2.png',
-                        width: smallGrass2Width,
-                        isFlipped: true,
-                        opacity: 0.45,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Tablet gutter elements
-              if (isTablet) ...[
-                Positioned(
-                  left: leftEdgeX + 8.0,
-                  top: h * 0.16,
-                  child: _GrassDecoItem(
-                    assetPath: 'assets/images/grass2.png',
-                    width: smallGrass2Width,
-                    opacity: 0.40,
-                  ),
-                ),
-                Positioned(
-                  right: rightEdgeX + 8.0,
-                  top: h * 0.18,
-                  child: _GrassDecoItem(
-                    assetPath: 'assets/images/grass1.png',
-                    width: smallGrass1Width,
-                    isFlipped: true,
-                    opacity: 0.40,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        );
-      },
-    );
+    canvas.drawShadow(path, const Color(0xFF251E11), 3.0, false);
+    canvas.drawPath(path, fillPaint);
+    canvas.drawPath(path, borderPaint);
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _GrassDecoItem extends StatelessWidget {
-  const _GrassDecoItem({
+// ---------------------------------------------------------------------------
+// Green Corner Mandala Painter
+// ---------------------------------------------------------------------------
+enum _Corner { topRight, bottomLeft, bottomRight }
+
+class _GreenCornerMandalaPainter extends CustomPainter {
+  const _GreenCornerMandalaPainter({required this.corner});
+
+  final _Corner corner;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    canvas.save();
+
+    Offset center;
+    double startAngle;
+
+    switch (corner) {
+      case _Corner.topRight:
+        center = Offset(w, 0);
+        startAngle = math.pi * 0.5;
+        break;
+      case _Corner.bottomLeft:
+        center = Offset(0, h);
+        startAngle = -math.pi * 0.5;
+        break;
+      case _Corner.bottomRight:
+        center = Offset(w, h);
+        startAngle = math.pi;
+        break;
+    }
+
+    final linePaint = Paint()
+      ..color = const Color(0xFF4C6647).withValues(alpha: 0.65)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: w * 0.85),
+      startAngle,
+      math.pi * 0.5,
+      false,
+      linePaint,
+    );
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: w * 0.58),
+      startAngle,
+      math.pi * 0.5,
+      false,
+      linePaint,
+    );
+
+    final innerPaint = Paint()
+      ..color = const Color(0xFF4C6647).withValues(alpha: 0.25)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: w * 0.32),
+      startAngle,
+      math.pi * 0.5,
+      true,
+      innerPaint,
+    );
+
+    final tickPaint = Paint()
+      ..color = const Color(0xFF4C6647).withValues(alpha: 0.70)
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 1; i <= 5; i++) {
+      final angle = startAngle + (i * (math.pi * 0.5 / 6.0));
+      final r1 = w * 0.58;
+      final r2 = w * 0.76;
+      final p1 = Offset(center.dx + r1 * math.cos(angle), center.dy + r1 * math.sin(angle));
+      final p2 = Offset(center.dx + r2 * math.cos(angle), center.dy + r2 * math.sin(angle));
+      canvas.drawLine(p1, p2, tickPaint);
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ---------------------------------------------------------------------------
+// Subtle Natural Grass Decoration Items
+// ---------------------------------------------------------------------------
+class _GrassDecorationItem extends StatelessWidget {
+  const _GrassDecorationItem({
     required this.assetPath,
     required this.width,
     this.isFlipped = false,
@@ -1211,6 +1284,139 @@ class _GrassDecoItem extends StatelessWidget {
     return Opacity(
       opacity: opacity,
       child: image,
+    );
+  }
+}
+
+class _AyoQuestionBackgroundDecoration extends StatelessWidget {
+  const _AyoQuestionBackgroundDecoration({required this.isTablet});
+
+  final bool isTablet;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        final h = constraints.maxHeight;
+
+        final maxContentWidth = isTablet ? 680.0 : 440.0;
+        final sidePadding = isTablet ? 36.0 : 18.0;
+        final contentWidth = math.min(w - (sidePadding * 2), maxContentWidth);
+        final gutter = math.max(0.0, (w - contentWidth) / 2.0);
+
+        final scale = isTablet ? 1.25 : (w < 370 ? 0.85 : 1.0);
+        final grass1Width = 34.0 * scale;
+        final grass2Width = 36.0 * scale;
+        final smallGrass1Width = 26.0 * scale;
+        final smallGrass2Width = 28.0 * scale;
+
+        final leftEdgeX = isTablet ? math.max(12.0, (gutter - grass1Width) / 2) : 4.0;
+        final rightEdgeX = isTablet ? math.max(12.0, (gutter - grass1Width) / 2) : 4.0;
+
+        return IgnorePointer(
+          child: Stack(
+            children: [
+              Positioned(
+                left: leftEdgeX,
+                top: h * 0.31,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _GrassDecorationItem(
+                      assetPath: 'assets/images/grass1.png',
+                      width: grass1Width,
+                      opacity: 0.50,
+                    ),
+                    Transform.translate(
+                      offset: const Offset(-8.0, 3.0),
+                      child: _GrassDecorationItem(
+                        assetPath: 'assets/images/grass2.png',
+                        width: smallGrass2Width,
+                        opacity: 0.45,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                right: rightEdgeX,
+                top: h * 0.34,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _GrassDecorationItem(
+                      assetPath: 'assets/images/grass2.png',
+                      width: smallGrass2Width,
+                      isFlipped: true,
+                      opacity: 0.45,
+                    ),
+                    Transform.translate(
+                      offset: const Offset(-6.0, 0.0),
+                      child: _GrassDecorationItem(
+                        assetPath: 'assets/images/grass1.png',
+                        width: smallGrass1Width,
+                        isFlipped: true,
+                        opacity: 0.48,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                left: leftEdgeX + (isTablet ? 6.0 : 2.0),
+                top: h * 0.64,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _GrassDecorationItem(
+                      assetPath: 'assets/images/grass2.png',
+                      width: grass2Width,
+                      opacity: 0.52,
+                    ),
+                    Transform.translate(
+                      offset: const Offset(-10.0, -5.0),
+                      child: _GrassDecorationItem(
+                        assetPath: 'assets/images/grass1.png',
+                        width: smallGrass1Width,
+                        opacity: 0.46,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                right: rightEdgeX + (isTablet ? 6.0 : 2.0),
+                top: h * 0.67,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _GrassDecorationItem(
+                      assetPath: 'assets/images/grass1.png',
+                      width: grass1Width,
+                      isFlipped: true,
+                      opacity: 0.50,
+                    ),
+                    Transform.translate(
+                      offset: const Offset(-8.0, 4.0),
+                      child: _GrassDecorationItem(
+                        assetPath: 'assets/images/grass2.png',
+                        width: smallGrass2Width,
+                        isFlipped: true,
+                        opacity: 0.45,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

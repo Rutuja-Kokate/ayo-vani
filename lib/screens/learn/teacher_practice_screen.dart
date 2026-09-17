@@ -7,29 +7,28 @@ import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
-import '../learn/widgets/phase_selection_dialog.dart';
 
-/// Supported Question Types in the AyoVani learning flow.
-enum QuestionType {
-  /// Single-choice multiple choice question (Questions 1 to 4)
-  mcq,
-
-  /// Match the correct meanings question (Question 5)
+/// Supported Question Types in the Teacher Practice Phase.
+enum TeacherPracticeQuestionType {
+  /// Match the correct meanings question (Question 1)
   matching,
+
+  /// Single-choice multiple choice question (Questions 2 to 5)
+  mcq,
 }
 
-/// Data model representing a Question in the AyoVani learning flow.
-class Phase1QuestionData {
-  const Phase1QuestionData({
+/// Data model representing a Practice Question in the Teacher Practice Flow.
+class TeacherPracticeQuestionData {
+  const TeacherPracticeQuestionData({
     required this.questionNumber,
     required this.totalQuestions,
     required this.progressValue,
     required this.progressPercentText,
     required this.instruction,
     required this.englishHelperText,
-    this.type = QuestionType.mcq,
+    this.type = TeacherPracticeQuestionType.mcq,
     // For MCQ
-    this.word = '',
+    this.question = '',
     this.options = const [],
     this.correctAnswer = '',
     // For Matching
@@ -49,10 +48,10 @@ class Phase1QuestionData {
   final String progressPercentText;
   final String instruction;
   final String englishHelperText;
-  final QuestionType type;
+  final TeacherPracticeQuestionType type;
 
   // MCQ fields
-  final String word;
+  final String question;
   final List<String> options;
   final String correctAnswer;
 
@@ -66,181 +65,51 @@ class Phase1QuestionData {
   final String feedbackExplanation;
   final String chapterLabel;
   final String levelLabel;
-
-  int get correctIndex => options.indexOf(correctAnswer);
 }
 
-/// Level 1 → Phase 1 Question Flow Screen for AYOVAANI.
+/// Interactive Teacher Practice Phase Screen for AyoVani Level 1.
 ///
-/// Data-driven question runner displaying:
-/// - Question 1: "एंगा" -> "माँ" (Q 1/5, 20%)
-/// - Question 2: "अपुते" -> "पिता" (Q 2/5, 40%)
-/// - Question 3: "हगा" -> "भाई" (Q 3/5, 60%)
-/// - Question 4: "मिसी" -> "बहन" (4 options: भाई, बहन, माँ, पिता) (Q 4/5, 80%)
-/// - Question 5: Match the meanings (Q 5/5, 100%)
-///   मुंडारी शब्द: कोड़ा, कुड़िहोन, दुअर, लिजअः, चटु
-///   हिंदी अर्थ: दरवाजा, पति, कपड़ा, बर्तन, पत्नी
-///
-/// Follows the exact visual template, styling, responsive sizing, and
-/// larger squirrel cartoon display without UI overlap.
-class Phase1Question1Screen extends StatefulWidget {
-  const Phase1Question1Screen({
+/// Features:
+/// - Question 1: "Match the Words" (5 pairs: होन→बच्चा, दअः→पानी, जोम-नू→खाना, ओड़अः→घर, दुब→बैठना)
+///   with shuffled right-hand Hindi column and clickable maroon MundariAudioButtons.
+/// - Questions 2–5: "Choose the Correct Mundari Sentence" (बैठो।, किताब खोलो।, आपका नाम क्या है?, पानी चाहिए?)
+///   with randomized options and clickable maroon MundariAudioButtons before each Mundari sentence.
+/// - Dynamic progress header (Q 1/5 .. Q 5/5, progress bar & percentage).
+/// - "CHECK" button for validation; "CONTINUE" for Q1–Q4; "FINISH" on Q5 to return to Phase Popup.
+/// - Responsive on mobile and tablet without overflow.
+class TeacherPracticeScreen extends StatefulWidget {
+  const TeacherPracticeScreen({
     super.key,
+    this.levelNumber = 1,
     this.initialQuestionIndex = 0,
-    this.questions = defaultQuestions,
     this.onBack,
+    this.onFinish,
     this.onNavigateTab,
-    this.onNextQuestion,
-    this.onCompletePhase,
-    this.onPlayMundariAudio,
+    this.onPlayAudio,
   });
 
+  final int levelNumber;
   final int initialQuestionIndex;
-  final List<Phase1QuestionData> questions;
   final VoidCallback? onBack;
+  final VoidCallback? onFinish;
   final ValueChanged<int>? onNavigateTab;
-  final VoidCallback? onNextQuestion;
-  final VoidCallback? onCompletePhase;
-  final ValueChanged<String>? onPlayMundariAudio;
-
-  /// Canonical Phase 1 Question dataset (Questions 1 to 5)
-  static const List<Phase1QuestionData> defaultQuestions = [
-    // -------------------------------------------------------------------------
-    // Question 1
-    // -------------------------------------------------------------------------
-    Phase1QuestionData(
-      questionNumber: 1,
-      totalQuestions: 5,
-      progressValue: 0.20,
-      progressPercentText: '20%',
-      type: QuestionType.mcq,
-      instruction: 'सरते ओरोतो सलाएमे',
-      englishHelperText: '(choose the correct meaning)',
-      word: 'एंगा',
-      options: [
-        'माँ', // Must be spelled exactly with nasalization 'माँ'
-        'पिता',
-        'भाई',
-      ],
-      correctAnswer: 'माँ',
-      feedbackExplanation: '"एंगा" का अर्थ "माँ" होता है।',
-    ),
-
-    // -------------------------------------------------------------------------
-    // Question 2
-    // -------------------------------------------------------------------------
-    Phase1QuestionData(
-      questionNumber: 2,
-      totalQuestions: 5,
-      progressValue: 0.40,
-      progressPercentText: '40%',
-      type: QuestionType.mcq,
-      instruction: 'सरते ओरोतो सलाएमे',
-      englishHelperText: '(choose the correct meaning)',
-      word: 'अपुते',
-      options: [
-        'भाई',
-        'पिता',
-        'माँ',
-      ],
-      correctAnswer: 'पिता',
-      feedbackExplanation: '"अपुते" का अर्थ "पिता" होता है।',
-    ),
-
-    // -------------------------------------------------------------------------
-    // Question 3
-    // -------------------------------------------------------------------------
-    Phase1QuestionData(
-      questionNumber: 3,
-      totalQuestions: 5,
-      progressValue: 0.60,
-      progressPercentText: '60%',
-      type: QuestionType.mcq,
-      instruction: 'सरते ओरोतो सलाएमे',
-      englishHelperText: '(choose the correct meaning)',
-      word: 'हगा',
-      options: [
-        'पिता',
-        'भाई',
-        'माँ',
-      ],
-      correctAnswer: 'भाई',
-      feedbackExplanation: '"हगा" का अर्थ "भाई" होता है।',
-    ),
-
-    // -------------------------------------------------------------------------
-    // Question 4 (4 Options)
-    // -------------------------------------------------------------------------
-    Phase1QuestionData(
-      questionNumber: 4,
-      totalQuestions: 5,
-      progressValue: 0.80,
-      progressPercentText: '80%',
-      type: QuestionType.mcq,
-      instruction: 'सरते ओरोतो सलाएमे',
-      englishHelperText: '(choose the correct meaning)',
-      word: 'मिसी',
-      options: [
-        'भाई',
-        'बहन',
-        'माँ',
-        'पिता',
-      ],
-      correctAnswer: 'बहन',
-      feedbackExplanation: '"मिसी" का अर्थ "बहन" होता है।',
-    ),
-
-    // -------------------------------------------------------------------------
-    // Question 5 (Matching Question: 5 Mundari words -> 5 Hindi meanings)
-    // -------------------------------------------------------------------------
-    Phase1QuestionData(
-      questionNumber: 5,
-      totalQuestions: 5,
-      progressValue: 1.0,
-      progressPercentText: '100%',
-      type: QuestionType.matching,
-      instruction: 'सरते ओरोतो को जोकाएपे',
-      englishHelperText: '(match the correct meanings)',
-      leftColumnHeading: 'मुंडारी शब्द',
-      rightColumnHeading: 'हिंदी अर्थ',
-      leftItems: [
-        'कोड़ा',
-        'कुड़िहोन',
-        'दुअर',
-        'लिजअः',
-        'चटु',
-      ],
-      rightItems: [
-        'दरवाजा',
-        'पति',
-        'कपड़ा',
-        'बर्तन',
-        'पत्नी',
-      ],
-      correctPairs: {
-        0: 1, // कोड़ा → पति
-        1: 4, // कुड़िहोन → पत्नी
-        2: 0, // दुअर → दरवाजा
-        3: 2, // लिजअः → कपड़ा
-        4: 3, // चटु → बर्तन
-      },
-      feedbackExplanation:
-          '"कोड़ा" → "पति" • "कुड़िहोन" → "पत्नी" • "दुअर" → "दरवाजा" • "लिजअः" → "कपड़ा" • "चटु" → "बर्तन"',
-    ),
-  ];
+  final ValueChanged<String>? onPlayAudio;
 
   @override
-  State<Phase1Question1Screen> createState() => _Phase1Question1ScreenState();
+  State<TeacherPracticeScreen> createState() => _TeacherPracticeScreenState();
 }
 
-class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
+class _TeacherPracticeScreenState extends State<TeacherPracticeScreen> {
   int _navIndex = 1; // "Learn" tab active
   late int _currentQuestionIndex;
 
-  // MCQ state
-  int? _selectedOptionIndex; // Initially null (none selected)
+  // Randomized question dataset created in initState
+  late List<TeacherPracticeQuestionData> _questions;
 
-  // Matching state (Question 5)
+  // MCQ state
+  int? _selectedOptionIndex;
+
+  // Matching state (Question 1)
   int? _selectedLeftIndex;
   int? _selectedRightIndex;
   final Map<int, int> _matches = {}; // leftIndex -> rightIndex
@@ -248,23 +117,139 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   bool _isChecked = false;
   bool _isCorrect = false;
 
-  Phase1QuestionData get _currentQuestion => widget.questions[_currentQuestionIndex];
-  bool get _isMatching => _currentQuestion.type == QuestionType.matching;
-
   @override
   void initState() {
     super.initState();
-    _currentQuestionIndex = widget.initialQuestionIndex.clamp(
-      0,
-      widget.questions.isNotEmpty ? widget.questions.length - 1 : 0,
-    );
+    _currentQuestionIndex = widget.initialQuestionIndex.clamp(0, 4);
+    _initializeQuestions();
   }
+
+  void _initializeQuestions() {
+    // -------------------------------------------------------------------------
+    // Question 1: Matching
+    // Left: होन, दअः, जोम-नू, ओड़अः, दुब
+    // Right: बच्चा, पानी, खाना, घर, बैठना (shuffled)
+    // -------------------------------------------------------------------------
+    const leftWords = ['होन', 'दअः', 'जोम-नू', 'ओड़अः', 'दुब'];
+    const originalPairs = {
+      'होन': 'बच्चा',
+      'दअः': 'पानी',
+      'जोम-नू': 'खाना',
+      'ओड़अः': 'घर',
+      'दुब': 'बैठना',
+    };
+
+    // Shuffled right items (deterministic non-trivial order with seed for reproducibility, or random)
+    final rightMeanings = ['पानी', 'बैठना', 'बच्चा', 'घर', 'खाना'];
+    final Map<int, int> q1CorrectPairs = {};
+    for (int l = 0; l < leftWords.length; l++) {
+      final targetMeaning = originalPairs[leftWords[l]]!;
+      final rIndex = rightMeanings.indexOf(targetMeaning);
+      q1CorrectPairs[l] = rIndex;
+    }
+
+    // -------------------------------------------------------------------------
+    // Questions 2 to 5: MCQs with randomized option positions
+    // -------------------------------------------------------------------------
+    final q2Options = ['हिजुःमे।', 'दुब मे।', 'लेलेमे', 'कजिलेम']..shuffle(math.Random());
+    final q3Options = ['नेरे ओलेमे।', 'किताब निइपे', 'तिंगु कोःमे', 'धेआन ते अयुमेपे।']..shuffle(math.Random());
+    final q4Options = ['अम चिलका मेनाःमा?', 'नेअ चेकनअः?', 'अमगअ लुतुम चेकनअः?', 'कोतेमतना?']..shuffle(math.Random());
+    final q5Options = ['मंडी जोम केदा?', 'दअः लगतिङअ?', 'चेनअःम चेकातना?', 'हे/का।']..shuffle(math.Random());
+
+    _questions = [
+      // Q1: Matching
+      TeacherPracticeQuestionData(
+        questionNumber: 1,
+        totalQuestions: 5,
+        progressValue: 0.20,
+        progressPercentText: '20%',
+        type: TeacherPracticeQuestionType.matching,
+        instruction: 'सही अर्थ से मिलाएँ',
+        englishHelperText: '(Match the correct meanings)',
+        leftColumnHeading: 'मुंडारी शब्द',
+        rightColumnHeading: 'हिंदी अर्थ',
+        leftItems: leftWords,
+        rightItems: rightMeanings,
+        correctPairs: q1CorrectPairs,
+        feedbackExplanation:
+            '"होन" → "बच्चा" • "दअः" → "पानी" • "जोम-नू" → "खाना" • "ओड़अः" → "घर" • "दुब" → "बैठना"',
+        levelLabel: 'Level ${widget.levelNumber}',
+      ),
+
+      // Q2: MCQ - बैठो। -> दुब मे।
+      TeacherPracticeQuestionData(
+        questionNumber: 2,
+        totalQuestions: 5,
+        progressValue: 0.40,
+        progressPercentText: '40%',
+        type: TeacherPracticeQuestionType.mcq,
+        instruction: 'सही मुंडारी वाक्य चुनें',
+        englishHelperText: '(Choose the correct Mundari sentence)',
+        question: 'बैठो।',
+        options: q2Options,
+        correctAnswer: 'दुब मे।',
+        feedbackExplanation: '"बैठो।" का सही मुंडारी वाक्य "दुब मे।" है।',
+        levelLabel: 'Level ${widget.levelNumber}',
+      ),
+
+      // Q3: MCQ - किताब खोलो। -> किताब निइपे
+      TeacherPracticeQuestionData(
+        questionNumber: 3,
+        totalQuestions: 5,
+        progressValue: 0.60,
+        progressPercentText: '60%',
+        type: TeacherPracticeQuestionType.mcq,
+        instruction: 'सही मुंडारी वाक्य चुनें',
+        englishHelperText: '(Choose the correct Mundari sentence)',
+        question: 'किताब खोलो।',
+        options: q3Options,
+        correctAnswer: 'किताब निइपे',
+        feedbackExplanation: '"किताब खोलो।" का सही मुंडारी वाक्य "किताब निइपे" है।',
+        levelLabel: 'Level ${widget.levelNumber}',
+      ),
+
+      // Q4: MCQ - आपका नाम क्या है? -> अमगअ लुतुम चेकनअः?
+      TeacherPracticeQuestionData(
+        questionNumber: 4,
+        totalQuestions: 5,
+        progressValue: 0.80,
+        progressPercentText: '80%',
+        type: TeacherPracticeQuestionType.mcq,
+        instruction: 'सही मुंडारी वाक्य चुनें',
+        englishHelperText: '(Choose the correct Mundari sentence)',
+        question: 'आपका नाम क्या है?',
+        options: q4Options,
+        correctAnswer: 'अमगअ लुतुम चेकनअः?',
+        feedbackExplanation: '"आपका नाम क्या है?" का सही मुंडारी वाक्य "अमगअ लुतुम चेकनअः?" है।',
+        levelLabel: 'Level ${widget.levelNumber}',
+      ),
+
+      // Q5: MCQ - पानी चाहिए? -> दअः लगतिङअ?
+      TeacherPracticeQuestionData(
+        questionNumber: 5,
+        totalQuestions: 5,
+        progressValue: 1.0,
+        progressPercentText: '100%',
+        type: TeacherPracticeQuestionType.mcq,
+        instruction: 'सही मुंडारी वाक्य चुनें',
+        englishHelperText: '(Choose the correct Mundari sentence)',
+        question: 'पानी चाहिए?',
+        options: q5Options,
+        correctAnswer: 'दअः लगतिङअ?',
+        feedbackExplanation: '"पानी चाहिए?" का सही मुंडारी वाक्य "दअः लगतिङअ?" है।',
+        levelLabel: 'Level ${widget.levelNumber}',
+      ),
+    ];
+  }
+
+  TeacherPracticeQuestionData get _currentQuestion => _questions[_currentQuestionIndex];
+  bool get _isMatching => _currentQuestion.type == TeacherPracticeQuestionType.matching;
 
   void _handleBack() {
     if (widget.onBack != null) {
       widget.onBack!();
     } else {
-      Navigator.of(context).maybePop();
+      Navigator.of(context).maybePop(false);
     }
   }
 
@@ -278,20 +263,16 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Mundari Audio Pronunciation Trigger
-  // ---------------------------------------------------------------------------
   void _playMundariAudio(String text) {
-    if (widget.onPlayMundariAudio != null) {
-      widget.onPlayMundariAudio!(text);
+    if (widget.onPlayAudio != null) {
+      widget.onPlayAudio!(text);
     } else {
-      // Hook for backend audio playback integration (pronunciation / TTS audio)
-      debugPrint('[AyoVani Audio] Play Mundari pronunciation for: "$text"');
+      debugPrint('Playing Mundari pronunciation: $text');
     }
   }
 
   // ---------------------------------------------------------------------------
-  // MCQ Selection Logic (Questions 1 to 4)
+  // MCQ Option Selection
   // ---------------------------------------------------------------------------
   void _selectOption(int index) {
     if (_isChecked && _isCorrect) return;
@@ -303,7 +284,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Matching Selection Logic (Question 5)
+  // Matching Selection Logic
   // ---------------------------------------------------------------------------
   void _onLeftItemTap(int leftIndex) {
     if (_isChecked && _isCorrect) return;
@@ -320,12 +301,10 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         _selectedLeftIndex = null;
         _selectedRightIndex = null;
       } else {
-        // If this left item was already matched, unpair so user can reselect
         if (_matches.containsKey(leftIndex)) {
           _matches.remove(leftIndex);
           _selectedLeftIndex = leftIndex;
         } else if (_selectedLeftIndex == leftIndex) {
-          // Deselect
           _selectedLeftIndex = null;
         } else {
           _selectedLeftIndex = leftIndex;
@@ -349,12 +328,10 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         _selectedLeftIndex = null;
         _selectedRightIndex = null;
       } else {
-        // If this right item was already matched, unpair so user can reselect
         if (_matches.containsValue(rightIndex)) {
           _matches.removeWhere((k, v) => v == rightIndex);
           _selectedRightIndex = rightIndex;
         } else if (_selectedRightIndex == rightIndex) {
-          // Deselect
           _selectedRightIndex = null;
         } else {
           _selectedRightIndex = rightIndex;
@@ -364,12 +341,11 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Check / Continue Logic
+  // Check & Continue / Finish Logic
   // ---------------------------------------------------------------------------
   void _handleCheckOrContinue() {
-    // 1. If currently in answered + correct state, tapping action advances or finishes
     if (_isChecked && _isCorrect) {
-      final isLastQuestion = _currentQuestionIndex == widget.questions.length - 1;
+      final isLastQuestion = _currentQuestionIndex == _questions.length - 1;
       if (isLastQuestion) {
         _finishPhase();
       } else {
@@ -379,7 +355,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
     }
 
     if (_isMatching) {
-      // Validate matching: all 5 pairs must be matched
+      // Validate that all 5 pairs are matched
       if (_matches.length < _currentQuestion.leftItems.length) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -404,7 +380,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         return;
       }
 
-      // Check each pair against correctPairs
+      // Check all matches
       bool allCorrect = true;
       for (final entry in _currentQuestion.correctPairs.entries) {
         if (_matches[entry.key] != entry.value) {
@@ -454,7 +430,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   }
 
   void _advanceToNextQuestion() {
-    if (_currentQuestionIndex < widget.questions.length - 1) {
+    if (_currentQuestionIndex < _questions.length - 1) {
       setState(() {
         _currentQuestionIndex++;
         _selectedOptionIndex = null;
@@ -470,73 +446,13 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   }
 
   void _finishPhase() {
-    PhaseSelectionDialog.showAfterPhaseCompletion(
-      context: context,
-      levelNumber: 1,
-      levelTitle: 'Level 1',
-      onCompletePhase: widget.onCompletePhase,
-    );
-  }
-
-  void _showPhaseCompletionDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: const Color(0xFFFCFAF6),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          side: const BorderSide(color: Color(0xFFE5D7C3), width: 1.2),
-        ),
-        title: Row(
-          children: const [
-            Icon(Icons.emoji_events_rounded, color: Color(0xFFC0882A), size: 28.0),
-            SizedBox(width: 10.0),
-            Flexible(
-              child: Text(
-                'Phase 1 Completed!',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF251E11),
-                  fontSize: 18.0,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: const Text(
-          'शानदार! आपने Phase 1 के सभी 5 प्रश्नों को सफलतापूर्वक पूरा कर लिया है!\n(Congratulations! You have completed all 5 questions of Phase 1.)',
-          style: TextStyle(
-            fontFamilyFallback: ['Noto Sans Devanagari', 'Mangal', 'sans-serif'],
-            fontSize: 14.0,
-            color: Color(0xFF4A3B32),
-            height: 1.4,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogCtx).pop();
-              Navigator.of(context).maybePop();
-            },
-            child: const Text(
-              'FINISH',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF671D21),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    widget.onFinish?.call();
+    Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenWidth = mediaQuery.size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = Responsive.isTabletOrLarger(context) || screenWidth >= 600;
 
     return AyoScreenBackground(
@@ -546,7 +462,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
           bottom: false,
           child: Stack(
             children: [
-              // 1. Top-Left Traditional Warli/Indian Corner Ornament
+              // 1. Top-Left Traditional Warli Corner Ornament
               Positioned(
                 top: 0,
                 left: 0,
@@ -564,7 +480,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                 ),
               ),
 
-              // 2. Top-Right Traditional Warli/Indian Corner Ornament (Flipped)
+              // 2. Top-Right Traditional Warli Corner Ornament (Flipped)
               Positioned(
                 top: 0,
                 right: 0,
@@ -585,12 +501,12 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                 ),
               ),
 
-              // 3. Subtle Natural Grass Background Decoration (grass1.png & grass2.png)
+              // 3. Natural Grass Background Decoration
               Positioned.fill(
                 child: _AyoQuestionBackgroundDecoration(isTablet: isTablet),
               ),
 
-              // 4. Main Scrollable Page Content
+              // 4. Scrollable Question Content
               SingleChildScrollView(
                 physics: const ClampingScrollPhysics(),
                 padding: EdgeInsets.only(
@@ -607,7 +523,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Header: Circular Back Button & Centered AyoVaani Logo
+                        // Header: Circular Back Button & AyoVaani Logo
                         _buildHeader(isTablet),
                         const SizedBox(height: 12.0),
 
@@ -615,24 +531,24 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                         _buildProgressCard(isTablet),
                         const SizedBox(height: 16.0),
 
-                        // Cartoon Character (Noticeably Larger) + Speech Bubble + Decorative Question Card
+                        // Character + Question Card
                         _buildCartoonAndQuestionSection(isTablet),
                         const SizedBox(height: 18.0),
 
-                        // Question Content: Either MCQ Options (Q1-Q4) OR Matching Columns (Q5)
+                        // Content: Either Matching Columns (Q1) OR MCQ Options (Q2-Q5)
                         if (_isMatching)
                           _buildMatchingSection(isTablet)
                         else
                           _buildAnswerOptions(isTablet),
                         const SizedBox(height: 16.0),
 
-                        // Optional Feedback Message Banner (Shown on check)
+                        // Optional Feedback Message Banner
                         if (_isChecked) ...[
                           _buildFeedbackBanner(isTablet),
                           const SizedBox(height: 14.0),
                         ],
 
-                        // Full-Width Burgundy "CHECK" / "CONTINUE" Action Button
+                        // Action Button: "CHECK" / "CONTINUE" / "FINISH"
                         _buildCheckButton(isTablet),
                         const SizedBox(height: 12.0),
                       ],
@@ -652,7 +568,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Top Header (Back Button & Official AyoVaani Logo)
+  // Top Header (Back Button & Centered Logo)
   // ---------------------------------------------------------------------------
   Widget _buildHeader(bool isTablet) {
     return SizedBox(
@@ -660,7 +576,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Circular White Back Button with Black Arrow
           Align(
             alignment: Alignment.centerLeft,
             child: Material(
@@ -693,12 +608,9 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
               ),
             ),
           ),
-
-          // Official AyoVaani Centered Logo
           Center(
             child: AyoLogo(
               height: isTablet ? 80.0 : 66.0,
-              assetPath: 'assets/images/ayovaani_logo.png',
             ),
           ),
         ],
@@ -732,20 +644,19 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Row 1: Green Pill "First • Ch 1", "Level 1", "Q X/5"
           Row(
             children: [
               Expanded(
                 child: Row(
                   children: [
-                    // Left: Green Pill "First • Ch 1"
+                    // Green Pill: "First • Ch 1"
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10.0,
                         vertical: 4.0,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF4C6647), // Muted dark olive green
+                        color: const Color(0xFF4C6647),
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                       child: Text(
@@ -779,7 +690,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
               ),
               const SizedBox(width: 8.0),
 
-              // Right: "Q X/5"
+              // "Q X/5"
               Text(
                 'Q ${currentQ.questionNumber}/${currentQ.totalQuestions}',
                 style: TextStyle(
@@ -793,7 +704,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
           ),
           const SizedBox(height: 10.0),
 
-          // Row 2: Horizontal Progress Bar + Percentage Label
+          // Progress Bar + Percentage
           Row(
             children: [
               Expanded(
@@ -804,7 +715,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                     minHeight: 7.0,
                     backgroundColor: const Color(0xFFE4DCD0),
                     valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color(0xFF671D21), // AyoVaani deep burgundy
+                      Color(0xFF671D21),
                     ),
                   ),
                 ),
@@ -827,7 +738,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Cartoon + Question Area (Noticeably Larger Cartoon)
+  // Cartoon + Question Area
   // ---------------------------------------------------------------------------
   Widget _buildCartoonAndQuestionSection(bool isTablet) {
     return LayoutBuilder(
@@ -841,18 +752,15 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Left Column: Speech Bubble + Larger Squirrel Cartoon
+            // Speech Bubble + Squirrel Cartoon
             SizedBox(
               width: cartoonWidth,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Speech bubble: "Let's learn together!"
                   _buildSpeechBubble(isTablet),
                   const SizedBox(height: 4.0),
-
-                  // Squirrel Cartoon Asset: assets/images/cartoon.png (Enlarged)
                   SizedBox(
                     width: cartoonWidth,
                     height: cartoonHeight,
@@ -867,7 +775,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
             ),
             const SizedBox(width: 8.0),
 
-            // Right Column: Decorative Question Card
+            // Decorative Question Card
             Expanded(
               child: _buildQuestionCard(isTablet),
             ),
@@ -877,9 +785,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Speech Bubble Above Cartoon
-  // ---------------------------------------------------------------------------
   Widget _buildSpeechBubble(bool isTablet) {
     return CustomPaint(
       painter: const _SpeechBubblePainter(),
@@ -905,18 +810,15 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Decorative Question Card (Off-white, Dark Green Outline, Green Corner Mandala)
-  // ---------------------------------------------------------------------------
   Widget _buildQuestionCard(bool isTablet) {
     final currentQ = _currentQuestion;
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFCFAF6), // Light cream
+        color: const Color(0xFFFCFAF6),
         borderRadius: BorderRadius.circular(20.0),
         border: Border.all(
-          color: const Color(0xFF4C6647), // Dark green outline
+          color: const Color(0xFF4C6647),
           width: 1.8,
         ),
         boxShadow: [
@@ -931,7 +833,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         borderRadius: BorderRadius.circular(20.0),
         child: Stack(
           children: [
-            // Top-Right Green Mandala Corner
+            // Mandala Corners
             Positioned(
               top: 0,
               right: 0,
@@ -942,8 +844,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                 ),
               ),
             ),
-
-            // Bottom-Left Green Mandala Corner
             Positioned(
               bottom: 0,
               left: 0,
@@ -954,8 +854,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                 ),
               ),
             ),
-
-            // Bottom-Right Green Mandala Corner
             Positioned(
               bottom: 0,
               right: 0,
@@ -967,7 +865,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
               ),
             ),
 
-            // Card Inner Text Hierarchy
+            // Question Text
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: isTablet ? 18.0 : 10.0,
@@ -977,31 +875,23 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Question instruction in Devanagari with Speaker Icon (Burgundy)
-                  Center(
-                    child: MundariAudioText(
-                      text: currentQ.instruction,
-                      onAudioTap: () => _playMundariAudio(currentQ.instruction),
-                      iconSize: isTablet ? 24.0 : 20.0,
-                      iconColor: const Color(0xFF671D21),
-                      spacing: isTablet ? 7.0 : 5.0,
-                      style: TextStyle(
-                        fontFamilyFallback: const [
-                          'Noto Sans Devanagari',
-                          'Mangal',
-                          'Nirmala UI',
-                          'sans-serif',
-                        ],
-                        fontSize: isTablet ? 19.5 : 16.0,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF671D21), // AyoVaani burgundy
-                        letterSpacing: -0.2,
-                      ),
+                  Text(
+                    currentQ.instruction,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamilyFallback: const [
+                        'Noto Sans Devanagari',
+                        'Mangal',
+                        'Nirmala UI',
+                        'sans-serif',
+                      ],
+                      fontSize: isTablet ? 19.0 : 16.0,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF671D21),
+                      letterSpacing: -0.2,
                     ),
                   ),
                   const SizedBox(height: 3.0),
-
-                  // English explanation
                   Text(
                     currentQ.englishHelperText,
                     textAlign: TextAlign.center,
@@ -1012,17 +902,12 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                       color: const Color(0xFF4A3B32),
                     ),
                   ),
-
-                  // Prominently displayed word with Speaker Icon (Only for MCQ questions)
-                  if (!_isMatching && currentQ.word.isNotEmpty) ...[
-                    const SizedBox(height: 8.0),
+                  if (!_isMatching && currentQ.question.isNotEmpty) ...[
+                    const SizedBox(height: 10.0),
                     Center(
-                      child: MundariAudioText(
-                        text: currentQ.word,
-                        onAudioTap: () => _playMundariAudio(currentQ.word),
-                        iconSize: isTablet ? 34.0 : 28.0,
-                        iconColor: const Color(0xFF671D21),
-                        spacing: isTablet ? 10.0 : 8.0,
+                      child: Text(
+                        currentQ.question,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamilyFallback: const [
                             'Noto Sans Devanagari',
@@ -1030,11 +915,11 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                             'Nirmala UI',
                             'sans-serif',
                           ],
-                          fontSize: isTablet ? 42.0 : 34.0,
+                          fontSize: isTablet ? 32.0 : 26.0,
                           fontWeight: FontWeight.w900,
                           color: const Color(0xFF1E170E),
-                          letterSpacing: 0.5,
-                          height: 1.15,
+                          letterSpacing: 0.3,
+                          height: 1.2,
                         ),
                       ),
                     ),
@@ -1049,14 +934,14 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Matching Columns Section (Question 5)
+  // Matching Section (Question 1)
   // ---------------------------------------------------------------------------
   Widget _buildMatchingSection(bool isTablet) {
     final currentQ = _currentQuestion;
 
     return Column(
       children: [
-        // Column Headings: "मुंडारी शब्द" & "हिंदी अर्थ"
+        // Column Headings
         Row(
           children: [
             Expanded(
@@ -1074,7 +959,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Left Column: Mundari Words
+            // Left Column (Mundari words with speaker buttons)
             Expanded(
               child: Column(
                 children: [
@@ -1087,34 +972,34 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                     ),
                     if (i < currentQ.leftItems.length - 1)
                       SizedBox(height: isTablet ? 10.0 : 8.0),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          SizedBox(width: isTablet ? 16.0 : 10.0),
+            SizedBox(width: isTablet ? 16.0 : 10.0),
 
-          // Right Column: Hindi Meanings
-          Expanded(
-            child: Column(
-              children: [
-                for (int i = 0; i < currentQ.rightItems.length; i++) ...[
-                  _buildMatchingCard(
-                    text: currentQ.rightItems[i],
-                    index: i,
-                    isLeft: false,
-                    isTablet: isTablet,
-                  ),
-                  if (i < currentQ.rightItems.length - 1)
-                    SizedBox(height: isTablet ? 10.0 : 8.0),
+            // Right Column (Hindi meanings)
+            Expanded(
+              child: Column(
+                children: [
+                  for (int i = 0; i < currentQ.rightItems.length; i++) ...[
+                    _buildMatchingCard(
+                      text: currentQ.rightItems[i],
+                      index: i,
+                      isLeft: false,
+                      isTablet: isTablet,
+                    ),
+                    if (i < currentQ.rightItems.length - 1)
+                      SizedBox(height: isTablet ? 10.0 : 8.0),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
-      ),
-    ],
-  );
-}
+          ],
+        ),
+      ],
+    );
+  }
 
   Widget _buildColumnHeader(String title, bool isTablet) {
     return Container(
@@ -1123,7 +1008,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         vertical: isTablet ? 8.0 : 6.0,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF4C6647), // Muted dark olive green
+        color: const Color(0xFF4C6647),
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Center(
@@ -1156,7 +1041,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
     final isSelected = isLeft ? (_selectedLeftIndex == index) : (_selectedRightIndex == index);
     final isMatched = isLeft ? _matches.containsKey(index) : _matches.containsValue(index);
 
-    // Determine correctness after CHECK
     bool? isPairCorrect;
     if (_isChecked) {
       if (isLeft) {
@@ -1174,7 +1058,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
       }
     }
 
-    // Colors & indicator logic
     Color backgroundColor = const Color(0xFFFAF6F0);
     Color borderColor = const Color(0xFFB3A596);
     double borderWidth = 1.3;
@@ -1182,7 +1065,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
 
     if (_isChecked && isMatched) {
       if (isPairCorrect == true) {
-        // Correct pair
         backgroundColor = const Color(0xFFF1F7EE);
         borderColor = const Color(0xFF386633);
         borderWidth = 2.0;
@@ -1192,7 +1074,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
           child: const Icon(Icons.check, color: Colors.white, size: 15.0),
         );
       } else {
-        // Incorrect pair
         backgroundColor = const Color(0xFFFDF0EF);
         borderColor = const Color(0xFF9E2A2B);
         borderWidth = 2.0;
@@ -1203,7 +1084,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         );
       }
     } else if (isSelected) {
-      // Actively tapped item waiting for partner
       backgroundColor = const Color(0xFFF6FAF3);
       borderColor = const Color(0xFF4C6647);
       borderWidth = 2.0;
@@ -1220,7 +1100,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         ),
       );
     } else if (isMatched) {
-      // Matched before check
       backgroundColor = const Color(0xFFF6FAF3);
       borderColor = const Color(0xFF4C6647);
       borderWidth = 1.8;
@@ -1230,7 +1109,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         child: const Icon(Icons.check, color: Colors.white, size: 14.0),
       );
     } else {
-      // Unselected & unmatched
       indicatorWidget = _buildCircleIndicator(
         fillColor: Colors.transparent,
         borderColor: const Color(0xFFB3A596),
@@ -1268,7 +1146,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Circular Radio-Like Indicator
                 indicatorWidget,
                 if (isLeft) ...[
                   SizedBox(width: isTablet ? 8.0 : 6.0),
@@ -1282,8 +1159,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                 ] else ...[
                   const SizedBox(width: 10.0),
                 ],
-
-                // Devanagari Word/Meaning Text
                 Expanded(
                   child: Text(
                     text,
@@ -1294,7 +1169,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                         'Nirmala UI',
                         'sans-serif',
                       ],
-                      fontSize: isTablet ? 18.5 : 15.0,
+                      fontSize: isTablet ? 18.0 : 15.0,
                       fontWeight: FontWeight.w700,
                       color: isSelected || isMatched
                           ? const Color(0xFF4C6647)
@@ -1311,7 +1186,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Answer Options List (MCQ: Questions 1 to 4)
+  // Answer Options List (MCQ: Questions 2 to 5)
   // ---------------------------------------------------------------------------
   Widget _buildAnswerOptions(bool isTablet) {
     final currentQ = _currentQuestion;
@@ -1335,19 +1210,16 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
     required String text,
     required bool isTablet,
   }) {
-    final currentQ = _currentQuestion;
     final isSelected = (_selectedOptionIndex == index);
 
-    // Styling based on state
-    Color backgroundColor = const Color(0xFFFAF6F0); // Warm cream
-    Color borderColor = const Color(0xFF4A3B32); // Dark brown outline
+    Color backgroundColor = const Color(0xFFFAF6F0);
+    Color borderColor = const Color(0xFF4A3B32);
     double borderWidth = 1.3;
     Widget indicatorWidget;
 
     if (isSelected) {
       if (_isChecked) {
         if (_isCorrect) {
-          // Correct state (Green success)
           backgroundColor = const Color(0xFFF1F7EE);
           borderColor = const Color(0xFF386633);
           borderWidth = 2.0;
@@ -1357,7 +1229,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
             child: const Icon(Icons.check, color: Colors.white, size: 17.0),
           );
         } else {
-          // Incorrect state (Rust error)
           backgroundColor = const Color(0xFFFDF0EF);
           borderColor = const Color(0xFF9E2A2B);
           borderWidth = 2.0;
@@ -1368,7 +1239,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
           );
         }
       } else {
-        // Selected state before checking (Dark Green match)
         backgroundColor = const Color(0xFFF6FAF3);
         borderColor = const Color(0xFF4C6647);
         borderWidth = 2.0;
@@ -1379,7 +1249,6 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         );
       }
     } else {
-      // Unselected state
       indicatorWidget = _buildCircleIndicator(
         fillColor: Colors.transparent,
         borderColor: const Color(0xFFB3A596),
@@ -1387,9 +1256,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
       );
     }
 
-    final verticalPad = isTablet
-        ? 18.0
-        : (currentQ.options.length > 3 ? 12.0 : 14.0);
+    final verticalPad = isTablet ? 16.0 : 12.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -1415,7 +1282,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
           splashColor: const Color(0xFF4C6647).withValues(alpha: 0.12),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: 16.0,
+              horizontal: 14.0,
               vertical: verticalPad,
             ),
             child: Row(
@@ -1423,9 +1290,18 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
               children: [
                 // Radio Button Indicator
                 indicatorWidget,
-                const SizedBox(width: 16.0),
+                const SizedBox(width: 10.0),
 
-                // Devanagari Option Text
+                // Mundari Clickable Speaker Icon (Deep Maroon)
+                MundariAudioButton(
+                  text: text,
+                  onTap: () => _playMundariAudio(text),
+                  iconSize: isTablet ? 24.0 : 20.0,
+                  color: const Color(0xFF671D21),
+                ),
+                const SizedBox(width: 10.0),
+
+                // Mundari Option Sentence
                 Expanded(
                   child: Text(
                     text,
@@ -1436,7 +1312,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                         'Nirmala UI',
                         'sans-serif',
                       ],
-                      fontSize: isTablet ? 23.0 : 20.0,
+                      fontSize: isTablet ? 21.0 : 18.0,
                       fontWeight: FontWeight.w700,
                       color: isSelected && !_isChecked
                           ? const Color(0xFF4C6647)
@@ -1473,7 +1349,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Visual Feedback Banner (Correct / Incorrect)
+  // Feedback Banner
   // ---------------------------------------------------------------------------
   Widget _buildFeedbackBanner(bool isTablet) {
     final isCorrect = _isCorrect;
@@ -1548,11 +1424,11 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Check / Continue Action Button
+  // Check / Continue / Finish Action Button
   // ---------------------------------------------------------------------------
   Widget _buildCheckButton(bool isTablet) {
     final isCompleted = _isChecked && _isCorrect;
-    final isLastQuestion = _currentQuestionIndex == widget.questions.length - 1;
+    final isLastQuestion = _currentQuestionIndex == _questions.length - 1;
     final String buttonLabel;
     if (!isCompleted) {
       buttonLabel = 'CHECK';
@@ -1563,15 +1439,15 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
     }
 
     return Container(
-      height: isTablet ? 56.0 : 52.0,
+      height: isTablet ? 56.0 : 50.0,
       decoration: BoxDecoration(
-        color: const Color(0xFF5E171B), // Deep burgundy / maroon
+        color: const Color(0xFF671D21), // AyoVaani Deep burgundy
         borderRadius: BorderRadius.circular(28.0),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF5E171B).withValues(alpha: 0.32),
+            color: const Color(0xFF671D21).withValues(alpha: 0.32),
             blurRadius: 10.0,
-            offset: const Offset(0, 3),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1600,7 +1476,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
 }
 
 // ---------------------------------------------------------------------------
-// Speech Bubble Painter with Small Tail Pointing Downward Left
+// Speech Bubble Painter
 // ---------------------------------------------------------------------------
 class _SpeechBubblePainter extends CustomPainter {
   const _SpeechBubblePainter();
@@ -1622,7 +1498,6 @@ class _SpeechBubblePainter extends CustomPainter {
     final path = Path();
     path.addRRect(rrect);
 
-    // Downward-pointing pointer towards the squirrel's paw
     final tailPath = Path()
       ..moveTo(size.width * 0.35, size.height - 6.0)
       ..lineTo(size.width * 0.24, size.height)
@@ -1641,7 +1516,7 @@ class _SpeechBubblePainter extends CustomPainter {
 }
 
 // ---------------------------------------------------------------------------
-// Green Corner Mandala Flourish for Question Card
+// Green Corner Mandala Painter
 // ---------------------------------------------------------------------------
 enum _Corner { topRight, bottomLeft, bottomRight }
 
@@ -1680,7 +1555,6 @@ class _GreenCornerMandalaPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    // Outer concentric arc
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: w * 0.85),
       startAngle,
@@ -1689,7 +1563,6 @@ class _GreenCornerMandalaPainter extends CustomPainter {
       linePaint,
     );
 
-    // Mid concentric arc
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: w * 0.58),
       startAngle,
@@ -1698,7 +1571,6 @@ class _GreenCornerMandalaPainter extends CustomPainter {
       linePaint,
     );
 
-    // Inner filled quarter-circle
     final innerPaint = Paint()
       ..color = const Color(0xFF4C6647).withValues(alpha: 0.25)
       ..style = PaintingStyle.fill;
@@ -1711,7 +1583,6 @@ class _GreenCornerMandalaPainter extends CustomPainter {
       innerPaint,
     );
 
-    // Radiating hatch dots / petal ticks
     final tickPaint = Paint()
       ..color = const Color(0xFF4C6647).withValues(alpha: 0.70)
       ..strokeWidth = 1.2
@@ -1734,7 +1605,7 @@ class _GreenCornerMandalaPainter extends CustomPainter {
 }
 
 // ---------------------------------------------------------------------------
-// Reusable Single Grass Asset Item with Subtle Opacity and Horizontal Flip
+// Subtle Natural Grass Decoration Items
 // ---------------------------------------------------------------------------
 class _GrassDecorationItem extends StatelessWidget {
   const _GrassDecorationItem({
@@ -1769,9 +1640,6 @@ class _GrassDecorationItem extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Subtle, Low-Contrast Natural Grass Background Decoration (grass1 & grass2)
-// ---------------------------------------------------------------------------
 class _AyoQuestionBackgroundDecoration extends StatelessWidget {
   const _AyoQuestionBackgroundDecoration({required this.isTablet});
 
@@ -1784,28 +1652,23 @@ class _AyoQuestionBackgroundDecoration extends StatelessWidget {
         final w = constraints.maxWidth;
         final h = constraints.maxHeight;
 
-        // Content geometry to compute side gutters
         final maxContentWidth = isTablet ? 680.0 : 440.0;
         final sidePadding = isTablet ? 36.0 : 18.0;
         final contentWidth = math.min(w - (sidePadding * 2), maxContentWidth);
         final gutter = math.max(0.0, (w - contentWidth) / 2.0);
 
-        // Responsive scaling for different screen sizes (mobile vs tablet)
         final scale = isTablet ? 1.25 : (w < 370 ? 0.85 : 1.0);
         final grass1Width = 34.0 * scale;
         final grass2Width = 36.0 * scale;
         final smallGrass1Width = 26.0 * scale;
         final smallGrass2Width = 28.0 * scale;
 
-        // On tablet: place comfortably inside the side gutters.
-        // On mobile: position along the edges to frame content with breathing room.
         final leftEdgeX = isTablet ? math.max(12.0, (gutter - grass1Width) / 2) : 4.0;
         final rightEdgeX = isTablet ? math.max(12.0, (gutter - grass1Width) / 2) : 4.0;
 
         return IgnorePointer(
           child: Stack(
             children: [
-              // 1. Left Mid Cluster: flanking the middle background / cartoon section
               Positioned(
                 left: leftEdgeX,
                 top: h * 0.31,
@@ -1829,8 +1692,6 @@ class _AyoQuestionBackgroundDecoration extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // 2. Right Mid Cluster: flanking the question card, flipped horizontally
               Positioned(
                 right: rightEdgeX,
                 top: h * 0.34,
@@ -1856,8 +1717,6 @@ class _AyoQuestionBackgroundDecoration extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // 3. Lower-Left Cluster: around the answer section / check button
               Positioned(
                 left: leftEdgeX + (isTablet ? 6.0 : 2.0),
                 top: h * 0.64,
@@ -1881,8 +1740,6 @@ class _AyoQuestionBackgroundDecoration extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // 4. Lower-Right Cluster: around the answer section / check button
               Positioned(
                 right: rightEdgeX + (isTablet ? 6.0 : 2.0),
                 top: h * 0.67,
@@ -1908,50 +1765,6 @@ class _AyoQuestionBackgroundDecoration extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // 5. Subtle Middle/Lower Background Elements: filling empty space above nav
-              Positioned(
-                left: leftEdgeX + (isTablet ? 14.0 : 8.0),
-                top: h * 0.82,
-                child: _GrassDecorationItem(
-                  assetPath: 'assets/images/grass2.png',
-                  width: smallGrass2Width * 0.9,
-                  opacity: 0.42,
-                ),
-              ),
-              Positioned(
-                right: rightEdgeX + (isTablet ? 14.0 : 8.0),
-                top: h * 0.84,
-                child: _GrassDecorationItem(
-                  assetPath: 'assets/images/grass1.png',
-                  width: smallGrass1Width * 0.88,
-                  isFlipped: true,
-                  opacity: 0.42,
-                ),
-              ),
-
-              // 6. Tablet side gutter accents: filling wide margins cleanly
-              if (isTablet) ...[
-                Positioned(
-                  left: leftEdgeX + 8.0,
-                  top: h * 0.16,
-                  child: _GrassDecorationItem(
-                    assetPath: 'assets/images/grass2.png',
-                    width: smallGrass2Width,
-                    opacity: 0.40,
-                  ),
-                ),
-                Positioned(
-                  right: rightEdgeX + 8.0,
-                  top: h * 0.18,
-                  child: _GrassDecorationItem(
-                    assetPath: 'assets/images/grass1.png',
-                    width: smallGrass1Width,
-                    isFlipped: true,
-                    opacity: 0.40,
-                  ),
-                ),
-              ],
             ],
           ),
         );
