@@ -7,6 +7,7 @@ import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
+import '../../services/tts_service.dart';
 
 /// Supported Question Types in the Teacher Practice Phase.
 enum TeacherPracticeQuestionType {
@@ -267,7 +268,7 @@ class _TeacherPracticeScreenState extends State<TeacherPracticeScreen> {
     if (widget.onPlayAudio != null) {
       widget.onPlayAudio!(text);
     } else {
-      debugPrint('Playing Mundari pronunciation: $text');
+      TtsService().speakCodeMixedClassroomScript(text);
     }
   }
 

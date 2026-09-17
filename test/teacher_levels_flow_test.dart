@@ -164,6 +164,7 @@ void main() {
       expect(find.text('FINISH'), findsNothing);
 
       // 5. Tap "Next" -> transitions to PAGE 2
+      await tester.ensureVisible(find.text('Next'));
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
@@ -195,6 +196,7 @@ void main() {
       expect(find.text('Next'), findsOneWidget);
 
       // 6. Tap "Next" -> transitions to PAGE 3
+      await tester.ensureVisible(find.text('Next'));
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
 
@@ -230,22 +232,27 @@ void main() {
       expect(find.text('Next'), findsNothing);
 
       // 7. Test Back Navigation: Page 3 -> Page 2 -> Page 1
+      await tester.ensureVisible(find.byIcon(Icons.arrow_back_rounded));
       await tester.tap(find.byIcon(Icons.arrow_back_rounded));
       await tester.pumpAndSettle();
       expect(find.text('कक्षा में छात्रों को दिए जाने वाले निर्देश:'), findsOneWidget);
 
+      await tester.ensureVisible(find.byIcon(Icons.arrow_back_rounded));
       await tester.tap(find.byIcon(Icons.arrow_back_rounded));
       await tester.pumpAndSettle();
       expect(find.text('कक्षा में बार-बार बोले जाने वाले शब्द:'), findsOneWidget);
 
       // Forward back to Page 3
+      await tester.ensureVisible(find.text('Next'));
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Next'));
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
       expect(find.text('FINISH'), findsOneWidget);
 
       // 8. Tap "FINISH" -> completes and returns to Teacher Phase Popup
+      await tester.ensureVisible(find.text('FINISH'));
       await tester.tap(find.text('FINISH'));
       await tester.pumpAndSettle();
 

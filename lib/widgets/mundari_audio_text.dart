@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/tts_service.dart';
 
 /// Reusable interactive audio speaker button for Mundari pronunciation.
 ///
@@ -6,12 +7,12 @@ import 'package:flutter/material.dart';
 /// - Provides child-friendly tap feedback (ink ripple)
 /// - Uses AyoVaani deep burgundy (#671D21) accent
 /// - Compact icon size vertically aligned with text
-/// - Pure interactive UI hook ready for backend audio playback integration
+/// - Triggers Sherpa-ONNX local Mundari TTS audio playback on tap
 class MundariAudioButton extends StatelessWidget {
   const MundariAudioButton({
     super.key,
     required this.text,
-    required this.onTap,
+    this.onTap,
     this.iconSize = 22.0,
     this.color = const Color(0xFF671D21),
     this.tooltip,
@@ -20,8 +21,9 @@ class MundariAudioButton extends StatelessWidget {
   /// The Mundari word or phrase associated with this audio button.
   final String text;
 
-  /// Callback triggered when the speaker button is tapped.
-  final VoidCallback onTap;
+  /// Optional callback triggered when the speaker button is tapped.
+  /// Defaults to synthesizing speech via TtsService (Sherpa-ONNX model).
+  final VoidCallback? onTap;
 
   /// Icon size in dp.
   final double iconSize;
@@ -41,7 +43,7 @@ class MundariAudioButton extends StatelessWidget {
         color: Colors.transparent,
         shape: const CircleBorder(),
         child: InkResponse(
-          onTap: onTap,
+          onTap: onTap ?? () => TtsService().speakCodeMixedClassroomScript(text),
           radius: iconSize * 0.9 + 6.0,
           containedInkWell: false,
           splashColor: color.withValues(alpha: 0.22),
@@ -65,7 +67,7 @@ class MundariAudioText extends StatelessWidget {
   const MundariAudioText({
     super.key,
     required this.text,
-    required this.onAudioTap,
+    this.onAudioTap,
     required this.style,
     this.iconSize = 22.0,
     this.iconColor = const Color(0xFF671D21),
@@ -78,8 +80,9 @@ class MundariAudioText extends StatelessWidget {
   /// The Mundari text to display.
   final String text;
 
-  /// Callback invoked when the speaker icon is pressed.
-  final VoidCallback onAudioTap;
+  /// Optional callback invoked when the speaker icon is pressed.
+  /// Defaults to TtsService().speakCodeMixedClassroomScript(text).
+  final VoidCallback? onAudioTap;
 
   /// Text style for the Devanagari text.
   final TextStyle style;

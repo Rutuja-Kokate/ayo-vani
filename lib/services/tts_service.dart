@@ -23,12 +23,7 @@ class TtsService {
   /// Initialise the service. Must be called before any playback.
   Future<void> init() async {
     if (_initialized) return;
-    if (_isInitializing) {
-      while (_isInitializing) {
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-      return;
-    }
+    if (_isInitializing) return;
 
     _isInitializing = true;
     
@@ -82,7 +77,7 @@ class TtsService {
           vits: sherpa.OfflineTtsVitsModelConfig(
             model: modelFile.path,
             tokens: tokensFile.path,
-            lexicon: tokensFile.path,
+            lexicon: '',
           ),
           numThreads: 2,
           debug: false,
@@ -135,9 +130,133 @@ class TtsService {
     'section': 'सेक्शन',
   };
 
+  /// Transliterate Devanagari text to Latin phonemes compatible with Sherpa-ONNX VITS model tokens.txt
+  static String devanagariToPhonemes(String text) {
+    if (text.isEmpty) return text;
+    // If text contains no Devanagari, return as-is
+    if (!RegExp(r'[\u0900-\u097F]').hasMatch(text)) {
+      return text.toLowerCase();
+    }
+
+    // Normalize nukta variations (composite vs combining nukta)
+    String input = text
+        .replaceAll('ड़', 'r')
+        .replaceAll('ढ़', 'rh')
+        .replaceAll('ड़', 'r')
+        .replaceAll('ढ़', 'rh')
+        .replaceAll('फ़', 'f')
+        .replaceAll('ज़', 'z');
+
+    final Map<String, String> vowels = {
+      'अ': 'a', 'आ': 'a', 'इ': 'i', 'ई': 'i', 'उ': 'u', 'ऊ': 'u',
+      'ऋ': 'ri', 'ए': 'e', 'ऐ': 'ai', 'ओ': 'o', 'औ': 'au', 'अं': 'an', 'अः': 'ah',
+    };
+
+    final Map<String, String> matras = {
+      'ा': 'a', 'ि': 'i', 'ी': 'i', 'ु': 'u', 'ू': 'u', 'ृ': 'ri',
+      'े': 'e', 'ै': 'ai', 'ो': 'o', 'ौ': 'au', 'ं': 'n', 'ः': 'h',
+      'ॅ': 'e', 'ॉ': 'o',
+    };
+
+    final Map<String, String> consonants = {
+      'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'ng',
+      'च': 'c', 'छ': 'ch', 'ज': 'j', 'झ': 'jh', 'ञ': 'ny',
+      'ट': 't', 'ठ': 'th', 'ड': 'd', 'ढ': 'dh', 'ण': 'n',
+      'त': 't', 'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n',
+      'प': 'p', 'फ': 'f', 'ब': 'b', 'भ': 'bh', 'म': 'm',
+      'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v',
+      'श': 'sh', 'ष': 'sh', 'स': 's', 'ह': 'h',
+    };
+
+    final StringBuffer sb = StringBuffer();
+    final runes = input.runes.toList();
+    final int len = runes.length;
+
+    for (int i = 0; i < len; i++) {
+      final String char = String.fromCharCode(runes[i]);
+
+      // Ignore combining nukta U+093C if encountered standalone
+      if (char == '़') continue;
+
+      // Independent Vowels
+      if (vowels.containsKey(char)) {
+        sb.write(vowels[char]);
+        continue;
+      }
+
+      // Consonants
+      if (consonants.containsKey(char)) {
+        String base = consonants[char]!;
+
+        // Check next char for nukta, matra, or virama
+        if (i + 1 < len) {
+          final String nextChar = String.fromCharCode(runes[i + 1]);
+
+          if (nextChar == '़') {
+            if (base == 'd') {
+              base = 'r';
+            } else if (base == 'dh') {
+              base = 'rh';
+            } else if (base == 'j') {
+              base = 'z';
+            } else if (base == 'f') {
+              base = 'f';
+            }
+            i++; // skip nukta
+          }
+        }
+
+        // Re-check next char after optional nukta
+        if (i + 1 < len) {
+          final String nextChar = String.fromCharCode(runes[i + 1]);
+
+          if (nextChar == '्') {
+            // Virama (halant): suppress inherent 'a'
+            sb.write(base);
+            i++; // skip virama
+            continue;
+          } else if (matras.containsKey(nextChar)) {
+            // Matra present: write base consonant + matra vowel
+            sb.write(base);
+            sb.write(matras[nextChar]);
+            i++; // skip matra
+            continue;
+          }
+        }
+
+        // Check if consonant is at word end or before non-Devanagari char (schwa deletion)
+        bool isWordEnd = true;
+        if (i + 1 < len) {
+          final String nextChar = String.fromCharCode(runes[i + 1]);
+          if (RegExp(r'[\u0900-\u097F]').hasMatch(nextChar)) {
+            isWordEnd = false;
+          }
+        }
+
+        if (isWordEnd) {
+          sb.write(base);
+        } else {
+          sb.write('${base}a');
+        }
+        continue;
+      }
+
+      // Matras standalone
+      if (matras.containsKey(char)) {
+        sb.write(matras[char]);
+        continue;
+      }
+
+      // Preserve non-Devanagari characters (spaces, punctuation, digits, Latin letters)
+      sb.write(char.toLowerCase());
+    }
+
+    return sb.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
   /// Synthesize and play general text
   Future<void> speak(String text) async {
-    await speakWordAndMundari(text, null);
+    await speakCodeMixedClassroomScript(text);
   }
 
   /// Synthesize and play code-mixed (Mundari + English) classroom scripts using local ONNX Mundari TTS.
@@ -155,10 +274,13 @@ class TtsService {
     // Ensure EVERY single English word in any context is dynamically transliterated to Devanagari script via Gemini/fallback
     normalizedText = await HindiToMundariTranslator.ensureFullDevanagari(normalizedText);
 
+    // Convert Devanagari text to Latin phonemes for Sherpa-ONNX model
+    final String phoneticText = devanagariToPhonemes(normalizedText);
+
     if (_sherpaTts != null) {
       try {
-        debugPrint('[TTS] Synthesizing speech using local Sherpa-ONNX Mundari TTS model...');
-        final audio = _sherpaTts!.generate(text: normalizedText, sid: 0, speed: 1.0);
+        debugPrint('[TTS] Synthesizing speech for "$phoneticText" (from "$normalizedText") using local Sherpa-ONNX Mundari TTS model...');
+        final audio = _sherpaTts!.generate(text: phoneticText, sid: 0, speed: 1.0);
         final samples = audio.samples;
         final sampleRate = audio.sampleRate;
         if (samples.isNotEmpty) {
@@ -176,7 +298,8 @@ class TtsService {
       }
     }
 
-    await speak(normalizedText);
+    // Fallback to flutter_tts
+    await speakWordAndMundari(normalizedText, null);
   }
 
   Uint8List _createWavBytes(Float32List samples, int sampleRate) {

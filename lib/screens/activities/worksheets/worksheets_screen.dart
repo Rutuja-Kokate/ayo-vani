@@ -8,6 +8,7 @@ import '../../../data/english_activities_data.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
+import '../../../widgets/mundari_audio_text.dart';
 import '../../../services/worksheet_pdf_service.dart';
 import '../../../services/content_generation_service.dart';
 
@@ -771,14 +772,16 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                         ),
                       ),
                       const SizedBox(height: 2.0),
-                      Text(
-                        shuffledSentences[i].mundariOdia,
+                      MundariAudioText(
+                        text: shuffledSentences[i].mundariOdia,
                         style: TextStyle(
                           fontFamily: AppTypography.bodyFontFamily,
                           fontSize: isTablet ? 12.0 : 10.5,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primaryBurgundy,
                         ),
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        iconSize: 16.0,
                       ),
                     ],
                   ),

@@ -7,6 +7,7 @@ import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
+import '../../services/tts_service.dart';
 
 /// Data model representing an Application Question in the Teacher Application Phase.
 class TeacherApplicationQuestionData {
@@ -217,7 +218,7 @@ class _TeacherApplicationScreenState extends State<TeacherApplicationScreen> {
     if (widget.onPlayAudio != null) {
       widget.onPlayAudio!(text);
     } else {
-      debugPrint('Playing Mundari pronunciation: $text');
+      TtsService().speakCodeMixedClassroomScript(text);
     }
   }
 
