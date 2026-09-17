@@ -333,6 +333,7 @@
   "typeDialogHint": "Enter text here...",
   "msgCopied": "Copied to clipboard",
   "msgShared": "Sharing translation...",
+  "msgTtsNotAvailable": "Voice playback is not available for this language",
 
   "toolsTitle": "Teacher Tools",
   "toolsSubtitle": "Utilities & resources for the classroom",

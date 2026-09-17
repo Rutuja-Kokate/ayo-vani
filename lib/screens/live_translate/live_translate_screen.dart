@@ -14,6 +14,7 @@ import '../../pipeline/fuzzy_matcher.dart';
 import '../../pipeline/hindi_stt_service.dart';
 import '../../services/audio_player_service.dart';
 import '../../services/speech_to_speech_service.dart';
+import '../../services/tts_service.dart';
 import '../../widgets/ayo_badges.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
@@ -133,11 +134,14 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
   Future<void> _initModel() async {
     final stt = context.read<HindiSttService>();
     final s2st = context.read<SpeechToSpeechService>();
+    final tts = TtsService();
 
     if (!stt.isInitialized) {
       await stt.initialize();
     }
     await s2st.initialize();
+    await tts.init();
+
     if (mounted) {
       setState(() {
         _isModelLoading = false;
@@ -151,6 +155,45 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
     _maxRecordingTimer?.cancel();
     _audioRecorder.dispose();
     super.dispose();
+  }
+
+  Future<void> _speakMundariResult(BuildContext context, String sourceHindi, String targetMundari) async {
+    final l10n = AppLocalizations.of(context);
+    final audioPlayer = context.read<S2SAudioPlayerService>();
+    final cacheManager = context.read<DemoCacheManager>();
+
+    if (targetMundari.trim().isEmpty) return;
+
+    try {
+      final match = FuzzyMatcher.findBestMatch(sourceHindi, cacheManager, threshold: 0.4);
+      final audioPath = match.entry != null ? 'assets/demo_audio/${match.entry!.audioFilename}' : null;
+
+      await audioPlayer.playTranslationResult(
+        S2STranslationResult(
+          hindiText: sourceHindi,
+          mundariText: targetMundari,
+          audioPath: audioPath,
+          audioBytes: null,
+          source: TranslationSource.demoCache,
+          latencyMs: 0,
+        ),
+      );
+    } catch (e) {
+      debugPrint('[Audio Playback Error] $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.msgTtsNotAvailable ?? 'इस भाषा के लिए आवाज़ उपलब्ध नहीं है',
+              style: const TextStyle(fontFamily: 'Inter'),
+            ),
+            backgroundColor: AppColors.primaryBurgundy,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   void _addTranslationToHistory(String hindi, String mundari) {
@@ -178,26 +221,16 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
       }
     });
 
-    context.read<S2SAudioPlayerService>().playTranslationResult(
-      S2STranslationResult(
-        hindiText: cleanHindi,
-        mundariText: cleanMundari,
-        audioBytes: null,
-        source: TranslationSource.demoCache,
-        latencyMs: 0,
-      ),
-    );
+    _speakMundariResult(context, cleanHindi, cleanMundari);
   }
 
   Future<void> _toggleListening() async {
-    // Guard against multiple taps or overlapping processing sessions
     if (_isModelLoading || _isProcessing) return;
 
     final hindiStt = context.read<HindiSttService>();
     final cacheManager = context.read<DemoCacheManager>();
 
     if (_isListening) {
-      // STOP LISTENING & PROCESS RECORDING
       _amplitudeSub?.cancel();
       _maxRecordingTimer?.cancel();
       _silenceMs = 0;
@@ -252,7 +285,6 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
         }
       }
     } else {
-      // START RECORDING
       if (await _audioRecorder.hasPermission()) {
         final tempDir = await getTemporaryDirectory();
         _audioPath = '${tempDir.path}/live_record_${DateTime.now().millisecondsSinceEpoch}.wav';
@@ -417,31 +449,16 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Section 1: Full-Width Language Pair Selector
                     _buildLanguageSelector(),
-
                     const SizedBox(height: 12.0),
-
-                    // Section 2: Quick-Phrase Chips
                     _buildQuickPhraseChips(),
-
                     const SizedBox(height: 14.0),
-
-                    // Section 3: Transcript / Result Cards
                     _buildSourceCard(isTablet),
-
                     const SizedBox(height: 10.0),
-
                     _buildTargetCard(isTablet),
-
                     const SizedBox(height: 20.0),
-
-                    // Section 4: Redesigned Mic Button (~80dp circle with static ring) & Type Button
                     _buildMicAndTypeArea(),
-
                     const SizedBox(height: 22.0),
-
-                    // Section 5: Recent Translations Section ("हाल के अनुवाद")
                     _buildRecentTranslationsSection(),
                   ],
                 ),
@@ -459,7 +476,6 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
     );
   }
 
-  /// Section 1: Full-Width Language Selector
   Widget _buildLanguageSelector() {
     return Container(
       width: double.infinity,
@@ -504,7 +520,6 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
     );
   }
 
-  /// Section 2: Quick-Phrase Chips
   Widget _buildQuickPhraseChips() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -539,7 +554,6 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
     );
   }
 
-  /// Section 3a: Source Card ("हिंदी")
   Widget _buildSourceCard(bool isTablet) {
     final l10n = AppLocalizations.of(context);
     final hasText = _sourceText.isNotEmpty;
@@ -588,7 +602,6 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
     );
   }
 
-  /// Section 3b: Target Card ("Mundari")
   Widget _buildTargetCard(bool isTablet) {
     final l10n = AppLocalizations.of(context);
     final hasText = _translatedMundariText.isNotEmpty;
@@ -648,23 +661,24 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
             const Divider(color: Color(0xFF8B3A3E), thickness: 0.8),
             const SizedBox(height: 4.0),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Replay Audio Speaker Button
                 InkWell(
-                  onTap: () => _copyToClipboard(context, _translatedMundariText),
+                  onTap: () => _speakMundariResult(context, _sourceText, _translatedMundariText),
                   borderRadius: BorderRadius.circular(8.0),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.copy_rounded, size: 14.0, color: Colors.white),
+                        const Icon(Icons.volume_up_rounded, size: 18.0, color: Colors.white),
                         const SizedBox(width: 4.0),
                         Text(
-                          l10n?.btnCopy ?? 'कॉपी करें',
+                          l10n?.translateReplay ?? 'ऑडियो पुनः चलाएं',
                           style: const TextStyle(
                             fontFamily: 'Inter',
-                            fontSize: 11.5,
+                            fontSize: 12.0,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -673,29 +687,57 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 14.0),
-                InkWell(
-                  onTap: () => _shareTranslation(context, _sourceText, _translatedMundariText),
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.share_rounded, size: 14.0, color: Colors.white),
-                        const SizedBox(width: 4.0),
-                        Text(
-                          l10n?.btnShare ?? 'साझा करें',
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
+
+                Row(
+                  children: [
+                    InkWell(
+                      onTap: () => _copyToClipboard(context, _translatedMundariText),
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.copy_rounded, size: 14.0, color: Colors.white),
+                            const SizedBox(width: 4.0),
+                            Text(
+                              l10n?.btnCopy ?? 'कॉपी करें',
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12.0),
+                    InkWell(
+                      onTap: () => _shareTranslation(context, _sourceText, _translatedMundariText),
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.share_rounded, size: 14.0, color: Colors.white),
+                            const SizedBox(width: 4.0),
+                            Text(
+                              l10n?.btnShare ?? 'साझा करें',
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -705,7 +747,6 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
     );
   }
 
-  /// Section 4: Redesigned Mic Button (~80dp circle with static ring) & Type Button
   Widget _buildMicAndTypeArea() {
     final l10n = AppLocalizations.of(context);
 
@@ -796,7 +837,6 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
     );
   }
 
-  /// Section 5: Recent Translations Section ("हाल के अनुवाद")
   Widget _buildRecentTranslationsSection() {
     final l10n = AppLocalizations.of(context);
 
@@ -843,10 +883,10 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                   borderRadius: BorderRadius.circular(12.0),
                   child: InkWell(
                     onTap: () {
-                      setState(() {
-                        _sourceText = _recentHistory[i].hindi;
-                        _translatedMundariText = _recentHistory[i].mundari;
-                      });
+                      _addTranslationToHistory(
+                        _recentHistory[i].hindi,
+                        _recentHistory[i].mundari,
+                      );
                     },
                     borderRadius: BorderRadius.circular(12.0),
                     child: Container(
