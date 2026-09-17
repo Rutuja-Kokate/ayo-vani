@@ -7,6 +7,13 @@ import '../../../data/english_activities_data.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
+import '../../../services/tts_service.dart';
+
+
+
+import '../../../services/content_generation_service.dart';
+import '../../../rag/models/rag_flashcard.dart';
+import 'package:flutter/foundation.dart';
 
 /// Interactive Flashcard item model
 class FlashcardItem {
@@ -16,7 +23,7 @@ class FlashcardItem {
     required this.pronunciation,
     required this.emoji,
     this.mundariRoman,
-    this.mundariOdia,
+    this.mundariDevanagari,
   });
 
   final String word;
@@ -24,11 +31,13 @@ class FlashcardItem {
   final String pronunciation;
   final String emoji;
   final String? mundariRoman;
-  final String? mundariOdia;
+  final String? mundariDevanagari;
+
+  String? get mundariOdia => mundariDevanagari;
 
   String? get mundariDisplay {
-    if (mundariRoman != null && mundariOdia != null) {
-      return '( $mundariRoman / $mundariOdia )';
+    if (mundariRoman != null && mundariDevanagari != null) {
+      return '( $mundariRoman / $mundariDevanagari )';
     }
     return null;
   }
@@ -41,6 +50,7 @@ class FlashcardsScreen extends StatefulWidget {
     required this.className,
     required this.chapterNumber,
     required this.chapterName,
+    this.subject = 'Hindi',
     this.onBack,
     this.onNavigateTab,
   });
@@ -48,6 +58,7 @@ class FlashcardsScreen extends StatefulWidget {
   final String className;
   final int chapterNumber;
   final String chapterName;
+  final String subject;
   final VoidCallback? onBack;
   final ValueChanged<int>? onNavigateTab;
 
@@ -57,15 +68,75 @@ class FlashcardsScreen extends StatefulWidget {
 
 class _FlashcardsScreenState extends State<FlashcardsScreen> {
   int _currentIndex = 0;
+  late final TtsService _ttsService;
+  bool _isSpeaking = false;
   bool _isFlipped = false;
-  int _navIndex = 1; // Learn tab
+  int _navIndex = 0;
+  List<FlashcardItem> _cards = [];
+  double _currentSpeechRate = 0.5;
+  bool _isLoading = true;
+  final ContentGenerationService _ragService = ContentGenerationService();
 
-  late final List<FlashcardItem> _cards;
+  void _setSpeechRate(double rate) {
+    setState(() {
+      _currentSpeechRate = rate;
+    });
+    _ttsService.setSpeechRate(rate);
+  }
 
   @override
   void initState() {
     super.initState();
-    _cards = _generateCards();
+    _ttsService = TtsService();
+    _ttsService.init();
+    _loadCards();
+  }
+
+  Future<void> _loadCards() async {
+    final cached = await _ragService.isCached(widget.chapterName, GenerationArtifactType.flashcard);
+    if (cached) {
+      try {
+        final ragSet = await _ragService.generateFlashcards(widget.chapterName, widget.className, subject: widget.subject);
+        final ragItems = ragSet.cards.map((c) {
+          return FlashcardItem(
+            word: c.wordHindi,
+            meaning: c.meaningHindi,
+            pronunciation: c.wordMundari.isNotEmpty ? c.wordMundari : 'RAG Generated',
+            emoji: c.emoji.isNotEmpty ? c.emoji : '✨',
+            mundariDevanagari: c.wordMundari,
+          );
+        }).toList();
+        
+        if (mounted) {
+          setState(() {
+            _cards = ragItems;
+            _isLoading = false;
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) => _autoPlayCurrentCard());
+        }
+        return;
+      } catch (e) {
+        debugPrint('[RAG] Failed to load cached flashcards: $e');
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _cards = _generateCards();
+        _isLoading = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) => _autoPlayCurrentCard());
+    }
+  }
+
+  /// Speak the current card (English/Hindi only) and update UI state.
+  Future<void> _autoPlayCurrentCard() async {
+    if (_isSpeaking || _cards.isEmpty) return;
+    final card = _cards[_currentIndex];
+    setState(() => _isSpeaking = true);
+    // Passing null for Mundari so the TTS doesn't attempt to speak it.
+    await _ttsService.speakWordAndMundari(card.word, null);
+    if (mounted) setState(() => _isSpeaking = false);
   }
 
   List<FlashcardItem> _generateCards() {
@@ -76,7 +147,7 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
           word: w.english,
           meaning: '${w.meaning} ${w.mundariDisplay}',
           mundariRoman: w.mundariRoman,
-          mundariOdia: w.mundariOdia,
+          mundariDevanagari: w.mundariDevanagari,
           pronunciation: w.pronunciation,
           emoji: w.emoji,
         );
@@ -151,6 +222,14 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    
     final isTablet = Responsive.isTabletOrLarger(context);
     final currentCard = _cards[_currentIndex];
 
@@ -395,32 +474,19 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              if (item.mundariRoman != null && item.mundariOdia != null) ...[
+              if (item.mundariRoman != null || item.mundariDevanagari != null) ...[
                 const SizedBox(height: 4.0),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '( ${item.mundariRoman} / ',
-                        style: TextStyle(
-                          fontFamily: AppTypography.bodyFontFamily,
-                          fontSize: isTablet ? 19.0 : 16.0,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primaryBurgundy,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '${item.mundariOdia} )',
-                        style: TextStyle(
-                          fontFamily: 'NotoSansOriya',
-                          fontSize: isTablet ? 19.0 : 16.0,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primaryBurgundy,
-                        ),
-                      ),
-                    ],
-                  ),
+                Text(
+                  item.mundariRoman != null && item.mundariDevanagari != null
+                      ? '( ${item.mundariRoman} / ${item.mundariDevanagari} )'
+                      : '( ${item.mundariRoman ?? item.mundariDevanagari} )',
                   textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: isTablet ? 19.0 : 16.0,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryBurgundy,
+                  ),
                 ),
               ],
               const SizedBox(height: 8.0),
@@ -537,17 +603,24 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
         const SizedBox(width: 20.0),
 
         // Audio Listen Button
+        // Audio Listen Button
         ElevatedButton.icon(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Playing audio pronunciation for "${_cards[_currentIndex].word}"'),
-                duration: const Duration(seconds: 1),
-                backgroundColor: AppColors.primaryBurgundy,
-              ),
-            );
+          onPressed: _isSpeaking ? null : () async {
+            setState(() => _isSpeaking = true);
+            // Passing null so it skips the Mundari speech
+            await _ttsService.speakWordAndMundari(_cards[_currentIndex].word, null);
+            if (mounted) setState(() => _isSpeaking = false);
           },
-          icon: const Icon(Icons.volume_up_rounded, color: Colors.white, size: 20.0),
+          icon: _isSpeaking
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.0,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : const Icon(Icons.volume_up_rounded, color: Colors.white, size: 20.0),
           label: const Text(
             'Listen',
             style: TextStyle(
@@ -560,6 +633,44 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
             backgroundColor: AppColors.primaryBurgundy,
             padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 12.0),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          ),
+        ),
+        const SizedBox(width: 20.0),
+
+        // Speed Dropdown
+        Container(
+          height: 42,
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFDFBF7),
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<double>(
+              value: _currentSpeechRate,
+              icon: const Icon(Icons.arrow_drop_down, color: AppColors.textPrimary, size: 20),
+              dropdownColor: const Color(0xFFFDFBF7),
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.bold,
+                fontSize: 13.0,
+                color: AppColors.textPrimary,
+              ),
+              onChanged: _isSpeaking ? null : (double? newValue) {
+                if (newValue != null) {
+                  _setSpeechRate(newValue);
+                }
+              },
+              items: const [
+                DropdownMenuItem(value: 0.1, child: Text('0.1x')),
+                DropdownMenuItem(value: 0.2, child: Text('0.2x')),
+                DropdownMenuItem(value: 0.25, child: Text('0.25x')),
+                DropdownMenuItem(value: 0.5, child: Text('0.5x')),
+                DropdownMenuItem(value: 0.75, child: Text('0.75x')),
+                DropdownMenuItem(value: 1.0, child: Text('1.0x')),
+                DropdownMenuItem(value: 1.5, child: Text('1.5x')),
+              ],
+            ),
           ),
         ),
         const SizedBox(width: 20.0),

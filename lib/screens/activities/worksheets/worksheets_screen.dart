@@ -8,6 +8,7 @@ import '../../../data/english_activities_data.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
+import '../../../services/worksheet_pdf_service.dart';
 
 class OddOneOutRow {
   final List<EnglishMundariWord> items;
@@ -40,6 +41,7 @@ class WorksheetsScreen extends StatefulWidget {
 class _WorksheetsScreenState extends State<WorksheetsScreen> {
   int _navIndex = 1;
   int _selectedWorksheet = 0;
+  bool _isDownloading = false;
 
   void _handleBack() {
     if (widget.onBack != null) {
@@ -278,7 +280,7 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
       EnglishMundariWord(
         english: 'Banana',
         mundariRoman: 'Kela',
-        mundariOdia: 'କେଲା',
+        mundariDevanagari: 'केला',
         meaning: 'Yellow fruit',
         pronunciation: 'buh-nan-uh',
         emoji: '🍌',
@@ -287,7 +289,7 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
       EnglishMundariWord(
         english: 'Apple',
         mundariRoman: 'Seb',
-        mundariOdia: 'ସେବ',
+        mundariDevanagari: 'सेब',
         meaning: 'Red fruit',
         pronunciation: 'ap-uhl',
         emoji: '🍎',
@@ -296,7 +298,7 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
       EnglishMundariWord(
         english: 'Grapes',
         mundariRoman: 'Angoor',
-        mundariOdia: 'ଅଙ୍ଗୁର',
+        mundariDevanagari: 'अंगूर',
         meaning: 'Purple fruit',
         pronunciation: 'grayps',
         emoji: '🍇',
@@ -442,8 +444,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                     const SizedBox(height: 2.0),
                     Text(
                       worksheetLabels['AYOVAANI Classroom Worksheet']!,
-                      style: const TextStyle(
-                        fontFamily: 'NotoSansOriya',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
                         fontSize: 13.0,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primaryBurgundy,
@@ -465,8 +467,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                     const SizedBox(height: 2.0),
                     Text(
                       '${worksheetLabels['Name:']} ____________  ${worksheetLabels['Date:']} ______',
-                      style: const TextStyle(
-                        fontFamily: 'NotoSansOriya',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
                         fontSize: 11.0,
                         color: AppColors.textSecondary,
                       ),
@@ -491,8 +493,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                 const SizedBox(height: 2.0),
                 Text(
                   worksheetLabels['AYOVAANI Classroom Worksheet']!,
-                  style: const TextStyle(
-                    fontFamily: 'NotoSansOriya',
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 12.0,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryBurgundy,
@@ -510,8 +512,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                 const SizedBox(height: 2.0),
                 Text(
                   '${worksheetLabels['Name:']} ____________  ${worksheetLabels['Date:']} ______',
-                  style: const TextStyle(
-                    fontFamily: 'NotoSansOriya',
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.0,
                     color: AppColors.textSecondary,
                   ),
@@ -557,8 +559,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
             const SizedBox(height: 2.0),
             Text(
               worksheetLabels['Exercise: Trace and write the words below']!,
-              style: const TextStyle(
-                fontFamily: 'NotoSansOriya',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
                 fontSize: 12.0,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primaryBurgundy,
@@ -573,7 +575,7 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
           _buildSampleTracingRow(
             tracingWords[i].english,
             tracingWords[i].mundariRoman,
-            tracingWords[i].mundariOdia,
+            tracingWords[i].mundariDevanagari,
             tracingWords[i].emoji,
           ),
         ],
@@ -628,8 +630,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
             const SizedBox(height: 2.0),
             Text(
               worksheetLabels['Exercise 1: Draw lines to match each picture to its sentence']!,
-              style: const TextStyle(
-                fontFamily: 'NotoSansOriya',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
                 fontSize: 12.0,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primaryBurgundy,
@@ -716,7 +718,7 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                       Text(
                         shuffledSentences[i].mundariOdia,
                         style: TextStyle(
-                          fontFamily: 'NotoSansOriya',
+                          fontFamily: AppTypography.bodyFontFamily,
                           fontSize: isTablet ? 12.0 : 10.5,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primaryBurgundy,
@@ -757,8 +759,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
             const SizedBox(height: 2.0),
             Text(
               worksheetLabels['Exercise 2: Fun with Words - Read the syllables']!,
-              style: const TextStyle(
-                fontFamily: 'NotoSansOriya',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
                 fontSize: 12.0,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primaryBurgundy,
@@ -830,9 +832,9 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                           ),
                         ),
                         TextSpan(
-                          text: '${sampleWords[i].mundariOdia} )',
+                          text: '${sampleWords[i].mundariDevanagari} )',
                           style: TextStyle(
-                            fontFamily: 'NotoSansOriya',
+                            fontFamily: AppTypography.bodyFontFamily,
                             fontSize: isTablet ? 13.0 : 11.5,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primaryBurgundy,
@@ -875,8 +877,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
             const SizedBox(height: 2.0),
             Text(
               worksheetLabels['Exercise: Read the riddles and write the answers below']!,
-              style: const TextStyle(
-                fontFamily: 'NotoSansOriya',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
                 fontSize: 12.0,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primaryBurgundy,
@@ -932,9 +934,9 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                           ),
                           const SizedBox(height: 3.0),
                           Text(
-                            riddles[i].mundariOdia,
+                            riddles[i].mundariDevanagari,
                             style: TextStyle(
-                              fontFamily: 'NotoSansOriya',
+                              fontFamily: AppTypography.bodyFontFamily,
                               fontSize: isTablet ? 13.0 : 11.5,
                               fontWeight: FontWeight.w600,
                               color: AppColors.primaryBurgundy,
@@ -963,8 +965,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                     const SizedBox(height: 2.0),
                     Text(
                       '${worksheetLabels['Answer:']} _______________________',
-                      style: const TextStyle(
-                        fontFamily: 'NotoSansOriya',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
                         fontSize: 12.0,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primaryBurgundy,
@@ -1008,9 +1010,9 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                             ),
                           ),
                           TextSpan(
-                            text: '${riddles[i].answerMundariOdia} )',
-                            style: const TextStyle(
-                              fontFamily: 'NotoSansOriya',
+                            text: '${riddles[i].answerMundariDevanagari} )',
+                            style: TextStyle(
+                              fontFamily: AppTypography.bodyFontFamily,
                               fontSize: 11.0,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF9E8B7A),
@@ -1053,8 +1055,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
             const SizedBox(height: 2.0),
             Text(
               worksheetLabels['Exercise: Circle the odd one out in each row below']!,
-              style: const TextStyle(
-                fontFamily: 'NotoSansOriya',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
                 fontSize: 12.0,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primaryBurgundy,
@@ -1153,9 +1155,9 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                   ),
                 ),
                 TextSpan(
-                  text: '${word.mundariOdia} )',
+                  text: '${word.mundariDevanagari} )',
                   style: TextStyle(
-                    fontFamily: 'NotoSansOriya',
+                    fontFamily: AppTypography.bodyFontFamily,
                     fontSize: isTablet ? 10.5 : 9.5,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryBurgundy,
@@ -1185,7 +1187,7 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
   Widget _buildSampleTracingRow(
     String word,
     String mundariRoman,
-    String mundariOdia,
+    String mundariDevanagari,
     String emoji,
   ) {
     return Container(
@@ -1214,7 +1216,7 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                if (mundariRoman.isNotEmpty || mundariOdia.isNotEmpty) ...[
+                if (mundariRoman.isNotEmpty || mundariDevanagari.isNotEmpty) ...[
                   const SizedBox(height: 1.0),
                   Text.rich(
                     TextSpan(
@@ -1229,9 +1231,9 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                           ),
                         ),
                         TextSpan(
-                          text: '$mundariOdia )',
-                          style: const TextStyle(
-                            fontFamily: 'NotoSansOriya',
+                          text: '$mundariDevanagari )',
+                          style: TextStyle(
+                            fontFamily: AppTypography.bodyFontFamily,
                             fontSize: 11.5,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primaryBurgundy,
@@ -1276,18 +1278,41 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton.icon(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Downloading "${widget.chapterName} Worksheet.pdf"...'),
-                backgroundColor: const Color(0xFFC88A22),
-              ),
-            );
+          onPressed: _isDownloading ? null : () async {
+            setState(() => _isDownloading = true);
+            try {
+              await WorksheetPdfService.printOrShare(
+                chapterName: widget.chapterName,
+                className: widget.className,
+                words: _getChapterWords(),
+              );
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error generating PDF: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            } finally {
+              if (mounted) setState(() => _isDownloading = false);
+            }
           },
-          icon: const Icon(Icons.download_rounded, color: Colors.white, size: 20.0),
-          label: const Text(
-            'Download PDF',
-            style: TextStyle(fontFamily: 'Inter', color: Colors.white, fontWeight: FontWeight.w600),
+          icon: _isDownloading
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : const Icon(Icons.download_rounded, color: Colors.white, size: 20.0),
+          label: Text(
+            _isDownloading ? 'Generating...' : 'Download PDF',
+            style: const TextStyle(
+                fontFamily: 'Inter', color: Colors.white, fontWeight: FontWeight.w600),
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFC88A22),
@@ -1297,18 +1322,34 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
         ),
         const SizedBox(width: 16.0),
         OutlinedButton.icon(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Sending worksheet to printer...'),
-                backgroundColor: AppColors.textPrimary,
-              ),
-            );
+          onPressed: _isDownloading ? null : () async {
+            setState(() => _isDownloading = true);
+            try {
+              await WorksheetPdfService.printOrShare(
+                chapterName: widget.chapterName,
+                className: widget.className,
+                words: _getChapterWords(),
+              );
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error printing: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            } finally {
+              if (mounted) setState(() => _isDownloading = false);
+            }
           },
           icon: const Icon(Icons.print_rounded, color: AppColors.textPrimary, size: 20.0),
           label: const Text(
             'Print',
-            style: TextStyle(fontFamily: 'Inter', color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+            style: TextStyle(
+                fontFamily: 'Inter',
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600),
           ),
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 14.0),
