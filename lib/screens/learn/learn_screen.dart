@@ -3,6 +3,7 @@ import '../../app/responsive/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_dimens.dart';
 import '../../app/theme/app_typography.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
@@ -160,7 +161,7 @@ class LearnScreen extends StatelessWidget {
                             SizedBox(height: isTablet ? 16.0 : 12.0),
 
                             // 2. Section Header: Title, Subtitle, & Botanical Divider
-                            _buildHeader(isTablet),
+                            _buildHeader(context, isTablet),
 
                             SizedBox(height: isTablet ? 20.0 : 16.0),
 
@@ -168,10 +169,10 @@ class LearnScreen extends StatelessWidget {
                             _buildLearningCard(
                               context: context,
                               isTablet: isTablet,
-                              title: 'For Teachers',
-                              subtitle: 'Plan, prepare & teach',
-                              tags: 'Lessons • Worksheets • Quizzes • Translation',
-                              buttonText: 'Explore',
+                              title: AppLocalizations.of(context)?.learnForTeachers ?? 'For Teachers',
+                              subtitle: AppLocalizations.of(context)?.learnTeacherSubtitle ?? 'Plan, prepare & teach',
+                              tags: AppLocalizations.of(context)?.learnTeacherTags ?? 'Lessons • Worksheets • Quizzes • Translation',
+                              buttonText: AppLocalizations.of(context)?.btnExplore ?? 'Explore',
                               badgeIcon: Icons.co_present_rounded,
                               badgeBgColor: const Color(0xFFF7EBEB),
                               badgeIconColor: AppColors.primaryBurgundy,
@@ -186,10 +187,10 @@ class LearnScreen extends StatelessWidget {
                             _buildLearningCard(
                               context: context,
                               isTablet: isTablet,
-                              title: 'For Students',
-                              subtitle: 'Learn, practice & play',
-                              tags: 'Lessons • Flashcards • Games • Activities',
-                              buttonText: 'Start Learning',
+                              title: AppLocalizations.of(context)?.learnForStudents ?? 'For Students',
+                              subtitle: AppLocalizations.of(context)?.learnStudentSubtitle ?? 'Learn, practice & play',
+                              tags: AppLocalizations.of(context)?.learnStudentTags ?? 'Lessons • Flashcards • Games • Activities',
+                              buttonText: AppLocalizations.of(context)?.btnStartLearning ?? 'Start Learning',
                               badgeIcon: Icons.face_rounded,
                               badgeBgColor: const Color(0xFFEAF3E8),
                               badgeIconColor: const Color(0xFF416B3C),
@@ -291,11 +292,13 @@ class LearnScreen extends StatelessWidget {
   }
 
   /// Header with Title, Subtitle, and small Botanical Divider.
-  Widget _buildHeader(bool isTablet) {
+  Widget _buildHeader(BuildContext context, bool isTablet) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       children: [
         Text(
-          'Learning',
+          l10n?.learnTitle ?? 'Learning',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: AppTypography.headingFontFamily,
@@ -307,7 +310,7 @@ class LearnScreen extends StatelessWidget {
         ),
         const SizedBox(height: 4.0),
         Text(
-          'Choose how you want to learn today',
+          l10n?.learnSubtitle ?? 'Choose how you want to learn today',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: AppTypography.bodyFontFamily,

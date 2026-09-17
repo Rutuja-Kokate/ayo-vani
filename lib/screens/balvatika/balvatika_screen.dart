@@ -3,19 +3,22 @@ import '../../app/responsive/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_dimens.dart';
 import '../../app/theme/app_typography.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/subject_data.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
-import '../../widgets/ayo_coming_soon.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/ayo_subject_card.dart';
+import 'balvatika_topics_screen.dart';
 
 /// Chapter data model for early learning foundation stage & curriculum listings.
 class BalvatikaChapter {
   const BalvatikaChapter({
     required this.number,
     required this.title,
+    this.titleHindi,
     required this.description,
+    this.descriptionHindi,
     required this.icon,
     this.topic,
     this.lesson,
@@ -25,19 +28,29 @@ class BalvatikaChapter {
 
   final int number;
   final String title;
+  final String? titleHindi;
   final String description;
+  final String? descriptionHindi;
   final IconData icon;
   final String? topic;
   final String? lesson;
   final String? emoji;
   final String? chapterImage;
+
+  String getLocalizedTitle(BuildContext context) {
+    final isHindi = Localizations.localeOf(context).languageCode == 'hi';
+    if (isHindi && titleHindi != null) return titleHindi!;
+    return title;
+  }
+
+  String getLocalizedDescription(BuildContext context) {
+    final isHindi = Localizations.localeOf(context).languageCode == 'hi';
+    if (isHindi && descriptionHindi != null) return descriptionHindi!;
+    return description;
+  }
 }
 
 /// Screen: Balvatika / Foundation Stage for AYOVAANI Teacher App.
-///
-/// In the current MVP scope, all Balvatika learning content is Coming Soon.
-/// Communicates the coming soon state cleanly while preserving the exact
-/// AYOVAANI visual language, layout, branding, and responsive behavior.
 class BalvatikaScreen extends StatefulWidget {
   const BalvatikaScreen({
     super.key,
@@ -90,6 +103,17 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
     }
   }
 
+  void _navigateToTopics(Subject module) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => BalvatikaTopicsScreen(
+          module: module,
+          onNavigateTab: widget.onNavigateTab,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isTablet = Responsive.isTabletOrLarger(context);
@@ -102,7 +126,6 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
           bottom: false,
           child: Stack(
             children: [
-              // Top-left Warli Corner Ornament
               Positioned(
                 top: 0,
                 left: 0,
@@ -113,8 +136,6 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
                   ),
                 ),
               ),
-
-              // Top-right Warli Corner Ornament (Horizontally Mirrored)
               Positioned(
                 top: 0,
                 right: 0,
@@ -125,8 +146,6 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
                   ),
                 ),
               ),
-
-              // Bottom-left Warli Corner Ornament
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -140,8 +159,6 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
                   ),
                 ),
               ),
-
-              // Bottom-right Warli Corner Ornament
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -156,8 +173,6 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
                   ),
                 ),
               ),
-
-              // Main Scrollable Content
               LayoutBuilder(
                 builder: (context, constraints) {
                   final horizontalPadding = isTablet ? 44.0 : AppSpacing.lg;
@@ -177,33 +192,12 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 1. Top Bar: Back Button + Centered AyoVaani Logo
                             _buildTopBar(isTablet),
-
                             SizedBox(height: isTablet ? 14.0 : 12.0),
-
-                            // 2. Balvatika Header: Title Info + Info Card
                             _buildBalvatikaHeader(isTablet),
-
                             SizedBox(height: isTablet ? 18.0 : 16.0),
-
-                            // 3. Primary Coming Soon Card
-                            const AyoComingSoonCard(
-                              title: 'Balvatika',
-                              message:
-                                  'Learning content is coming soon.\nFoundational language modules, stories, and sensory games are currently in development.',
-                              badgeText: 'Coming Soon',
-                              icon: Icons.hourglass_top_rounded,
-                            ),
-
-                            SizedBox(height: isTablet ? 18.0 : 16.0),
-
-                            // 4. Planned Foundation Modules (All Coming Soon, Disabled)
                             _buildModulesContainer(isTablet),
-
                             SizedBox(height: isTablet ? 16.0 : 14.0),
-
-                            // 5. Encouragement Info Card
                             _buildCurriculumNoticeCard(isTablet),
                           ],
                         ),
@@ -223,7 +217,6 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
     );
   }
 
-  /// Top decorative Warli corner ornament.
   Widget _buildCornerDecoration({
     required bool isRight,
     required double size,
@@ -249,7 +242,6 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
         : imageWidget;
   }
 
-  /// 1. Top Bar: Back Button at top-left, Centered AyoVaani Logo
   Widget _buildTopBar(bool isTablet) {
     final logoHeight = isTablet ? 100.0 : 80.0;
 
@@ -264,7 +256,6 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
             child: InkWell(
               onTap: _handleBack,
               borderRadius: BorderRadius.circular(20.0),
-              splashColor: AppColors.primaryBurgundy.withValues(alpha: 0.12),
               child: Container(
                 width: 40.0,
                 height: 40.0,
@@ -301,8 +292,9 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
     );
   }
 
-  /// 2. Header: Balvatika Foundation Stage
   Widget _buildBalvatikaHeader(bool isTablet) {
+    final l10n = AppLocalizations.of(context);
+
     final titleBlock = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -339,7 +331,7 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                widget.title,
+                l10n?.classBalvatika ?? widget.title,
                 style: TextStyle(
                   fontFamily: AppTypography.headingFontFamily,
                   fontSize: isTablet ? 26.0 : 22.0,
@@ -351,7 +343,7 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
               ),
               const SizedBox(height: 3.0),
               Text(
-                widget.subtitle,
+                l10n?.balvatikaSubtitle ?? widget.subtitle,
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: isTablet ? 13.5 : 12.5,
@@ -361,7 +353,7 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
               ),
               const SizedBox(height: 2.0),
               Text(
-                widget.description,
+                l10n?.balvatikaDesc ?? widget.description,
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: isTablet ? 13.0 : 12.0,
@@ -421,7 +413,7 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Foundation Modules',
+                  l10n?.balvatikaModulesTitle ?? 'Foundation Modules',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.5,
@@ -430,7 +422,7 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
                   ),
                 ),
                 Text(
-                  '3 Modules',
+                  l10n?.countModules(3) ?? '3 Modules',
                   style: TextStyle(
                     fontFamily: AppTypography.headingFontFamily,
                     fontSize: isTablet ? 21.0 : 19.0,
@@ -441,7 +433,7 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Current Status',
+                  l10n?.labelSubjectStatus ?? 'Subject Status',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.0,
@@ -450,12 +442,12 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
                   ),
                 ),
                 Text(
-                  'Coming Soon',
+                  l10n?.labelAvailable ?? 'Available',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF8C7C6D),
+                    color: const Color(0xFF385E32),
                   ),
                 ),
               ],
@@ -486,9 +478,9 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
     }
   }
 
-  /// 4. Planned Foundation Modules (All Coming Soon)
   Widget _buildModulesContainer(bool isTablet) {
     final modules = Subject.balvatikaSubjects;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -510,7 +502,6 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Title Pill
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
             decoration: BoxDecoration(
@@ -527,7 +518,7 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
                 ),
                 const SizedBox(width: 6.0),
                 Text(
-                  'Curriculum Modules',
+                  l10n?.balvatikaCurriculumModules ?? 'Curriculum Modules',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 13.0,
@@ -540,14 +531,12 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
             ),
           ),
           SizedBox(height: isTablet ? 16.0 : 12.0),
-
-          // Modules list: All disabled with Coming Soon
           Column(
             children: [
               for (int i = 0; i < modules.length; i++) ...[
                 AyoSubjectCard(
                   subject: modules[i],
-                  onTap: null, // Non-clickable
+                  onTap: () => _navigateToTopics(modules[i]),
                   isTablet: isTablet,
                 ),
                 if (i < modules.length - 1) const SizedBox(height: 10.0),
@@ -559,8 +548,9 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
     );
   }
 
-  /// 5. Encouragement Info Card
   Widget _buildCurriculumNoticeCard(bool isTablet) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -596,7 +586,7 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Early Learning Focus',
+                  l10n?.balvatikaNoticeTitle ?? 'Early Learning Focus',
                   style: TextStyle(
                     fontFamily: AppTypography.headingFontFamily,
                     fontSize: 15.0,
@@ -606,7 +596,7 @@ class _BalvatikaScreenState extends State<BalvatikaScreen> {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Balvatika content is currently being curated in regional tribal languages.',
+                  l10n?.balvatikaNoticeDesc ?? 'Balvatika content is currently being curated in regional tribal languages.',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 12.0,

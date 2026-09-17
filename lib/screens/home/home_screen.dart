@@ -6,7 +6,6 @@ import '../../app/theme/app_typography.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_class_selection_grid.dart';
 import '../live_translate/live_translate_screen.dart';
-import '../validation/hitl_validation_screen.dart';
 
 /// Screen 03 — Home / Dashboard for AYOVAANI Teacher App.
 ///
@@ -133,11 +132,6 @@ class HomeScreen extends StatelessWidget {
 
                   // 3. Offline Status Card (spans full width of tablet content)
                   _buildOfflineStatusCard(),
-
-                  const SizedBox(height: 12.0),
-
-                  // 3b. Teacher Validation HITL Card
-                  _buildHitlValidationCard(context),
 
                   SizedBox(height: offlineToContentSpacing),
 
@@ -340,95 +334,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHitlValidationCard(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFFDFBF7),
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(
-          color: const Color(0xFFC88A22).withOpacity(0.4),
-          width: 1.2,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0A000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
-      child: Row(
-        children: [
-          Container(
-            width: 36.0,
-            height: 36.0,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF4E5),
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            child: const Icon(
-              Icons.fact_check_rounded,
-              color: Color(0xFFC88A22),
-              size: 20.0,
-            ),
-          ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'शिक्षक सुधार केंद्र (Teacher Validation)',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: AppTypography.headingFontFamily,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2.0),
-                const Text(
-                  'समीक्षा करें और मॉडल सटीकता बढ़ाएं',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 12.0,
-                    color: Color(0xFF756760),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8.0),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const HitlValidationScreen(),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryBurgundy,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            ),
-            child: const Text(
-              'खोलें →',
-              style: TextStyle(fontFamily: 'Inter', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12.5),
             ),
           ),
         ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../app/theme/app_colors.dart';
 import '../app/theme/app_dimens.dart';
 import '../app/theme/app_typography.dart';
+import '../l10n/app_localizations.dart';
 import 'ayo_badges.dart';
 import 'ayo_buttons.dart';
 import 'ayo_cards.dart';
@@ -190,7 +191,7 @@ class AyoReviewBanner extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               ),
               child: Text(
-                actionLabel,
+                AppLocalizations.of(context)?.btnReviewNow ?? actionLabel,
                 style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
               ),
             ),

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App & Brand Names (Proper Nouns - Left Unchanged) -->
+    <string name="app_name">AYOVAANI</string>
+
+    <!-- Academic Subject Names (Proper Nouns - Left Unchanged) -->
+    <string name="subject_english">English</string>
+    <string name="subject_math">Math</string>
+    <string name="subject_science">Science</string>
+    <string name="subject_hindi">Hindi</string>
+    <string name="subject_social_science">Social Science</string>
+    <string name="subject_computer">Computer</string>
+
+    <!-- General UI Buttons -->
+    <string name="button_submit">Submit</string>
+    <string name="button_next">Next</string>
+    <string name="button_back">Back</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_save">Save</string>
+    <string name="button_retry">Try Again</string>
+    <string name="button_play_again">Play Again</string>
+    <string name="button_download_pdf">Download PDF</string>
+    <string name="button_print">Print</string>
+
+    <!-- Navigation & Menu Items -->
+    <string name="menu_home">Home</string>
+    <string name="menu_settings">Settings</string>
+
+    <!-- UI Labels & Headers -->
+    <string name="label_search">Search</string>
+    <string name="label_filter">Filter</string>
+    <string name="label_chapters">Chapters</string>
+    <string name="label_total_chapters">Total Chapters</string>
+    <string name="label_subject_status">Subject Status</string>
+    <string name="label_functional">Functional</string>
+    <string name="label_available">Available</string>
+    <string name="label_answer">Answer:</string>
+    <string name="label_answer_key">Answer key:</string>
+    <string name="label_riddle">Riddle</string>
+    <string name="label_exercise">Exercise:</string>
+    <string name="label_score">Score:</string>
+    <string name="label_well_done">Well done!</string>
+    <string name="label_quiz_completed">Quiz Completed!</string>
+
+    <!-- Input Hints -->
+    <string name="hint_search_chapters">Search chapters...</string>
+
+    <!-- Error Messages -->
+    <string name="error_generic">Something went wrong</string>
+    <string name="error_network">Network error, please try again</string>
+</resources>
