@@ -833,6 +833,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get msgShared => 'अनुवाद साझा किया जा रहा है...';
 
   @override
+  String get msgTtsNotAvailable => 'इस भाषा के लिए आवाज़ उपलब्ध नहीं है';
+
+  @override
   String get toolsTitle => 'शिक्षक उपकरण';
 
   @override
