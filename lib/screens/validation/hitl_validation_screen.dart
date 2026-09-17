@@ -5,6 +5,7 @@ import '../../models/hitl_validation_models.dart';
 import '../../services/hitl_sync_service.dart';
 import '../../services/hitl_validation_service.dart';
 import '../../widgets/ayo_screen_background.dart';
+import '../../widgets/mundari_audio_text.dart';
 
 class HitlValidationScreen extends StatefulWidget {
   const HitlValidationScreen({super.key});
@@ -345,15 +346,26 @@ class _HitlCardState extends State<_HitlCard> {
             style: TextStyle(fontFamily: 'Inter', fontSize: 11.5, color: Color(0xFF8B7361)),
           ),
           const SizedBox(height: 2.0),
-          Text(
-            widget.item.sourceText,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 15.5,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
+          widget.item.languagePair == LanguagePairEnum.mundariToHindi
+              ? MundariAudioText(
+                  text: widget.item.sourceText,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                )
+              : Text(
+                  widget.item.sourceText,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
           const SizedBox(height: 10.0),
 
           // AI Suggestion / Edit Box
@@ -378,16 +390,26 @@ class _HitlCardState extends State<_HitlCard> {
                 ),
               ),
             )
-          else
-            Text(
-              widget.item.targetText,
-              style: TextStyle(
-                fontFamily: AppTypography.headingFontFamily,
-                fontSize: 17.5,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF2E7D32),
-              ),
-            ),
+          else widget.item.languagePair == LanguagePairEnum.hindiToMundari
+              ? MundariAudioText(
+                  text: widget.item.targetText,
+                  style: TextStyle(
+                    fontFamily: AppTypography.headingFontFamily,
+                    fontSize: 17.5,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF2E7D32),
+                  ),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                )
+              : Text(
+                  widget.item.targetText,
+                  style: TextStyle(
+                    fontFamily: AppTypography.headingFontFamily,
+                    fontSize: 17.5,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF2E7D32),
+                  ),
+                ),
           const SizedBox(height: 16.0),
 
           // Action Buttons: Wrap dynamically for small screens and landscape/portrait fit

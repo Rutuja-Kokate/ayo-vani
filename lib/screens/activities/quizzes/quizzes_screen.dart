@@ -8,6 +8,7 @@ import '../../../data/english_activities_data.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
+import '../../../widgets/mundari_audio_text.dart';
 
 import '../../../services/content_generation_service.dart';
 
@@ -482,14 +483,15 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
               ),
               if (currentQ.questionOdia != null && currentQ.questionOdia!.isNotEmpty) ...[
                 const SizedBox(height: 4.0),
-                Text(
-                  currentQ.questionOdia!,
+                MundariAudioText(
+                  text: currentQ.questionOdia!,
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: isTablet ? 18.0 : 15.0,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryBurgundy,
                   ),
+                  mainAxisAlignment: MainAxisAlignment.start,
                 ),
               ],
             ],
@@ -654,31 +656,39 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
               ),
               const SizedBox(width: 14.0),
               Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: text,
-                        style: TextStyle(
-                          fontFamily: AppTypography.bodyFontFamily,
-                          fontSize: isTablet ? 15.0 : 14.0,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                          color: AppColors.textPrimary,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: text,
+                              style: TextStyle(
+                                fontFamily: AppTypography.bodyFontFamily,
+                                fontSize: isTablet ? 15.0 : 14.0,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            if (textOdia != null && textOdia.isNotEmpty) ...[
+                              TextSpan(
+                                text: ' ($textOdia)',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.bodyFontFamily,
+                                  fontSize: isTablet ? 15.0 : 14.0,
+                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                  color: AppColors.primaryBurgundy,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      if (textOdia != null && textOdia.isNotEmpty) ...[
-                        TextSpan(
-                          text: ' ($textOdia)',
-                          style: TextStyle(
-                            fontFamily: AppTypography.bodyFontFamily,
-                            fontSize: isTablet ? 15.0 : 14.0,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                            color: AppColors.primaryBurgundy,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                    ),
+                    if (textOdia != null && textOdia.isNotEmpty)
+                      MundariAudioButton(text: textOdia, iconSize: 18.0),
+                  ],
                 ),
               ),
             ],

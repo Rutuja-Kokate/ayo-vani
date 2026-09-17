@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../pipeline/demo_cache_manager.dart';
 import '../services/speech_to_speech_service.dart';
 import '../services/audio_player_service.dart';
+import '../widgets/mundari_audio_text.dart';
 
 
 class DemoCacheScreen extends StatefulWidget {
@@ -117,7 +118,12 @@ class _DemoCacheScreenState extends State<DemoCacheScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 4),
-                            Text('Mundari: ${entry.mundariDevanagari}', style: TextStyle(color: Colors.grey.shade700)),
+                            MundariAudioText(
+                              text: entry.mundariDevanagari,
+                              style: TextStyle(color: Colors.grey.shade700, fontSize: 13.5),
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              iconSize: 18.0,
+                            ),
                           ],
                         ),
                         trailing: IconButton(
