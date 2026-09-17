@@ -662,6 +662,54 @@ abstract class AppLocalizations {
   /// **'Numbers 1–20'**
   String get homeFeaturedLessonTitle;
 
+  /// No description provided for @homeStatsTodayCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Today: {count} lessons completed'**
+  String homeStatsTodayCompleted(int count);
+
+  /// No description provided for @homeStatsWeeklyTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'This week: {count} lessons'**
+  String homeStatsWeeklyTotal(int count);
+
+  /// No description provided for @homeNextLessonPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Next lesson: Addition Practice'**
+  String get homeNextLessonPreview;
+
+  /// No description provided for @homeHeaderLastSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Last sync: Today 9:00 AM'**
+  String get homeHeaderLastSync;
+
+  /// No description provided for @classSubtitleBalvatika.
+  ///
+  /// In en, this message translates to:
+  /// **'3 Modules'**
+  String get classSubtitleBalvatika;
+
+  /// No description provided for @classSubtitleFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'12 Lessons'**
+  String get classSubtitleFirst;
+
+  /// No description provided for @classSubtitleSecond.
+  ///
+  /// In en, this message translates to:
+  /// **'12 Lessons'**
+  String get classSubtitleSecond;
+
+  /// No description provided for @classSubtitleThird.
+  ///
+  /// In en, this message translates to:
+  /// **'12 Lessons'**
+  String get classSubtitleThird;
+
   /// No description provided for @balvatikaSubtitle.
   ///
   /// In en, this message translates to:
@@ -1519,6 +1567,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Replay Audio'**
   String get translateReplay;
+
+  /// No description provided for @translateSourcePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Speak or type to begin...'**
+  String get translateSourcePlaceholder;
+
+  /// No description provided for @translateTargetPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation will appear here...'**
+  String get translateTargetPlaceholder;
+
+  /// No description provided for @tagOfflineTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Translation'**
+  String get tagOfflineTranslation;
+
+  /// No description provided for @btnCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get btnCopy;
+
+  /// No description provided for @btnShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get btnShare;
+
+  /// No description provided for @btnTypeInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Type Instead'**
+  String get btnTypeInstead;
+
+  /// No description provided for @translateRecentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Translations'**
+  String get translateRecentTitle;
+
+  /// No description provided for @translateRecentPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recent translations will appear here'**
+  String get translateRecentPlaceholder;
+
+  /// No description provided for @typeDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Type Hindi Phrase'**
+  String get typeDialogTitle;
+
+  /// No description provided for @typeDialogHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter text here...'**
+  String get typeDialogHint;
+
+  /// No description provided for @msgCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get msgCopied;
+
+  /// No description provided for @msgShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing translation...'**
+  String get msgShared;
+
+  /// No description provided for @msgTtsNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice playback is not available for this language'**
+  String get msgTtsNotAvailable;
 
   /// No description provided for @toolsTitle.
   ///

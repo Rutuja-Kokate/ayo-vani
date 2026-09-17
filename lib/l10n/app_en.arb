@@ -140,6 +140,28 @@
   "homeLetsStart": "Let's Start",
   "homeFeaturedLessonTitle": "Numbers 1–20",
 
+  "homeStatsTodayCompleted": "Today: {count} lessons completed",
+  "@homeStatsTodayCompleted": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "homeStatsWeeklyTotal": "This week: {count} lessons",
+  "@homeStatsWeeklyTotal": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "homeNextLessonPreview": "Next lesson: Addition Practice",
+  "homeHeaderLastSync": "Last sync: Today 9:00 AM",
+
+  "classSubtitleBalvatika": "3 Modules",
+  "classSubtitleFirst": "12 Lessons",
+  "classSubtitleSecond": "12 Lessons",
+  "classSubtitleThird": "12 Lessons",
+
   "balvatikaSubtitle": "Foundation Stage | Learn, Listen, Speak",
   "balvatikaDesc": "Explore foundation stage learning modules and activities.",
   "balvatikaComingSoonMessage": "Learning content is coming soon.\nFoundational language modules, stories, and sensory games are currently in development.",
@@ -298,6 +320,20 @@
   "translateProcessing": "Translating...",
   "translateMundariOutput": "Mundari Audio Output",
   "translateReplay": "Replay Audio",
+
+  "translateSourcePlaceholder": "Speak or type to begin...",
+  "translateTargetPlaceholder": "Translation will appear here...",
+  "tagOfflineTranslation": "Offline Translation",
+  "btnCopy": "Copy",
+  "btnShare": "Share",
+  "btnTypeInstead": "Type Instead",
+  "translateRecentTitle": "Recent Translations",
+  "translateRecentPlaceholder": "Your recent translations will appear here",
+  "typeDialogTitle": "Type Hindi Phrase",
+  "typeDialogHint": "Enter text here...",
+  "msgCopied": "Copied to clipboard",
+  "msgShared": "Sharing translation...",
+  "msgTtsNotAvailable": "Voice playback is not available for this language",
 
   "toolsTitle": "Teacher Tools",
   "toolsSubtitle": "Utilities & resources for the classroom",
