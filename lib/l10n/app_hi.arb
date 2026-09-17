@@ -110,6 +110,16 @@
   "homeLetsStart": "आइए शुरू करें",
   "homeFeaturedLessonTitle": "संख्याएं 1–20",
 
+  "homeStatsTodayCompleted": "आज {count} पाठ पूरे हुए",
+  "homeStatsWeeklyTotal": "इस सप्ताह: {count} पाठ",
+  "homeNextLessonPreview": "अगला पाठ: जोड़ने का अभ्यास",
+  "homeHeaderLastSync": "अंतिम सिंक: आज सुबह 9:00 बजे",
+
+  "classSubtitleBalvatika": "3 मॉड्यूल",
+  "classSubtitleFirst": "12 पाठ",
+  "classSubtitleSecond": "12 पाठ",
+  "classSubtitleThird": "12 पाठ",
+
   "balvatikaSubtitle": "बुनियादी स्तर | सीखें, सुनें, बोलें",
   "balvatikaDesc": "बुनियादी स्तर के शिक्षण मॉड्यूल और गतिविधियों का अन्वेषण करें।",
   "balvatikaComingSoonMessage": "शिक्षण सामग्री शीघ्र ही उपलब्ध होगी।\nबुनियादी भाषा मॉड्यूल, कहानियां और संवेदी खेल वर्तमान में विकास में हैं।",
@@ -268,6 +278,20 @@
   "translateProcessing": "अनुवाद कर रहा है...",
   "translateMundariOutput": "मुंडारी ऑडियो आउटपुट",
   "translateReplay": "ऑडियो पुनः चलाएं",
+
+  "translateSourcePlaceholder": "बोलकर या टाइप करके शुरू करें",
+  "translateTargetPlaceholder": "अनुवाद यहां दिखेगा",
+  "tagOfflineTranslation": "ऑफ़लाइन अनुवाद",
+  "btnCopy": "कॉपी करें",
+  "btnShare": "साझा करें",
+  "btnTypeInstead": "टाइप करें",
+  "translateRecentTitle": "हाल के अनुवाद",
+  "translateRecentPlaceholder": "आपके अनुवाद यहां दिखेंगे",
+  "typeDialogTitle": "हिंदी वाक्यांश टाइप करें",
+  "typeDialogHint": "यहां टेक्स्ट दर्ज करें...",
+  "msgCopied": "क्लिपबोर्ड पर कॉपी किया गया",
+  "msgShared": "अनुवाद साझा किया जा रहा है...",
+  "msgTtsNotAvailable": "इस भाषा के लिए आवाज़ उपलब्ध नहीं है",
 
   "toolsTitle": "शिक्षक उपकरण",
   "toolsSubtitle": "कक्षा के लिए उपयोगिताएँ और संसाधन",

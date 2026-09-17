@@ -25,7 +25,7 @@ class S2SAudioPlayerService {
       await _audioPlayer.setPlaybackRate(_currentSpeed);
 
       final completer = Completer<void>();
-      
+
       // Listen for completion
       StreamSubscription? stateSub;
       stateSub = _audioPlayer.onPlayerStateChanged.listen((state) {
@@ -49,10 +49,10 @@ class S2SAudioPlayerService {
         debugPrint('[AudioPlayer] No audio found in result');
         if (!completer.isCompleted) completer.complete();
       }
-      
+
       // Wait for playback to actually finish
       await completer.future;
-      
+
     } catch (e) {
       debugPrint('[AudioPlayer] Error playing audio: $e');
     }
