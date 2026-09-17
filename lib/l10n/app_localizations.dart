@@ -1640,6 +1640,12 @@ abstract class AppLocalizations {
   /// **'Sharing translation...'**
   String get msgShared;
 
+  /// No description provided for @msgTtsNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice playback is not available for this language'**
+  String get msgTtsNotAvailable;
+
   /// No description provided for @toolsTitle.
   ///
   /// In en, this message translates to:
