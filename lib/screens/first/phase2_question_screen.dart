@@ -7,6 +7,7 @@ import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
+import '../../services/tts_service.dart';
 
 /// Data model representing an Activity Picture Question in Phase 2.
 class Phase2QuestionData {
@@ -185,6 +186,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
   @override
   void initState() {
     super.initState();
+    TtsService().init();
     _random = widget.randomSeed != null ? math.Random(widget.randomSeed) : math.Random();
     _currentQuestionIndex = widget.initialQuestionIndex.clamp(
       0,
@@ -224,7 +226,7 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
     if (widget.onPlayMundariAudio != null) {
       widget.onPlayMundariAudio!(text);
     } else {
-      debugPrint('[AyoVani Audio] Play Mundari pronunciation for: "$text"');
+      TtsService().speak(text);
     }
   }
 
@@ -274,6 +276,10 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
       _isChecked = true;
       _isCorrect = isAnswerCorrect;
     });
+
+    if (isAnswerCorrect) {
+      _playMundariAudio(_currentQuestion.correctAnswer);
+    }
   }
 
   void _advanceToNextQuestion() {
@@ -835,6 +841,15 @@ class _Phase2QuestionScreenState extends State<Phase2QuestionScreen> {
               children: [
                 indicatorWidget,
                 const SizedBox(width: 14.0),
+                MundariAudioButton(
+                  text: text,
+                  onTap: () => _playMundariAudio(text),
+                  iconSize: 22.0,
+                  color: isSelected && !_isChecked
+                      ? const Color(0xFF4C6647)
+                      : const Color(0xFF251E11),
+                ),
+                const SizedBox(width: 8.0),
                 Expanded(
                   child: Text(
                     text,

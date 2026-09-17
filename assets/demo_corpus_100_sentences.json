@@ -3,602 +3,702 @@
     {
       "id": 1,
       "hindi": "नमस्ते सभी को, सुप्रभात!",
-      "mundari_odia": "ଆଇନୋ ସାବୁକେ, ସୁପ୍ରଭାତ!",
-      "english": "Hello everyone, good morning!"
+      "mundari_odia": "आइनो साबुके, सुप्रभात!",
+      "english": "Hello everyone, good morning!",
+      "mundari_devanagari": "आइनो साबुके, सुप्रभात!"
     },
     {
       "id": 2,
       "hindi": "क्या आप आज कुछ नया सीखने के लिए तैयार हैं?",
-      "mundari_odia": "ଆଜି ଆପେ ଇଚେ ନାଁଆ ସିକେ ଜେଳିତ?",
-      "english": "Are you ready to learn something new today?"
+      "mundari_odia": "आजि आपे इचे नाँआ सिके जेलित?",
+      "english": "Are you ready to learn something new today?",
+      "mundari_devanagari": "आजि आपे इचे नाँआ सिके जेलित?"
     },
     {
       "id": 3,
       "hindi": "आज हम मजेदार तरीके से सीखने वाले हैं।",
-      "mundari_odia": "ଆଜି ଆମେ ଜେଲଲ୍ଲା ତରିଙ୍ଗେ ସିକାଇବୋ।",
-      "english": "Today, we are going to learn in a fun way."
+      "mundari_odia": "आजि आमे जेलल्ला तरिङ्गे सिकाइबो।",
+      "english": "Today, we are going to learn in a fun way.",
+      "mundari_devanagari": "आजि आमे जेलल्ला तरिङ्गे सिकाइबो।"
     },
     {
       "id": 4,
       "hindi": "क्या आप मुझे बता सकते हैं कि आप इस चित्र में क्या देखते हैं?",
-      "mundari_odia": "ଆପେ ମୋତେ କହି ସକତ କି ଏ ଚିତ୍ରେ କି ଦେକେ?",
-      "english": "Can you tell me what you see in this picture?"
+      "mundari_odia": "आपे मोते कहि सकत कि ए चित्रे कि देके?",
+      "english": "Can you tell me what you see in this picture?",
+      "mundari_devanagari": "आपे मोते कहि सकत कि ए चित्रे कि देके?"
     },
     {
       "id": 5,
       "hindi": "आपका पसंदीदा खाना क्या है?",
-      "mundari_odia": "ଆପେର ମନକେ ଖାନା କି?",
-      "english": "What is your favourite food?"
+      "mundari_odia": "आपेर मनके खाना कि?",
+      "english": "What is your favourite food?",
+      "mundari_devanagari": "आपेर मनके खाना कि?"
     },
     {
       "id": 6,
       "hindi": "क्या आप तीन फल का नाम बता सकते हैं?",
-      "mundari_odia": "ଆପେ ତିନ ଫଳର ନାଁ କହି ସକତ?",
-      "english": "Can you name three fruits?"
+      "mundari_odia": "आपे तिन फलर नाँ कहि सकत?",
+      "english": "Can you name three fruits?",
+      "mundari_devanagari": "आपे तिन फलर नाँ कहि सकत?"
     },
     {
       "id": 7,
       "hindi": "अपने चारों ओर देखो। आप क्या देखते हो?",
-      "mundari_odia": "ଆପେର ଚାରିକେ ଦେକୋ। ଆପେ କି ଦେକେ?",
-      "english": "Look around you. What do you see?"
+      "mundari_odia": "आपेर चारिके देको। आपे कि देके?",
+      "english": "Look around you. What do you see?",
+      "mundari_devanagari": "आपेर चारिके देको। आपे कि देके?"
     },
     {
       "id": 8,
       "hindi": "अब, मेरे बाद इस वाक्य को दोहराओ।",
-      "mundari_odia": "ଆବେ, ମେର ପଇଚେ ଏ କଥାଟାକେ ଦେକାରୋ।",
-      "english": "Now, repeat this sentence after me."
+      "mundari_odia": "आबे, मेर पइचे ए कथाटाके देकारो।",
+      "english": "Now, repeat this sentence after me.",
+      "mundari_devanagari": "आबे, मेर पइचे ए कथाटाके देकारो।"
     },
     {
       "id": 9,
       "hindi": "क्या आप इस सवाल का जवाब दे सकते हैं?",
-      "mundari_odia": "ଆପେ ଏ ପ୍ରଶ୍ନର ଉତର ଦେ ସକତ?",
-      "english": "Can you answer this question?"
+      "mundari_odia": "आपे ए प्रश्नर उतर दे सकत?",
+      "english": "Can you answer this question?",
+      "mundari_devanagari": "आपे ए प्रश्नर उतर दे सकत?"
     },
     {
       "id": 10,
       "hindi": "बहुत अच्छा! आइए एक साथ सीखते हैं।",
-      "mundari_odia": "ବହୁତ ଭଲ! ଆଇନେ ଏକଟା ସାତେ ସିକାଇବୋ।",
-      "english": "Very good! Let's learn together."
+      "mundari_odia": "बहुत भल! आइने एकटा साते सिकाइबो।",
+      "english": "Very good! Let's learn together.",
+      "mundari_devanagari": "बहुत भल! आइने एकटा साते सिकाइबो।"
     },
     {
       "id": 11,
       "hindi": "क्या आपको पढ़ना पसंद है?",
-      "mundari_odia": "ଆପକେ ପଢ଼ିଆ ପସଦ?",
-      "english": "Do you like reading?"
+      "mundari_odia": "आपके पढ़िआ पसद?",
+      "english": "Do you like reading?",
+      "mundari_devanagari": "आपके पढ़िआ पसद?"
     },
     {
       "id": 12,
       "hindi": "मुझे अपना नाम बताइए।",
-      "mundari_odia": "ମୋତେ ଆପେର ନାଁ କହିଦିଆ।",
-      "english": "Tell me your name."
+      "mundari_odia": "मोते आपेर नाँ कहिदिआ।",
+      "english": "Tell me your name.",
+      "mundari_devanagari": "मोते आपेर नाँ कहिदिआ।"
     },
     {
       "id": 13,
       "hindi": "आप कहाँ से हैं?",
-      "mundari_odia": "ଆପେ କୁଁତେ ସେ?",
-      "english": "Where are you from?"
+      "mundari_odia": "आपे कुँते से?",
+      "english": "Where are you from?",
+      "mundari_devanagari": "आपे कुँते से?"
     },
     {
       "id": 14,
       "hindi": "आपके परिवार में कितने सदस्य हैं?",
-      "mundari_odia": "ଆପେର ଫୋରାଲେ କଇତେ ଜନ ଅଛେ?",
-      "english": "How many members are there in your family?"
+      "mundari_odia": "आपेर फोराले कइते जन अछे?",
+      "english": "How many members are there in your family?",
+      "mundari_devanagari": "आपेर फोराले कइते जन अछे?"
     },
     {
       "id": 15,
       "hindi": "आपकी माता का नाम क्या है?",
-      "mundari_odia": "ଆପେର ଆଇ ନାଁ କି?",
-      "english": "What is your mother's name?"
+      "mundari_odia": "आपेर आइ नाँ कि?",
+      "english": "What is your mother's name?",
+      "mundari_devanagari": "आपेर आइ नाँ कि?"
     },
     {
       "id": 16,
       "hindi": "आपके पिता का नाम क्या है?",
-      "mundari_odia": "ଆପେର ଆବା ନାଁ କି?",
-      "english": "What is your father's name?"
+      "mundari_odia": "आपेर आबा नाँ कि?",
+      "english": "What is your father's name?",
+      "mundari_devanagari": "आपेर आबा नाँ कि?"
     },
     {
       "id": 17,
       "hindi": "आप कौन सी भाषा बोलते हैं?",
-      "mundari_odia": "ଆପେ କୁଁ ଭାସା କଥା କହେ?",
-      "english": "What language do you speak?"
+      "mundari_odia": "आपे कुँ भासा कथा कहे?",
+      "english": "What language do you speak?",
+      "mundari_devanagari": "आपे कुँ भासा कथा कहे?"
     },
     {
       "id": 18,
       "hindi": "क्या आप अंग्रेजी बोल सकते हैं?",
-      "mundari_odia": "ଆପେ ଇଂରେଜ କଥା କହି ସକତ?",
-      "english": "Can you speak English?"
+      "mundari_odia": "आपे इंरेज कथा कहि सकत?",
+      "english": "Can you speak English?",
+      "mundari_devanagari": "आपे इंरेज कथा कहि सकत?"
     },
     {
       "id": 19,
       "hindi": "मुझे यह पाठ समझाइए।",
-      "mundari_odia": "ମୋତେ ଏ ପାଠ ବୁଝାଇଦିଆ।",
-      "english": "Explain this lesson to me."
+      "mundari_odia": "मोते ए पाठ बुझाइदिआ।",
+      "english": "Explain this lesson to me.",
+      "mundari_devanagari": "मोते ए पाठ बुझाइदिआ।"
     },
     {
       "id": 20,
       "hindi": "क्या यह सही है?",
-      "mundari_odia": "ଏ ସିଡି?",
-      "english": "Is this correct?"
+      "mundari_odia": "ए सिडि?",
+      "english": "Is this correct?",
+      "mundari_devanagari": "ए सिडि?"
     },
     {
       "id": 21,
       "hindi": "आप कल स्कूल आएंगे?",
-      "mundari_odia": "ଆପେ କାଲେ ସ୍କୁଲେ ଆବୋ?",
-      "english": "Will you come to school tomorrow?"
+      "mundari_odia": "आपे काले स्कुले आबो?",
+      "english": "Will you come to school tomorrow?",
+      "mundari_devanagari": "आपे काले स्कुले आबो?"
     },
     {
       "id": 22,
       "hindi": "आप कितनी कक्षा में हैं?",
-      "mundari_odia": "ଆପେ କୁଁତେ କ୍ଲାସେ ଅଛେ?",
-      "english": "What class are you in?"
+      "mundari_odia": "आपे कुँते क्लासे अछे?",
+      "english": "What class are you in?",
+      "mundari_devanagari": "आपे कुँते क्लासे अछे?"
     },
     {
       "id": 23,
       "hindi": "आपका पसंदीदा विषय क्या है?",
-      "mundari_odia": "ଆପେର ମନକେ ବିସୟ କି?",
-      "english": "What is your favourite subject?"
+      "mundari_odia": "आपेर मनके बिसय़ कि?",
+      "english": "What is your favourite subject?",
+      "mundari_devanagari": "आपेर मनके बिसय़ कि?"
     },
     {
       "id": 24,
       "hindi": "आप गणित पढ़ना पसंद करते हैं?",
-      "mundari_odia": "ଆପେ ଗଣିତ ପଢ଼ିଆ ପସଦ କରେ?",
-      "english": "Do you like studying mathematics?"
+      "mundari_odia": "आपे गणित पढ़िआ पसद करे?",
+      "english": "Do you like studying mathematics?",
+      "mundari_devanagari": "आपे गणित पढ़िआ पसद करे?"
     },
     {
       "id": 25,
       "hindi": "विज्ञान विषय बहुत रोचक है।",
-      "mundari_odia": "ବିଜ୍ଞାନ ବିସୟ ବହୁତ ରୋଚକ।",
-      "english": "Science subject is very interesting."
+      "mundari_odia": "बिज्ञान बिसय़ बहुत रोचक।",
+      "english": "Science subject is very interesting.",
+      "mundari_devanagari": "बिज्ञान बिसय़ बहुत रोचक।"
     },
     {
       "id": 26,
       "hindi": "आप खेल में भाग लेते हैं?",
-      "mundari_odia": "ଆପେ ଖେଲେ ଭାଗ ଲେଏ?",
-      "english": "Do you participate in sports?"
+      "mundari_odia": "आपे खेले भाग लेए?",
+      "english": "Do you participate in sports?",
+      "mundari_devanagari": "आपे खेले भाग लेए?"
     },
     {
       "id": 27,
       "hindi": "आपका पसंदीदा खेल क्या है?",
-      "mundari_odia": "ଆପେର ମନକେ ଖେଲ କି?",
-      "english": "What is your favourite sport?"
+      "mundari_odia": "आपेर मनके खेल कि?",
+      "english": "What is your favourite sport?",
+      "mundari_devanagari": "आपेर मनके खेल कि?"
     },
     {
       "id": 28,
       "hindi": "क्या आप फुटबॉल खेलते हैं?",
-      "mundari_odia": "ଆପେ ଫୁଟବଲ ଖେଲେ?",
-      "english": "Do you play football?"
+      "mundari_odia": "आपे फुटबल खेले?",
+      "english": "Do you play football?",
+      "mundari_devanagari": "आपे फुटबल खेले?"
     },
     {
       "id": 29,
       "hindi": "मुझे आपकी कहानी सुनाइए।",
-      "mundari_odia": "ମୋତେ ଆପେର ଗଲ୍ପ ସୁନାଇଦିଆ।",
-      "english": "Tell me your story."
+      "mundari_odia": "मोते आपेर गल्प सुनाइदिआ।",
+      "english": "Tell me your story.",
+      "mundari_devanagari": "मोते आपेर गल्प सुनाइदिआ।"
     },
     {
       "id": 30,
       "hindi": "आप किस समय सो जाते हैं?",
-      "mundari_odia": "ଆପେ କୁଁ ସମେ ସୁତେ ଜାଏ?",
-      "english": "What time do you go to sleep?"
+      "mundari_odia": "आपे कुँ समे सुते जाए?",
+      "english": "What time do you go to sleep?",
+      "mundari_devanagari": "आपे कुँ समे सुते जाए?"
     },
     {
       "id": 31,
       "hindi": "सुबह आप कितने बजे उठते हैं?",
-      "mundari_odia": "ସୁତାର ଆପେ କୁଁ ସମେ ଉଠେ?",
-      "english": "What time do you wake up in the morning?"
+      "mundari_odia": "सुतार आपे कुँ समे उठे?",
+      "english": "What time do you wake up in the morning?",
+      "mundari_devanagari": "सुतार आपे कुँ समे उठे?"
     },
     {
       "id": 32,
       "hindi": "आप दिन में कितनी बार खाना खाते हैं?",
-      "mundari_odia": "ଆପେ ଦିନେ କୁଁତେ ବାର ଖାନା ଖାଏ?",
-      "english": "How many times do you eat in a day?"
+      "mundari_odia": "आपे दिने कुँते बार खाना खाए?",
+      "english": "How many times do you eat in a day?",
+      "mundari_devanagari": "आपे दिने कुँते बार खाना खाए?"
     },
     {
       "id": 33,
       "hindi": "क्या आप नाश्ता करते हैं?",
-      "mundari_odia": "ଆପେ ନାସତା କରେ?",
-      "english": "Do you have breakfast?"
+      "mundari_odia": "आपे नासता करे?",
+      "english": "Do you have breakfast?",
+      "mundari_devanagari": "आपे नासता करे?"
     },
     {
       "id": 34,
       "hindi": "आपका दोपहर का भोजन क्या है?",
-      "mundari_odia": "ଆପେର ଦୋପାର ଖାନା କି?",
-      "english": "What do you have for lunch?"
+      "mundari_odia": "आपेर दोपार खाना कि?",
+      "english": "What do you have for lunch?",
+      "mundari_devanagari": "आपेर दोपार खाना कि?"
     },
     {
       "id": 35,
       "hindi": "आप रात का खाना कब खाते हैं?",
-      "mundari_odia": "ଆପେ ରାତିର ଖାନା କୁଁ ସମେ ଖାଏ?",
-      "english": "When do you have dinner?"
+      "mundari_odia": "आपे रातिर खाना कुँ समे खाए?",
+      "english": "When do you have dinner?",
+      "mundari_devanagari": "आपे रातिर खाना कुँ समे खाए?"
     },
     {
       "id": 36,
       "hindi": "क्या आप दूध पीना पसंद करते हैं?",
-      "mundari_odia": "ଆପେ ଦୁଧ ପିଆ ପସଦ କରେ?",
-      "english": "Do you like drinking milk?"
+      "mundari_odia": "आपे दुध पिआ पसद करे?",
+      "english": "Do you like drinking milk?",
+      "mundari_devanagari": "आपे दुध पिआ पसद करे?"
     },
     {
       "id": 37,
       "hindi": "आप पानी कितना पीते हैं?",
-      "mundari_odia": "ଆପେ ପାଣି କୁଁତେ ପିଏ?",
-      "english": "How much water do you drink?"
+      "mundari_odia": "आपे पाणि कुँते पिए?",
+      "english": "How much water do you drink?",
+      "mundari_devanagari": "आपे पाणि कुँते पिए?"
     },
     {
       "id": 38,
       "hindi": "आपकी पसंद की सब्जी कौन सी है?",
-      "mundari_odia": "ଆପେର ମନକେ ତରକାରୀ କି?",
-      "english": "What is your favourite vegetable?"
+      "mundari_odia": "आपेर मनके तरकारी कि?",
+      "english": "What is your favourite vegetable?",
+      "mundari_devanagari": "आपेर मनके तरकारी कि?"
     },
     {
       "id": 39,
       "hindi": "क्या आप हरी सब्जी खाते हैं?",
-      "mundari_odia": "ଆପେ ସବୁଜ ତରକାରୀ ଖାଏ?",
-      "english": "Do you eat green vegetables?"
+      "mundari_odia": "आपे सबुज तरकारी खाए?",
+      "english": "Do you eat green vegetables?",
+      "mundari_devanagari": "आपे सबुज तरकारी खाए?"
     },
     {
       "id": 40,
       "hindi": "आपको कौन सी मिठाई पसंद है?",
-      "mundari_odia": "ଆପକେ କୁଁ ମିଠେ ପସଦ?",
-      "english": "What sweet do you like?"
+      "mundari_odia": "आपके कुँ मिठे पसद?",
+      "english": "What sweet do you like?",
+      "mundari_devanagari": "आपके कुँ मिठे पसद?"
     },
     {
       "id": 41,
       "hindi": "क्या आप बाहर खेलना पसंद करते हैं?",
-      "mundari_odia": "ଆପେ ବାଇରେ ଖେଲିଆ ପସଦ କରେ?",
-      "english": "Do you like playing outside?"
+      "mundari_odia": "आपे बाइरे खेलिआ पसद करे?",
+      "english": "Do you like playing outside?",
+      "mundari_devanagari": "आपे बाइरे खेलिआ पसद करे?"
     },
     {
       "id": 42,
       "hindi": "आप अपनी छुट्टी कहाँ बिताते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ଛୁଟି କୁଁତେ ବିତାଏ?",
-      "english": "Where do you spend your holidays?"
+      "mundari_odia": "आपे आपेर छुटि कुँते बिताए?",
+      "english": "Where do you spend your holidays?",
+      "mundari_devanagari": "आपे आपेर छुटि कुँते बिताए?"
     },
     {
       "id": 43,
       "hindi": "आपके पास कोई पालतू जानवर है?",
-      "mundari_odia": "ଆପେର ପାସେ ଜନ୍ତୁ ଅଛେ?",
-      "english": "Do you have any pets?"
+      "mundari_odia": "आपेर पासे जन्तु अछे?",
+      "english": "Do you have any pets?",
+      "mundari_devanagari": "आपेर पासे जन्तु अछे?"
     },
     {
       "id": 44,
       "hindi": "आप किस प्रकार का संगीत सुनते हैं?",
-      "mundari_odia": "ଆପେ କୁଁ ତରର ସୁର ସୁନେ?",
-      "english": "What kind of music do you listen to?"
+      "mundari_odia": "आपे कुँ तरर सुर सुने?",
+      "english": "What kind of music do you listen to?",
+      "mundari_devanagari": "आपे कुँ तरर सुर सुने?"
     },
     {
       "id": 45,
       "hindi": "क्या आप गाना गाते हैं?",
-      "mundari_odia": "ଆପେ ଗାନା ଗାଏ?",
-      "english": "Do you sing songs?"
+      "mundari_odia": "आपे गाना गाए?",
+      "english": "Do you sing songs?",
+      "mundari_devanagari": "आपे गाना गाए?"
     },
     {
       "id": 46,
       "hindi": "आप किस कलाकार को पसंद करते हैं?",
-      "mundari_odia": "ଆପେ କୁଁ କଳାକର ପସଦ କରେ?",
-      "english": "Which artist do you like?"
+      "mundari_odia": "आपे कुँ कलाकर पसद करे?",
+      "english": "Which artist do you like?",
+      "mundari_devanagari": "आपे कुँ कलाकर पसद करे?"
     },
     {
       "id": 47,
       "hindi": "क्या आप नृत्य करते हैं?",
-      "mundari_odia": "ଆପେ ନାଚେ?",
-      "english": "Do you dance?"
+      "mundari_odia": "आपे नाचे?",
+      "english": "Do you dance?",
+      "mundari_devanagari": "आपे नाचे?"
     },
     {
       "id": 48,
       "hindi": "आपका पसंदीदा त्योहार कौन सा है?",
-      "mundari_odia": "ଆପେର ମନକେ ଉତସବ କି?",
-      "english": "What is your favourite festival?"
+      "mundari_odia": "आपेर मनके उतसब कि?",
+      "english": "What is your favourite festival?",
+      "mundari_devanagari": "आपेर मनके उतसब कि?"
     },
     {
       "id": 49,
       "hindi": "आप दिवाली कैसे मनाते हैं?",
-      "mundari_odia": "ଆପେ ଦିୱାଲୀ କିସେ ମନାଏ?",
-      "english": "How do you celebrate Diwali?"
+      "mundari_odia": "आपे दिवाली किसे मनाए?",
+      "english": "How do you celebrate Diwali?",
+      "mundari_devanagari": "आपे दिवाली किसे मनाए?"
     },
     {
       "id": 50,
       "hindi": "आपका जन्मदिन कब है?",
-      "mundari_odia": "ଆପେର ଜନ୍ମଦିନ କୁଁ?",
-      "english": "When is your birthday?"
+      "mundari_odia": "आपेर जन्मदिन कुँ?",
+      "english": "When is your birthday?",
+      "mundari_devanagari": "आपेर जन्मदिन कुँ?"
     },
     {
       "id": 51,
       "hindi": "आप कितने साल के हैं?",
-      "mundari_odia": "ଆପେ କୁଁତେ ବର ର?",
-      "english": "How old are you?"
+      "mundari_odia": "आपे कुँते बर र?",
+      "english": "How old are you?",
+      "mundari_devanagari": "आपे कुँते बर र?"
     },
     {
       "id": 52,
       "hindi": "आपके सपने क्या हैं?",
-      "mundari_odia": "ଆପେର ସ୍ବପ୍ନ କି?",
-      "english": "What are your dreams?"
+      "mundari_odia": "आपेर स्बप्न कि?",
+      "english": "What are your dreams?",
+      "mundari_devanagari": "आपेर स्बप्न कि?"
     },
     {
       "id": 53,
       "hindi": "आप बड़े होकर क्या बनना चाहते हैं?",
-      "mundari_odia": "ଆପେ ବଡ ହୋଇ କି ହିତେ ଚାହେ?",
-      "english": "What do you want to become when you grow up?"
+      "mundari_odia": "आपे बड होइ कि हिते चाहे?",
+      "english": "What do you want to become when you grow up?",
+      "mundari_devanagari": "आपे बड होइ कि हिते चाहे?"
     },
     {
       "id": 54,
       "hindi": "क्या आप एक शिक्षक बनना चाहते हैं?",
-      "mundari_odia": "ଆପେ ଏକ ସିକ୍ଷକ ହୋଇତେ ଚାହେ?",
-      "english": "Do you want to become a teacher?"
+      "mundari_odia": "आपे एक सिक्षक होइते चाहे?",
+      "english": "Do you want to become a teacher?",
+      "mundari_devanagari": "आपे एक सिक्षक होइते चाहे?"
     },
     {
       "id": 55,
       "hindi": "आप अपनी भाषा को संरक्षित रखना चाहते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ଭାସାକେ ରକ୍ଷା କରିତେ ଚାହେ?",
-      "english": "Do you want to preserve your language?"
+      "mundari_odia": "आपे आपेर भासाके रक्षा करिते चाहे?",
+      "english": "Do you want to preserve your language?",
+      "mundari_devanagari": "आपे आपेर भासाके रक्षा करिते चाहे?"
     },
     {
       "id": 56,
       "hindi": "मुंडारी भाषा कितनी सुंदर है।",
-      "mundari_odia": "ମୁଣ୍ଡାରୀ ଭାସା କିତେ ସୁନ୍ଦର।",
-      "english": "The Mundari language is so beautiful."
+      "mundari_odia": "मुण्डारी भासा किते सुन्दर।",
+      "english": "The Mundari language is so beautiful.",
+      "mundari_devanagari": "मुण्डारी भासा किते सुन्दर।"
     },
     {
       "id": 57,
       "hindi": "आप अपनी संस्कृति को कितना जानते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ସଂସ୍କୃତିକେ କୁଁତେ ଜାନେ?",
-      "english": "How much do you know about your culture?"
+      "mundari_odia": "आपे आपेर संस्कृतिके कुँते जाने?",
+      "english": "How much do you know about your culture?",
+      "mundari_devanagari": "आपे आपेर संस्कृतिके कुँते जाने?"
     },
     {
       "id": 58,
       "hindi": "आपके गाँव में क्या विशेष है?",
-      "mundari_odia": "ଆପେର ଗାଉଁଁ ଅତେ କି ବିସେସ?",
-      "english": "What is special about your village?"
+      "mundari_odia": "आपेर गाउँँ अते कि बिसेस?",
+      "english": "What is special about your village?",
+      "mundari_devanagari": "आपेर गाउँँ अते कि बिसेस?"
     },
     {
       "id": 59,
       "hindi": "क्या आप अपने गाँव की परंपराओं का पालन करते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ଗାଉଁଁ ର ପରମ୍ପରାକେ ପାଳନ କରେ?",
-      "english": "Do you follow the traditions of your village?"
+      "mundari_odia": "आपे आपेर गाउँँ र परम्पराके पालन करे?",
+      "english": "Do you follow the traditions of your village?",
+      "mundari_devanagari": "आपे आपेर गाउँँ र परम्पराके पालन करे?"
     },
     {
       "id": 60,
       "hindi": "आपके समुदाय का मुख्य त्योहार क्या है?",
-      "mundari_odia": "ଆପେର ସମୁଦାୟର ମୁକ୍ଖୋ ଉତସବ କି?",
-      "english": "What is the main festival of your community?"
+      "mundari_odia": "आपेर समुदाय़र मुक्खो उतसब कि?",
+      "english": "What is the main festival of your community?",
+      "mundari_devanagari": "आपेर समुदाय़र मुक्खो उतसब कि?"
     },
     {
       "id": 61,
       "hindi": "क्या आप प्रकृति से प्रेम करते हैं?",
-      "mundari_odia": "ଆପେ ପ୍ରକୃତିସେ ପ୍ରେମ କରେ?",
-      "english": "Do you love nature?"
+      "mundari_odia": "आपे प्रकृतिसे प्रेम करे?",
+      "english": "Do you love nature?",
+      "mundari_devanagari": "आपे प्रकृतिसे प्रेम करे?"
     },
     {
       "id": 62,
       "hindi": "आप पेड़ों को कितना महत्व देते हैं?",
-      "mundari_odia": "ଆପେ ଗାଛକେ କୁଁତେ ମାହତ୍ୱ ଦେଏ?",
-      "english": "How much importance do you give to trees?"
+      "mundari_odia": "आपे गाछके कुँते माहत्व देए?",
+      "english": "How much importance do you give to trees?",
+      "mundari_devanagari": "आपे गाछके कुँते माहत्व देए?"
     },
     {
       "id": 63,
       "hindi": "क्या आप वन संरक्षण में विश्वास करते हैं?",
-      "mundari_odia": "ଆପେ ବନ ସଂରକ୍ଷଣେ ବିସ୍ୱାସ କରେ?",
-      "english": "Do you believe in forest conservation?"
+      "mundari_odia": "आपे बन संरक्षणे बिस्वास करे?",
+      "english": "Do you believe in forest conservation?",
+      "mundari_devanagari": "आपे बन संरक्षणे बिस्वास करे?"
     },
     {
       "id": 64,
       "hindi": "आप पानी को बर्बाद नहीं करते?",
-      "mundari_odia": "ଆପେ ପାଣିକେ ବରବାଦ ନେ କରେ?",
-      "english": "You don't waste water, do you?"
+      "mundari_odia": "आपे पाणिके बरबाद ने करे?",
+      "english": "You don't waste water, do you?",
+      "mundari_devanagari": "आपे पाणिके बरबाद ने करे?"
     },
     {
       "id": 65,
       "hindi": "आप अपने चारों ओर को स्वच्छ रखते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ଚାରିକେ ସଫ୍ଲ ରାକେ?",
-      "english": "Do you keep your surroundings clean?"
+      "mundari_odia": "आपे आपेर चारिके सफ्ल राके?",
+      "english": "Do you keep your surroundings clean?",
+      "mundari_devanagari": "आपे आपेर चारिके सफ्ल राके?"
     },
     {
       "id": 66,
       "hindi": "आप अपने स्कूल को साफ-सुथरा रखने में मदद करते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ସ୍କୁଲକେ ସାଫ ରାକିଆ ସାହାୟ୍ୟ କରେ?",
-      "english": "Do you help keep your school clean and tidy?"
+      "mundari_odia": "आपे आपेर स्कुलके साफ राकिआ साहाय़्य़ करे?",
+      "english": "Do you help keep your school clean and tidy?",
+      "mundari_devanagari": "आपे आपेर स्कुलके साफ राकिआ साहाय़्य़ करे?"
     },
     {
       "id": 67,
       "hindi": "आप अपने माता-पिता की बातें सुनते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ଆବା ଆଇର କଥା ସୁନେ?",
-      "english": "Do you listen to your parents?"
+      "mundari_odia": "आपे आपेर आबा आइर कथा सुने?",
+      "english": "Do you listen to your parents?",
+      "mundari_devanagari": "आपे आपेर आबा आइर कथा सुने?"
     },
     {
       "id": 68,
       "hindi": "क्या आप अपने शिक्षकों का सम्मान करते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ସିକ୍ଷକର ସମ୍ମାନ କରେ?",
-      "english": "Do you respect your teachers?"
+      "mundari_odia": "आपे आपेर सिक्षकर सम्मान करे?",
+      "english": "Do you respect your teachers?",
+      "mundari_devanagari": "आपे आपेर सिक्षकर सम्मान करे?"
     },
     {
       "id": 69,
       "hindi": "आप अपने दोस्तों से कैसा व्यवहार करते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ସାତିଅର ସାତେ କିସେ ବ୍ୟବାହାର କରେ?",
-      "english": "How do you treat your friends?"
+      "mundari_odia": "आपे आपेर सातिअर साते किसे ब्य़बाहार करे?",
+      "english": "How do you treat your friends?",
+      "mundari_devanagari": "आपे आपेर सातिअर साते किसे ब्य़बाहार करे?"
     },
     {
       "id": 70,
       "hindi": "क्या आप अपने भाई-बहन से प्रेम करते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ଭାଇ ବହୁଁଁନ ସେ ପ୍ରେମ କରେ?",
-      "english": "Do you love your siblings?"
+      "mundari_odia": "आपे आपेर भाइ बहुँँन से प्रेम करे?",
+      "english": "Do you love your siblings?",
+      "mundari_devanagari": "आपे आपेर भाइ बहुँँन से प्रेम करे?"
     },
     {
       "id": 71,
       "hindi": "आप दूसरों की मदद करना पसंद करते हैं?",
-      "mundari_odia": "ଆପେ ଦୁସର ସାହାୟ୍ୟ କରିଆ ପସଦ କରେ?",
-      "english": "Do you like helping others?"
+      "mundari_odia": "आपे दुसर साहाय़्य़ करिआ पसद करे?",
+      "english": "Do you like helping others?",
+      "mundari_devanagari": "आपे दुसर साहाय़्य़ करिआ पसद करे?"
     },
     {
       "id": 72,
       "hindi": "क्या आप किसी को चोट पहुँचाना पसंद नहीं करते?",
-      "mundari_odia": "ଆପେ କାକେ ଚଟ ଦେଇଆ ପସଦ ନେ କରେ?",
-      "english": "Don't you like hurting anyone?"
+      "mundari_odia": "आपे काके चट देइआ पसद ने करे?",
+      "english": "Don't you like hurting anyone?",
+      "mundari_devanagari": "आपे काके चट देइआ पसद ने करे?"
     },
     {
       "id": 73,
       "hindi": "आप सत्य बोलना पसंद करते हैं?",
-      "mundari_odia": "ଆପେ ସାଚ କଥା କହିଆ ପସଦ କରେ?",
-      "english": "Do you like telling the truth?"
+      "mundari_odia": "आपे साच कथा कहिआ पसद करे?",
+      "english": "Do you like telling the truth?",
+      "mundari_devanagari": "आपे साच कथा कहिआ पसद करे?"
     },
     {
       "id": 74,
       "hindi": "क्या आप कभी झूठ बोलते हैं?",
-      "mundari_odia": "ଆପେ କଭି ଝୁତ କଥା କହେ?",
-      "english": "Do you ever tell lies?"
+      "mundari_odia": "आपे कभि झुत कथा कहे?",
+      "english": "Do you ever tell lies?",
+      "mundari_devanagari": "आपे कभि झुत कथा कहे?"
     },
     {
       "id": 75,
       "hindi": "आप गलती करने से डरते नहीं हो?",
-      "mundari_odia": "ଆପେ ଭୁଲ କରିଆ ସେ ଡରେ ନେ?",
-      "english": "Aren't you afraid of making mistakes?"
+      "mundari_odia": "आपे भुल करिआ से डरे ने?",
+      "english": "Aren't you afraid of making mistakes?",
+      "mundari_devanagari": "आपे भुल करिआ से डरे ने?"
     },
     {
       "id": 76,
       "hindi": "क्या आप अपनी गलती स्वीकार करते हैं?",
-      "mundari_odia": "ଆପେ ଆପେର ଭୁଲ ସ୍ୱିକାର କରେ?",
-      "english": "Do you admit your mistakes?"
+      "mundari_odia": "आपे आपेर भुल स्विकार करे?",
+      "english": "Do you admit your mistakes?",
+      "mundari_devanagari": "आपे आपेर भुल स्विकार करे?"
     },
     {
       "id": 77,
       "hindi": "आप कभी किसी से माफी माँगते हो?",
-      "mundari_odia": "ଆପେ କଭି କାକେସେ ମାଫି ମାଗେ?",
-      "english": "Do you ever apologize to someone?"
+      "mundari_odia": "आपे कभि काकेसे माफि मागे?",
+      "english": "Do you ever apologize to someone?",
+      "mundari_devanagari": "आपे कभि काकेसे माफि मागे?"
     },
     {
       "id": 78,
       "hindi": "क्या आप धैर्य रखते हैं?",
-      "mundari_odia": "ଆପେ ଧୈର୍ଯ୍ୟ ରାକେ?",
-      "english": "Do you have patience?"
+      "mundari_odia": "आपे धैर्य्य़ राके?",
+      "english": "Do you have patience?",
+      "mundari_devanagari": "आपे धैर्य्य़ राके?"
     },
     {
       "id": 79,
       "hindi": "आप जल्दबाजी में निर्णय नहीं लेते?",
-      "mundari_odia": "ଆପେ ଜଲଦିଆ ନିର୍ଣ୍ଣୟ ନେ ଲେଏ?",
-      "english": "You don't make decisions in haste?"
+      "mundari_odia": "आपे जलदिआ निर्ण्णय़ ने लेए?",
+      "english": "You don't make decisions in haste?",
+      "mundari_devanagari": "आपे जलदिआ निर्ण्णय़ ने लेए?"
     },
     {
       "id": 80,
       "hindi": "क्या आप कभी गुस्सा करते हो?",
-      "mundari_odia": "ଆପେ କଭି ରାଗେ?",
-      "english": "Do you ever get angry?"
+      "mundari_odia": "आपे कभि रागे?",
+      "english": "Do you ever get angry?",
+      "mundari_devanagari": "आपे कभि रागे?"
     },
     {
       "id": 81,
       "hindi": "गुस्से में आप क्या करते हो?",
-      "mundari_odia": "ରାଗେ ଆପେ କି କରେ?",
-      "english": "What do you do when you get angry?"
+      "mundari_odia": "रागे आपे कि करे?",
+      "english": "What do you do when you get angry?",
+      "mundari_devanagari": "रागे आपे कि करे?"
     },
     {
       "id": 82,
       "hindi": "क्या आप शांत रहना जानते हो?",
-      "mundari_odia": "ଆପେ ଶାନତ ରାକିଆ ଜାନେ?",
-      "english": "Do you know how to stay calm?"
+      "mundari_odia": "आपे शानत राकिआ जाने?",
+      "english": "Do you know how to stay calm?",
+      "mundari_devanagari": "आपे शानत राकिआ जाने?"
     },
     {
       "id": 83,
       "hindi": "आप भय का सामना कैसे करते हो?",
-      "mundari_odia": "ଆପେ ଭୟର ସାମୁଞା କିସେ କରେ?",
-      "english": "How do you face your fears?"
+      "mundari_odia": "आपे भय़र सामुञा किसे करे?",
+      "english": "How do you face your fears?",
+      "mundari_devanagari": "आपे भय़र सामुञा किसे करे?"
     },
     {
       "id": 84,
       "hindi": "क्या आप हमेशा आत्मविश्वास से भरे रहते हो?",
-      "mundari_odia": "ଆପେ ସଦାବେଳେ ଆତ୍ମବିସ୍ୱାସେ ଭରେ ରାକେ?",
-      "english": "Are you always filled with confidence?"
+      "mundari_odia": "आपे सदाबेले आत्मबिस्वासे भरे राके?",
+      "english": "Are you always filled with confidence?",
+      "mundari_devanagari": "आपे सदाबेले आत्मबिस्वासे भरे राके?"
     },
     {
       "id": 85,
       "hindi": "आप नए काम सीखने से डरते नहीं हो?",
-      "mundari_odia": "ଆପେ ନାଁଆ କାମ ସିକିଆ ସେ ଡରେ ନେ?",
-      "english": "Aren't you afraid to learn new things?"
+      "mundari_odia": "आपे नाँआ काम सिकिआ से डरे ने?",
+      "english": "Aren't you afraid to learn new things?",
+      "mundari_devanagari": "आपे नाँआ काम सिकिआ से डरे ने?"
     },
     {
       "id": 86,
       "hindi": "क्या आप हर दिन कुछ न कुछ नया सीखते हो?",
-      "mundari_odia": "ଆପେ ଦିନେ ଦିନେ କୁଁ ନା ନୁଆ ସିକେ?",
-      "english": "Do you learn something new every day?"
+      "mundari_odia": "आपे दिने दिने कुँ ना नुआ सिके?",
+      "english": "Do you learn something new every day?",
+      "mundari_devanagari": "आपे दिने दिने कुँ ना नुआ सिके?"
     },
     {
       "id": 87,
       "hindi": "आप जिज्ञासु प्रवृत्ति के हो?",
-      "mundari_odia": "ଆପେ ଜିଜ୍ଞାସୁ ପ୍ରବୃତି ର?",
-      "english": "Are you curious by nature?"
+      "mundari_odia": "आपे जिज्ञासु प्रबृति र?",
+      "english": "Are you curious by nature?",
+      "mundari_devanagari": "आपे जिज्ञासु प्रबृति र?"
     },
     {
       "id": 88,
       "hindi": "आप प्रश्न पूछना पसंद करते हो?",
-      "mundari_odia": "ଆପେ ସୁଆଲ ପୁଛିଆ ପସଦ କରେ?",
-      "english": "Do you like asking questions?"
+      "mundari_odia": "आपे सुआल पुछिआ पसद करे?",
+      "english": "Do you like asking questions?",
+      "mundari_devanagari": "आपे सुआल पुछिआ पसद करे?"
     },
     {
       "id": 89,
       "hindi": "क्या आप अपनी सीमा को समझते हो?",
-      "mundari_odia": "ଆପେ ଆପେର ସିମାକେ ବୁଝେ?",
-      "english": "Do you understand your limits?"
+      "mundari_odia": "आपे आपेर सिमाके बुझे?",
+      "english": "Do you understand your limits?",
+      "mundari_devanagari": "आपे आपेर सिमाके बुझे?"
     },
     {
       "id": 90,
       "hindi": "आप अपने कौशल को सुधारना चाहते हो?",
-      "mundari_odia": "ଆପେ ଆପେର କୌସଲକେ ସୁଧାରିତେ ଚାହେ?",
-      "english": "Do you want to improve your skills?"
+      "mundari_odia": "आपे आपेर कौसलके सुधारिते चाहे?",
+      "english": "Do you want to improve your skills?",
+      "mundari_devanagari": "आपे आपेर कौसलके सुधारिते चाहे?"
     },
     {
       "id": 91,
       "hindi": "क्या आप किसी से सीखना पसंद करते हो?",
-      "mundari_odia": "ଆପେ କାକେସେ ସିକିଆ ପସଦ କରେ?",
-      "english": "Do you like learning from someone?"
+      "mundari_odia": "आपे काकेसे सिकिआ पसद करे?",
+      "english": "Do you like learning from someone?",
+      "mundari_devanagari": "आपे काकेसे सिकिआ पसद करे?"
     },
     {
       "id": 92,
       "hindi": "आप किताबें पढ़ना पसंद करते हो?",
-      "mundari_odia": "ଆପେ କିତାବ ପଢ଼ିଆ ପସଦ କରେ?",
-      "english": "Do you like reading books?"
+      "mundari_odia": "आपे किताब पढ़िआ पसद करे?",
+      "english": "Do you like reading books?",
+      "mundari_devanagari": "आपे किताब पढ़िआ पसद करे?"
     },
     {
       "id": 93,
       "hindi": "आपकी पसंद की किताब कौन सी है?",
-      "mundari_odia": "ଆପେର ମନକେ କିତାବ କି?",
-      "english": "What is your favourite book?"
+      "mundari_odia": "आपेर मनके किताब कि?",
+      "english": "What is your favourite book?",
+      "mundari_devanagari": "आपेर मनके किताब कि?"
     },
     {
       "id": 94,
       "hindi": "क्या आप कहानी सुनना पसंद करते हो?",
-      "mundari_odia": "ଆପେ ଗଲ୍ପ ସୁନିଆ ପସଦ କରେ?",
-      "english": "Do you like listening to stories?"
+      "mundari_odia": "आपे गल्प सुनिआ पसद करे?",
+      "english": "Do you like listening to stories?",
+      "mundari_devanagari": "आपे गल्प सुनिआ पसद करे?"
     },
     {
       "id": 95,
       "hindi": "आप अपनी भाषा को गर्व के साथ बोलते हो?",
-      "mundari_odia": "ଆପେ ଆପେର ଭାସାକେ ଗର୍ବେ ସାତେ କଥା କହେ?",
-      "english": "Do you speak your language with pride?"
+      "mundari_odia": "आपे आपेर भासाके गर्बे साते कथा कहे?",
+      "english": "Do you speak your language with pride?",
+      "mundari_devanagari": "आपे आपेर भासाके गर्बे साते कथा कहे?"
     },
     {
       "id": 96,
       "hindi": "क्या आप अपनी जाति का सम्मान करते हो?",
-      "mundari_odia": "ଆପେ ଆପେର ଜାତିର ସମ୍ମାନ କରେ?",
-      "english": "Do you respect your ethnicity?"
+      "mundari_odia": "आपे आपेर जातिर सम्मान करे?",
+      "english": "Do you respect your ethnicity?",
+      "mundari_devanagari": "आपे आपेर जातिर सम्मान करे?"
     },
     {
       "id": 97,
       "hindi": "आप भविष्य में अपनी भाषा को सिखाना चाहते हो?",
-      "mundari_odia": "ଆପେ ଭବିସ୍ୟତେ ଆପେର ଭାସାକେ ସିକାଇତେ ଚାହେ?",
-      "english": "Would you like to teach your language in the future?"
+      "mundari_odia": "आपे भबिस्य़ते आपेर भासाके सिकाइते चाहे?",
+      "english": "Would you like to teach your language in the future?",
+      "mundari_devanagari": "आपे भबिस्य़ते आपेर भासाके सिकाइते चाहे?"
     },
     {
       "id": 98,
       "hindi": "क्या आप अपनी भाषा को सुरक्षित रखने में मदद कर सकते हो?",
-      "mundari_odia": "ଆପେ ଆପେର ଭାସାକେ ସୁରକ୍ଷିତ ରାକିଆ ସାହାୟ୍ୟ କରି ସକତ?",
-      "english": "Can you help keep your language safe?"
+      "mundari_odia": "आपे आपेर भासाके सुरक्षित राकिआ साहाय़्य़ करि सकत?",
+      "english": "Can you help keep your language safe?",
+      "mundari_devanagari": "आपे आपेर भासाके सुरक्षित राकिआ साहाय़्य़ करि सकत?"
     },
     {
       "id": 99,
       "hindi": "आप अपनी परंपरा को अगली पीढ़ी तक पहुँचाना चाहते हो?",
-      "mundari_odia": "ଆପେ ଆପେର ପରମ୍ପରାକେ ଅଗିଲ ପିଡି ତକ ପୋଚାଇତେ ଚାହେ?",
-      "english": "Do you want to pass your traditions to the next generation?"
+      "mundari_odia": "आपे आपेर परम्पराके अगिल पिडि तक पोचाइते चाहे?",
+      "english": "Do you want to pass your traditions to the next generation?",
+      "mundari_devanagari": "आपे आपेर परम्पराके अगिल पिडि तक पोचाइते चाहे?"
     },
     {
       "id": 100,
       "hindi": "क्या यह शिक्षा कार्यक्रम आपको पसंद है?",
-      "mundari_odia": "ଏ ସିକ୍ଷା ପ୍ରୋଗ୍ରାମ ଆପକେ ପସଦ?",
-      "english": "Do you like this education program?"
+      "mundari_odia": "ए सिक्षा प्रोग्राम आपके पसद?",
+      "english": "Do you like this education program?",
+      "mundari_devanagari": "ए सिक्षा प्रोग्राम आपके पसद?"
     }
   ]
 }
