@@ -73,9 +73,12 @@ flutter:
   assets:
     - assets/images/
     - assets/images/warli_background.png
+    - assets/textbook_assets/
     - assets/demo_corpus_100_sentences.json
     - assets/demo_audio/
     - assets/models/
+    - assets/models/mt/
+    - assets/models/tts/
 
   fonts:
     - family: NotoSansOriya

@@ -7,6 +7,8 @@ import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
+import '../../services/tts_service.dart';
+import '../learn/widgets/phase_selection_dialog.dart';
 
 /// Supported Question Types in the AyoVani learning flow.
 enum QuestionType {
@@ -253,6 +255,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   @override
   void initState() {
     super.initState();
+    TtsService().init();
     _currentQuestionIndex = widget.initialQuestionIndex.clamp(
       0,
       widget.questions.isNotEmpty ? widget.questions.length - 1 : 0,
@@ -284,8 +287,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
     if (widget.onPlayMundariAudio != null) {
       widget.onPlayMundariAudio!(text);
     } else {
-      // Hook for backend audio playback integration (pronunciation / TTS audio)
-      debugPrint('[AyoVani Audio] Play Mundari pronunciation for: "$text"');
+      TtsService().speak(text);
     }
   }
 
@@ -366,9 +368,14 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   // Check / Continue Logic
   // ---------------------------------------------------------------------------
   void _handleCheckOrContinue() {
-    // 1. If currently in answered + correct state, tapping action advances
+    // 1. If currently in answered + correct state, tapping action advances or finishes
     if (_isChecked && _isCorrect) {
-      _advanceToNextQuestion();
+      final isLastQuestion = _currentQuestionIndex == widget.questions.length - 1;
+      if (isLastQuestion) {
+        _finishPhase();
+      } else {
+        _advanceToNextQuestion();
+      }
       return;
     }
 
@@ -444,6 +451,10 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         _isChecked = true;
         _isCorrect = isAnswerCorrect;
       });
+
+      if (isAnswerCorrect) {
+        _playMundariAudio(_currentQuestion.correctAnswer);
+      }
     }
   }
 
@@ -459,15 +470,17 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
         _isCorrect = false;
       });
     } else {
-      // Reached the end of available questions (Question 5 completed)
-      if (widget.onCompletePhase != null) {
-        widget.onCompletePhase!();
-      } else if (widget.onNextQuestion != null) {
-        widget.onNextQuestion!();
-      } else {
-        _showPhaseCompletionDialog();
-      }
+      _finishPhase();
     }
+  }
+
+  void _finishPhase() {
+    PhaseSelectionDialog.showAfterPhaseCompletion(
+      context: context,
+      levelNumber: 1,
+      levelTitle: 'Level 1',
+      onCompletePhase: widget.onCompletePhase,
+    );
   }
 
   void _showPhaseCompletionDialog() {
@@ -1417,23 +1430,39 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
                 indicatorWidget,
                 const SizedBox(width: 16.0),
 
-                // Devanagari Option Text
+                // Option Text with Speaker Icon
                 Expanded(
-                  child: Text(
-                    text,
-                    style: TextStyle(
-                      fontFamilyFallback: const [
-                        'Noto Sans Devanagari',
-                        'Mangal',
-                        'Nirmala UI',
-                        'sans-serif',
-                      ],
-                      fontSize: isTablet ? 23.0 : 20.0,
-                      fontWeight: FontWeight.w700,
-                      color: isSelected && !_isChecked
-                          ? const Color(0xFF4C6647)
-                          : const Color(0xFF251E11),
-                    ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      MundariAudioButton(
+                        text: text,
+                        onTap: () => _playMundariAudio(text),
+                        iconSize: 22.0,
+                        color: isSelected && !_isChecked
+                            ? const Color(0xFF4C6647)
+                            : const Color(0xFF251E11),
+                      ),
+                      const SizedBox(width: 8.0),
+                      Expanded(
+                        child: Text(
+                          text,
+                          style: TextStyle(
+                            fontFamilyFallback: const [
+                              'Noto Sans Devanagari',
+                              'Mangal',
+                              'Nirmala UI',
+                              'sans-serif',
+                            ],
+                            fontSize: isTablet ? 23.0 : 20.0,
+                            fontWeight: FontWeight.w700,
+                            color: isSelected && !_isChecked
+                                ? const Color(0xFF4C6647)
+                                : const Color(0xFF251E11),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -1544,6 +1573,15 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
   // ---------------------------------------------------------------------------
   Widget _buildCheckButton(bool isTablet) {
     final isCompleted = _isChecked && _isCorrect;
+    final isLastQuestion = _currentQuestionIndex == widget.questions.length - 1;
+    final String buttonLabel;
+    if (!isCompleted) {
+      buttonLabel = 'CHECK';
+    } else if (isLastQuestion) {
+      buttonLabel = 'FINISH';
+    } else {
+      buttonLabel = 'CONTINUE';
+    }
 
     return Container(
       height: isTablet ? 56.0 : 52.0,
@@ -1566,7 +1604,7 @@ class _Phase1Question1ScreenState extends State<Phase1Question1Screen> {
           splashColor: Colors.white.withValues(alpha: 0.20),
           child: Center(
             child: Text(
-              isCompleted ? 'CONTINUE' : 'CHECK',
+              buttonLabel,
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: isTablet ? 17.0 : 16.0,
