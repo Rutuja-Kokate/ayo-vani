@@ -3,6 +3,7 @@ import '../../app/responsive/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_dimens.dart';
 import '../../app/theme/app_typography.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/subject_data.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_coming_soon.dart';
@@ -11,12 +12,6 @@ import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/ayo_subject_card.dart';
 
 /// Screen: Second / Grade 2 for AYOVAANI Teacher App.
-///
-/// In this prototype/MVP scope, all Class 2 subjects are Coming Soon:
-/// - Displays AYOVAANI Class 2 visual structure
-/// - Clearly communicates "Coming Soon"
-/// - No chapter is treated as functional
-/// - Does not navigate to Flashcards, Worksheets, Games, or Quizzes
 class SecondScreen extends StatefulWidget {
   const SecondScreen({
     super.key,
@@ -61,6 +56,7 @@ class _SecondScreenState extends State<SecondScreen> {
   Widget build(BuildContext context) {
     final isTablet = Responsive.isTabletOrLarger(context);
     final cornerSize = isTablet ? 135.0 : 95.0;
+    final l10n = AppLocalizations.of(context);
 
     return AyoScreenBackground(
       child: Scaffold(
@@ -69,7 +65,6 @@ class _SecondScreenState extends State<SecondScreen> {
           bottom: false,
           child: Stack(
             children: [
-              // Top-left Warli Corner Ornament
               Positioned(
                 top: 0,
                 left: 0,
@@ -80,8 +75,6 @@ class _SecondScreenState extends State<SecondScreen> {
                   ),
                 ),
               ),
-
-              // Top-right Warli Corner Ornament (Horizontally Mirrored)
               Positioned(
                 top: 0,
                 right: 0,
@@ -92,8 +85,6 @@ class _SecondScreenState extends State<SecondScreen> {
                   ),
                 ),
               ),
-
-              // Bottom-left Warli Corner Ornament
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -107,8 +98,6 @@ class _SecondScreenState extends State<SecondScreen> {
                   ),
                 ),
               ),
-
-              // Bottom-right Warli Corner Ornament
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -123,8 +112,6 @@ class _SecondScreenState extends State<SecondScreen> {
                   ),
                 ),
               ),
-
-              // Main Scrollable Content
               LayoutBuilder(
                 builder: (context, constraints) {
                   final horizontalPadding = isTablet ? 44.0 : AppSpacing.lg;
@@ -144,34 +131,19 @@ class _SecondScreenState extends State<SecondScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 1. Top Bar: Back Button + Centered AyoVaani Logo
                             _buildTopBar(isTablet),
-
                             SizedBox(height: isTablet ? 14.0 : 12.0),
-
-                            // 2. Class 2 Header: Title Info + Info Card
                             _buildClass2Header(isTablet),
-
                             SizedBox(height: isTablet ? 18.0 : 16.0),
-
-                            // 3. Primary Reusable Coming Soon Banner
-                            const AyoComingSoonCard(
-                              title: 'Class 2 / Second',
+                            AyoComingSoonCard(
+                              title: l10n?.classSecond ?? 'Second',
                               message:
-                                  'Learning content is coming soon.\nGrade 2 curriculum chapters and learning activities are currently in development.',
-                              badgeText: 'Coming Soon',
+                                  'Class 2 curriculum modules are coming soon.\nMultilingual lessons, vocabulary, and interactive activities for Grade 2 are currently being prepared.',
+                              badgeText: l10n?.labelComingSoon ?? 'Coming Soon',
                               icon: Icons.hourglass_top_rounded,
                             ),
-
                             SizedBox(height: isTablet ? 18.0 : 16.0),
-
-                            // 4. Subjects Section (All Coming Soon, Disabled)
                             _buildSubjectsContainer(isTablet),
-
-                            SizedBox(height: isTablet ? 16.0 : 14.0),
-
-                            // 5. Notice Card
-                            _buildCurriculumNoticeCard(isTablet),
                           ],
                         ),
                       ),
@@ -190,7 +162,6 @@ class _SecondScreenState extends State<SecondScreen> {
     );
   }
 
-  /// Top decorative Warli corner ornament.
   Widget _buildCornerDecoration({
     required bool isRight,
     required double size,
@@ -216,7 +187,6 @@ class _SecondScreenState extends State<SecondScreen> {
         : imageWidget;
   }
 
-  /// 1. Top Bar: Back Button at top-left, Centered AyoVaani Logo
   Widget _buildTopBar(bool isTablet) {
     final logoHeight = isTablet ? 100.0 : 80.0;
 
@@ -231,7 +201,6 @@ class _SecondScreenState extends State<SecondScreen> {
             child: InkWell(
               onTap: _handleBack,
               borderRadius: BorderRadius.circular(20.0),
-              splashColor: AppColors.primaryBurgundy.withValues(alpha: 0.12),
               child: Container(
                 width: 40.0,
                 height: 40.0,
@@ -268,8 +237,9 @@ class _SecondScreenState extends State<SecondScreen> {
     );
   }
 
-  /// 2. Header: Class 2 / Second
   Widget _buildClass2Header(bool isTablet) {
+    final l10n = AppLocalizations.of(context);
+
     final titleBlock = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -306,7 +276,7 @@ class _SecondScreenState extends State<SecondScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Second',
+                l10n?.classSecond ?? 'Second',
                 style: TextStyle(
                   fontFamily: AppTypography.headingFontFamily,
                   fontSize: isTablet ? 26.0 : 22.0,
@@ -318,7 +288,7 @@ class _SecondScreenState extends State<SecondScreen> {
               ),
               const SizedBox(height: 3.0),
               Text(
-                'Grade 2 | Learn, Listen, Speak',
+                l10n?.secondSubtitle ?? 'Grade 2 | Learn, Listen, Speak',
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: isTablet ? 13.5 : 12.5,
@@ -328,7 +298,7 @@ class _SecondScreenState extends State<SecondScreen> {
               ),
               const SizedBox(height: 2.0),
               Text(
-                'Elementary curriculum lessons designed for Class 2 learners.',
+                l10n?.secondDesc ?? 'Explore Grade 2 learning modules and activities.',
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: isTablet ? 13.0 : 12.0,
@@ -388,7 +358,7 @@ class _SecondScreenState extends State<SecondScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Curriculum',
+                  'Grade 2 Modules',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.5,
@@ -397,7 +367,7 @@ class _SecondScreenState extends State<SecondScreen> {
                   ),
                 ),
                 Text(
-                  '4 Subjects',
+                  l10n?.countSubjects(4) ?? '4 Subjects',
                   style: TextStyle(
                     fontFamily: AppTypography.headingFontFamily,
                     fontSize: isTablet ? 21.0 : 19.0,
@@ -408,7 +378,7 @@ class _SecondScreenState extends State<SecondScreen> {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Class Status',
+                  l10n?.labelSubjectStatus ?? 'Subject Status',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.0,
@@ -417,7 +387,7 @@ class _SecondScreenState extends State<SecondScreen> {
                   ),
                 ),
                 Text(
-                  'Coming Soon',
+                  l10n?.labelComingSoon ?? 'Coming Soon',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 12.5,
@@ -453,7 +423,6 @@ class _SecondScreenState extends State<SecondScreen> {
     }
   }
 
-  /// 4. Subjects Section (All Coming Soon, Disabled)
   Widget _buildSubjectsContainer(bool isTablet) {
     final subjects = Subject.class2Subjects;
 
@@ -477,7 +446,6 @@ class _SecondScreenState extends State<SecondScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Title Pill
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
             decoration: BoxDecoration(
@@ -494,7 +462,7 @@ class _SecondScreenState extends State<SecondScreen> {
                 ),
                 const SizedBox(width: 6.0),
                 Text(
-                  'Subjects',
+                  'Grade 2 Modules',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 13.0,
@@ -507,123 +475,17 @@ class _SecondScreenState extends State<SecondScreen> {
             ),
           ),
           SizedBox(height: isTablet ? 16.0 : 12.0),
-
-          // Subjects Grid / List: All non-clickable
-          if (isTablet)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      AyoSubjectCard(
-                        subject: subjects[0],
-                        onTap: null,
-                        isTablet: true,
-                      ),
-                      const SizedBox(height: 12.0),
-                      AyoSubjectCard(
-                        subject: subjects[2],
-                        onTap: null,
-                        isTablet: true,
-                      ),
-                    ],
-                  ),
+          Column(
+            children: [
+              for (int i = 0; i < subjects.length; i++) ...[
+                AyoSubjectCard(
+                  subject: subjects[i],
+                  onTap: null,
+                  isTablet: isTablet,
                 ),
-                const SizedBox(width: 14.0),
-                Expanded(
-                  child: Column(
-                    children: [
-                      AyoSubjectCard(
-                        subject: subjects[1],
-                        onTap: null,
-                        isTablet: true,
-                      ),
-                      const SizedBox(height: 12.0),
-                      AyoSubjectCard(
-                        subject: subjects[3],
-                        onTap: null,
-                        isTablet: true,
-                      ),
-                    ],
-                  ),
-                ),
+                if (i < subjects.length - 1) const SizedBox(height: 10.0),
               ],
-            )
-          else
-            Column(
-              children: [
-                for (int i = 0; i < subjects.length; i++) ...[
-                  AyoSubjectCard(
-                    subject: subjects[i],
-                    onTap: null,
-                    isTablet: false,
-                  ),
-                  if (i < subjects.length - 1) const SizedBox(height: 10.0),
-                ],
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// 5. Notice Card
-  Widget _buildCurriculumNoticeCard(bool isTablet) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: const Color(0xFFFBF7F0),
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(
-          color: const Color(0xFFEADFCF),
-          width: 1.0,
-        ),
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: isTablet ? 20.0 : 16.0,
-        vertical: 14.0,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38.0,
-            height: 38.0,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF7EBE7),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.lock_clock_rounded,
-              color: AppColors.primaryBurgundy,
-              size: 20.0,
-            ),
-          ),
-          const SizedBox(width: 14.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Grade 2 Curriculum Timeline',
-                  style: TextStyle(
-                    fontFamily: AppTypography.headingFontFamily,
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2.0),
-                Text(
-                  'Class 2 curriculum modules are scheduled for the next release phase.',
-                  style: TextStyle(
-                    fontFamily: AppTypography.bodyFontFamily,
-                    fontSize: 12.0,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
         ],
       ),

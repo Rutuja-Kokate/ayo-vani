@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../app/responsive/responsive.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimens.dart';
@@ -385,7 +386,7 @@ class _HandyActionsMatchGameState extends State<HandyActionsMatchGame> {
           ),
           const SizedBox(height: 6.0),
           Text(
-            'Select the matching Mundari word:',
+            AppLocalizations.of(context)?.gameSelectMundari ?? 'Select the matching Mundari word:',
             style: TextStyle(
               fontFamily: AppTypography.bodyFontFamily,
               fontSize: 13.0,

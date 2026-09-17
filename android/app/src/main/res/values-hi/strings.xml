@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App & Brand Names (Proper Nouns - Left Unchanged) -->
+    <string name="app_name">AYOVAANI</string>
+
+    <!-- Academic Subject Names (Proper Nouns - Left Unchanged per Exception Rule) -->
+    <string name="subject_english">English</string>
+    <string name="subject_math">Math</string>
+    <string name="subject_science">Science</string>
+    <string name="subject_hindi">Hindi</string>
+    <string name="subject_social_science">Social Science</string>
+    <string name="subject_computer">Computer</string>
+
+    <!-- General UI Buttons -->
+    <string name="button_submit">जमा करें</string>
+    <string name="button_next">अगला</string>
+    <string name="button_back">पीछे</string>
+    <string name="button_cancel">रद्द करें</string>
+    <string name="button_save">सहेजें</string>
+    <string name="button_retry">पुनः प्रयास करें</string>
+    <string name="button_play_again">फिर से खेलें</string>
+    <string name="button_download_pdf">पीडीएफ डाउनलोड करें</string>
+    <string name="button_print">प्रिंट करें</string>
+
+    <!-- Navigation & Menu Items -->
+    <string name="menu_home">होम</string>
+    <string name="menu_settings">सेटिंग्स</string>
+
+    <!-- UI Labels & Headers -->
+    <string name="label_search">खोजें</string>
+    <string name="label_filter">फ़िल्टर</string>
+    <string name="label_chapters">अध्याय</string>
+    <string name="label_total_chapters">कुल अध्याय</string>
+    <string name="label_subject_status">विषय स्थिति</string>
+    <string name="label_functional">कार्यशील</string>
+    <string name="label_available">उपलब्ध</string>
+    <string name="label_answer">उत्तर:</string>
+    <string name="label_answer_key">उत्तर कुंजी:</string>
+    <string name="label_riddle">पहेली</string>
+    <string name="label_exercise">अभ्यास:</string>
+    <string name="label_score">स्कॉर:</string>
+    <string name="label_well_done">बहुत बढ़िया!</string>
+    <string name="label_quiz_completed">क्विज़ पूर्ण!</string>
+
+    <!-- Input Hints -->
+    <string name="hint_search_chapters">अध्याय खोजें...</string>
+
+    <!-- Error Messages -->
+    <string name="error_generic">कुछ गलत हो गया</string>
+    <string name="error_network">नेटवर्क त्रुटि, कृपया पुनः प्रयास करें</string>
+</resources>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../app/theme/app_colors.dart';
 import '../app/theme/app_dimens.dart';
 import '../app/theme/app_typography.dart';
+import '../l10n/app_localizations.dart';
 
 /// Reusable Dropdown / Select Field with warm parchment styling.
 class AyoDropdownField<T> extends StatelessWidget {
@@ -111,6 +112,8 @@ class AyoLanguageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
@@ -124,7 +127,7 @@ class AyoLanguageSelector extends StatelessWidget {
           // Source Language Button
           Expanded(
             child: _buildLanguageTile(
-              label: 'Instruction Language',
+              label: l10n?.labelInstructionLanguage ?? 'Instruction Language',
               language: sourceLanguage,
               onTap: onSourceTap,
             ),
@@ -164,7 +167,7 @@ class AyoLanguageSelector extends StatelessWidget {
           // Target / Mother Tongue Language Button
           Expanded(
             child: _buildLanguageTile(
-              label: 'Mother Tongue',
+              label: l10n?.labelMotherTongue ?? 'Mother Tongue',
               language: targetLanguage,
               onTap: onTargetTap,
             ),
