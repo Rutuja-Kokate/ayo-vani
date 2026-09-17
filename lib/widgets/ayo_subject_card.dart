@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import '../app/theme/app_colors.dart';
 import '../app/theme/app_typography.dart';
+import '../l10n/app_localizations.dart';
 import '../models/subject_data.dart';
 
 /// Reusable subject card widget for class subject selection screens.
-///
-/// Distinct visual states:
-/// - Available: Active warm cream card, maroon accents, "✓ Available" green badge, clickable.
-/// - Unavailable: Subtle muted disabled styling, "Coming Soon" pill, non-clickable.
 class AyoSubjectCard extends StatelessWidget {
   const AyoSubjectCard({
     super.key,
@@ -29,13 +26,13 @@ class AyoSubjectCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: isAvailable
-              ? const Color(0xFFFDFBF7) // Warm cream card surface
-              : const Color(0xFFF8F5F0), // Soft muted disabled beige
+              ? const Color(0xFFFDFBF7)
+              : const Color(0xFFF8F5F0),
           borderRadius: BorderRadius.circular(16.0),
           border: Border.all(
             color: isAvailable
-                ? const Color(0xFFE2D6C5) // Refined warm border
-                : const Color(0xFFEAE4D9), // Subtle muted border
+                ? const Color(0xFFE2D6C5)
+                : const Color(0xFFEAE4D9),
             width: isAvailable ? 1.4 : 1.0,
           ),
           boxShadow: isAvailable
@@ -67,8 +64,8 @@ class AyoSubjectCard extends StatelessWidget {
                   height: isTablet ? 56.0 : 48.0,
                   decoration: BoxDecoration(
                     color: isAvailable
-                        ? const Color(0xFFF7EBE7) // Soft terracotta tint
-                        : const Color(0xFFECE7DE), // Muted neutral tint
+                        ? const Color(0xFFF7EBE7)
+                        : const Color(0xFFECE7DE),
                     borderRadius: BorderRadius.circular(14.0),
                     border: Border.all(
                       color: isAvailable
@@ -81,8 +78,8 @@ class AyoSubjectCard extends StatelessWidget {
                     subject.icon,
                     size: isTablet ? 26.0 : 22.0,
                     color: isAvailable
-                        ? AppColors.primaryBurgundy // Deep maroon
-                        : const Color(0xFF9E8F82), // Muted disabled tone
+                        ? AppColors.primaryBurgundy
+                        : const Color(0xFF9E8F82),
                   ),
                 ),
                 SizedBox(width: isTablet ? 16.0 : 13.0),
@@ -144,14 +141,13 @@ class AyoSubjectCard extends StatelessWidget {
                         ),
                       const SizedBox(height: 7.0),
 
-                      // Status Badge: "✓ Available" or "Coming Soon"
-                      _buildStatusBadge(isAvailable),
+                      // Status Badge: "Available" or "Coming Soon"
+                      _buildStatusBadge(context, isAvailable),
                     ],
                   ),
                 ),
                 const SizedBox(width: 8.0),
 
-                // Trailing Action / Status Indicator
                 if (isAvailable)
                   Container(
                     width: 32.0,
@@ -183,13 +179,14 @@ class AyoSubjectCard extends StatelessWidget {
     );
   }
 
-  /// Status badge widget
-  Widget _buildStatusBadge(bool isAvailable) {
+  Widget _buildStatusBadge(BuildContext context, bool isAvailable) {
+    final l10n = AppLocalizations.of(context);
+
     if (isAvailable) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 9.0, vertical: 3.0),
         decoration: BoxDecoration(
-          color: const Color(0xFFE8F0E4), // Soft green tint
+          color: const Color(0xFFE8F0E4),
           borderRadius: BorderRadius.circular(10.0),
           border: Border.all(
             color: const Color(0xFFCCE0C8),
@@ -205,18 +202,14 @@ class AyoSubjectCard extends StatelessWidget {
               color: Color(0xFF385E32),
             ),
             const SizedBox(width: 4.0),
-            Flexible(
-              child: Text(
-                'Available',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: AppTypography.bodyFontFamily,
-                  fontSize: 11.0,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF385E32),
-                  letterSpacing: 0.2,
-                ),
+            Text(
+              l10n?.labelAvailable ?? 'Available',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: 11.0,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF385E32),
+                letterSpacing: 0.2,
               ),
             ),
           ],
@@ -227,7 +220,7 @@ class AyoSubjectCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.5),
       decoration: BoxDecoration(
-        color: const Color(0xFFECE7DE), // Soft muted beige
+        color: const Color(0xFFECE7DE),
         borderRadius: BorderRadius.circular(10.0),
         border: Border.all(
           color: const Color(0xFFDDD5C8),
@@ -243,17 +236,13 @@ class AyoSubjectCard extends StatelessWidget {
             color: Color(0xFF8C7C6D),
           ),
           const SizedBox(width: 4.0),
-          Flexible(
-            child: Text(
-              'Coming Soon',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: AppTypography.bodyFontFamily,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF8C7C6D),
-              ),
+          Text(
+            l10n?.labelComingSoon ?? 'Coming Soon',
+            style: TextStyle(
+              fontFamily: AppTypography.bodyFontFamily,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF8C7C6D),
             ),
           ),
         ],

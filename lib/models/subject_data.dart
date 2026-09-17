@@ -170,37 +170,37 @@ class Subject {
     ),
   ];
 
-  /// Balvatika foundation modules - All Coming Soon in the current MVP scope.
+  /// Balvatika foundation modules - Active in current scope.
   static const List<Subject> balvatikaSubjects = [
     Subject(
       id: 'literacy_bv',
       name: 'Early Literacy & Rhymes',
       hindiName: 'आरंभिक भाषा व गीत',
       icon: Icons.record_voice_over_rounded,
-      isAvailable: false,
-      badgeText: 'Coming Soon',
+      isAvailable: true,
+      badgeText: 'Available',
       description: 'Oral storytelling, picture reading & tribal rhymes',
-      totalChapters: 12,
+      totalChapters: 6,
     ),
     Subject(
       id: 'numeracy_bv',
       name: 'Early Numeracy & Shapes',
       hindiName: 'आरंभिक गणित व आकृतियाँ',
       icon: Icons.format_list_numbered_rounded,
-      isAvailable: false,
-      badgeText: 'Coming Soon',
+      isAvailable: true,
+      badgeText: 'Available',
       description: 'Counting 1–10, object sorting & color identification',
-      totalChapters: 12,
+      totalChapters: 6,
     ),
     Subject(
       id: 'discovery_bv',
       name: 'Sensory & World Play',
       hindiName: 'पर्यावरण व खेल',
       icon: Icons.palette_rounded,
-      isAvailable: false,
-      badgeText: 'Coming Soon',
+      isAvailable: true,
+      badgeText: 'Available',
       description: 'Nature exploration, body senses & creative arts',
-      totalChapters: 12,
+      totalChapters: 6,
     ),
   ];
 }
