@@ -47,7 +47,7 @@ class _DemoCacheScreenState extends State<DemoCacheScreen> {
       
       final result = S2STranslationResult(
         hindiText: entry.hindi,
-        mundariText: entry.mundariOdia,
+        mundariText: entry.mundariDevanagari,
         audioPath: 'assets/demo_audio/${entry.audioFilename}',
         source: TranslationSource.demoCache,
         latencyMs: 15,
@@ -117,7 +117,7 @@ class _DemoCacheScreenState extends State<DemoCacheScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 4),
-                            Text('Mundari: ${entry.mundariOdia}', style: TextStyle(color: Colors.grey.shade700)),
+                            Text('Mundari: ${entry.mundariDevanagari}', style: TextStyle(color: Colors.grey.shade700)),
                           ],
                         ),
                         trailing: IconButton(

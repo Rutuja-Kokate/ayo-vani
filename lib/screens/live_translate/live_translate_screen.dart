@@ -177,14 +177,14 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
         if (match.entry != null) {
           // Cache Hit! Play audio and show result
           setState(() {
-            _translatedText = '${match.entry!.hindi}\n\n${match.entry!.mundariOdia}';
+            _translatedText = '${match.entry!.hindi}\n\n${match.entry!.mundariDevanagari}';
           });
           
           // Play the pre-recorded audio
           await audioPlayer.playTranslationResult(
             S2STranslationResult(
               hindiText: match.entry!.hindi,
-              mundariText: match.entry!.mundariOdia,
+              mundariText: match.entry!.mundariDevanagari,
               audioBytes: null,
               source: TranslationSource.demoCache,
               audioPath: 'assets/demo_audio/${match.entry!.audioFilename}',
@@ -285,12 +285,12 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
             children: [
               // Language Direction Toggle and Speed Control
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Row(
                   children: [
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFDFBF7),
                           borderRadius: BorderRadius.circular(30.0),
@@ -304,17 +304,25 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                             style: const TextStyle(
                               fontFamily: 'Inter',
                               fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
+                              fontSize: 15.0,
                               color: AppColors.textPrimary,
                             ),
                             items: const [
                               DropdownMenuItem(
                                 value: TranslationDirection.hindiToMundari,
-                                child: Text('Hindi → Mundari'),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text('Hindi → Mundari'),
+                                ),
                               ),
                               DropdownMenuItem(
                                 value: TranslationDirection.mundariToHindi,
-                                child: Text('Mundari → Hindi'),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text('Mundari → Hindi'),
+                                ),
                               ),
                             ],
                             onChanged: (val) {
@@ -329,9 +337,9 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFDFBF7),
                         borderRadius: BorderRadius.circular(30.0),
@@ -344,14 +352,26 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                           style: const TextStyle(
                             fontFamily: 'Inter',
                             fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
+                            fontSize: 15.0,
                             color: AppColors.textPrimary,
                           ),
                           items: const [
-                            DropdownMenuItem(value: 0.75, child: Text('0.75x')),
-                            DropdownMenuItem(value: 1.0, child: Text('1.0x')),
-                            DropdownMenuItem(value: 1.25, child: Text('1.25x')),
-                            DropdownMenuItem(value: 1.5, child: Text('1.5x')),
+                            DropdownMenuItem(
+                              value: 0.75,
+                              child: FittedBox(fit: BoxFit.scaleDown, child: Text('0.75x')),
+                            ),
+                            DropdownMenuItem(
+                              value: 1.0,
+                              child: FittedBox(fit: BoxFit.scaleDown, child: Text('1.0x')),
+                            ),
+                            DropdownMenuItem(
+                              value: 1.25,
+                              child: FittedBox(fit: BoxFit.scaleDown, child: Text('1.25x')),
+                            ),
+                            DropdownMenuItem(
+                              value: 1.5,
+                              child: FittedBox(fit: BoxFit.scaleDown, child: Text('1.5x')),
+                            ),
                           ],
                           onChanged: (val) {
                             if (val != null) {

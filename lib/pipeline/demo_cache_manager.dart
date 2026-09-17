@@ -5,15 +5,19 @@ import 'package:flutter/foundation.dart';
 class DemoCacheEntry {
   final int id;
   final String hindi;
+  final String mundariDevanagari;
   final String mundariOdia;
   final String audioFilename;
   final String? english;
   // Pre-tokenized set for O(1) fuzzy matching
   late final Set<String> hindiTokens;
 
+  String get mundariText => mundariDevanagari;
+
   DemoCacheEntry({
     required this.id,
     required this.hindi,
+    required this.mundariDevanagari,
     required this.mundariOdia,
     required this.audioFilename,
     this.english,
@@ -22,10 +26,12 @@ class DemoCacheEntry {
   }
 
   factory DemoCacheEntry.fromJson(Map<String, dynamic> json) {
+    final devText = (json['mundari_devanagari'] as String?) ?? (json['mundari_odia'] as String? ?? '');
     return DemoCacheEntry(
       id: json['id'] as int,
       hindi: json['hindi'] as String,
-      mundariOdia: json['mundari_odia'] as String,
+      mundariDevanagari: devText,
+      mundariOdia: devText,
       audioFilename: json['audio_file'] as String? ?? 'mundari_demo_${json['id'].toString().padLeft(3, '0')}.wav',
       english: json['english'] as String?,
     );

@@ -7,6 +7,7 @@ import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
+import '../../services/tts_service.dart';
 import '../learn/widgets/phase_selection_dialog.dart';
 
 /// Data model for a Sentence-Building Question in Phase 3.
@@ -165,6 +166,7 @@ class _Phase3QuestionScreenState extends State<Phase3QuestionScreen> {
   @override
   void initState() {
     super.initState();
+    TtsService().init();
     _random = widget.randomSeed != null
         ? math.Random(widget.randomSeed)
         : math.Random();
@@ -207,7 +209,7 @@ class _Phase3QuestionScreenState extends State<Phase3QuestionScreen> {
     if (widget.onPlayMundariAudio != null) {
       widget.onPlayMundariAudio!(text);
     } else {
-      debugPrint('[AyoVani Audio] Play Mundari for: "$text"');
+      TtsService().speak(text);
     }
   }
 
@@ -305,6 +307,10 @@ class _Phase3QuestionScreenState extends State<Phase3QuestionScreen> {
       _isChecked = true;
       _isCorrect = isAnswerCorrect;
     });
+
+    if (isAnswerCorrect) {
+      _playMundariAudio(_currentQuestion.mundariSentence);
+    }
   }
 
   void _advanceToNextQuestion() {

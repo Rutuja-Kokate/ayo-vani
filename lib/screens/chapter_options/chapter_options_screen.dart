@@ -82,28 +82,7 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
   final ContentGenerationService _contentGenerationService = ContentGenerationService();
   bool _isGenerating = false;
   
-  bool _hasFlashcardsCached = false;
-  bool _hasQuizzesCached = false;
-  bool _hasWorksheetsCached = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _checkCacheStatus();
-  }
-
-  Future<void> _checkCacheStatus() async {
-    final fc = await _contentGenerationService.isCached(widget.chapterName, GenerationArtifactType.flashcard);
-    final qz = await _contentGenerationService.isCached(widget.chapterName, GenerationArtifactType.quiz);
-    final ws = await _contentGenerationService.isCached(widget.chapterName, GenerationArtifactType.worksheet);
-    if (mounted) {
-      setState(() {
-        _hasFlashcardsCached = fc;
-        _hasQuizzesCached = qz;
-        _hasWorksheetsCached = ws;
-      });
-    }
-  }
 
   void _handleBack() {
     if (widget.onBack != null) {
@@ -254,7 +233,6 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
           setState(() {
             _isGenerating = false;
           });
-          _checkCacheStatus();
         }
       }
     }
@@ -537,6 +515,8 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
                   Flexible(
                     child: Text(
                       widget.chapterName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: AppTypography.headingFontFamily,
                         fontSize: isTablet ? 22.0 : 18.5,
@@ -762,7 +742,7 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
     );
   }
 
-  /// Mobile Single-column List: Flashcards ↓ Worksheets ↓ Games ↓ Quizzes
+  /// Mobile Single-column List: Flashcards → Worksheets → Games → Quizzes
   Widget _buildMobileOptionsList() {
     return Column(
       children: [
