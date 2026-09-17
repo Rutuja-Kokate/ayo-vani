@@ -3,23 +3,11 @@ import '../../app/responsive/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_dimens.dart';
 import '../../app/theme/app_typography.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 
 /// Screen: Teacher Profile for AYOVAANI Teacher App.
-///
-/// Replaces the old Progress module in the main navigation (Tab 3):
-/// Home | Learn | Tools | Profile
-///
-/// Features:
-/// - Teacher Profile header with avatar, name ("Teacher"), role ("Classroom Educator"), and [Edit Profile]
-/// - Offline Ready card matching the Home screen green status
-/// - My Classroom card (Class 1, Hindi → Mundari, 32 students)
-/// - Language Settings card (Teaching Language: Hindi → Mundari)
-/// - Downloaded Content card (24 lessons offline, 128 MB storage used)
-/// - App Settings list (Notifications, Offline Sync, Help & Support, About AYOVAANI)
-/// - Subtle Log Out button
-/// - Responsive: 1-column on mobile (Pixel 4), intelligent 2-column on tablet (Pixel Tablet)
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
     super.key,
@@ -32,6 +20,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isTablet = Responsive.isTabletOrLarger(context);
     final cornerSize = isTablet ? 135.0 : 95.0;
+    final l10n = AppLocalizations.of(context);
 
     return AyoScreenBackground(
       child: Scaffold(
@@ -40,7 +29,6 @@ class ProfileScreen extends StatelessWidget {
           bottom: false,
           child: Stack(
             children: [
-              // Top-left Warli Corner Ornament
               Positioned(
                 top: 0,
                 left: 0,
@@ -51,8 +39,6 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Top-right Warli Corner Ornament (Horizontally Mirrored)
               Positioned(
                 top: 0,
                 right: 0,
@@ -63,8 +49,6 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Bottom-left Warli Corner Ornament
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -78,8 +62,6 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Bottom-right Warli Corner Ornament
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -94,8 +76,6 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Main Scrollable Content
               LayoutBuilder(
                 builder: (context, constraints) {
                   final horizontalPadding = isTablet ? 44.0 : AppSpacing.lg;
@@ -115,14 +95,10 @@ class ProfileScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 1. Top Bar: Centered AyoVaani Logo
                             _buildTopLogo(isTablet),
-
                             SizedBox(height: isTablet ? 16.0 : 14.0),
-
-                            // 2. Section Heading: "Teacher Profile"
                             Text(
-                              'Teacher Profile',
+                              l10n?.profileScreenTitle ?? 'Teacher Profile',
                               style: TextStyle(
                                 fontFamily: AppTypography.headingFontFamily,
                                 fontSize: isTablet ? 24.0 : 21.0,
@@ -133,7 +109,7 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4.0),
                             Text(
-                              'Classroom settings, offline sync status, and educator preferences.',
+                              l10n?.profileScreenSub ?? 'Classroom settings, offline sync status, and educator preferences.',
                               style: TextStyle(
                                 fontFamily: AppTypography.bodyFontFamily,
                                 fontSize: isTablet ? 13.5 : 12.5,
@@ -141,28 +117,23 @@ class ProfileScreen extends StatelessWidget {
                                 color: AppColors.textSecondary,
                               ),
                             ),
-
                             SizedBox(height: isTablet ? 18.0 : 14.0),
-
-                            // 3. Main Content: 2-Column on Tablet, Single-Column on Mobile
                             if (isTablet)
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Left Column: Profile Card, Offline Status, My Classroom
                                   Expanded(
                                     child: Column(
                                       children: [
                                         _buildProfileHeaderCard(context, isTablet: true),
                                         const SizedBox(height: 14.0),
-                                        _buildOfflineStatusCard(isTablet: true),
+                                        _buildOfflineStatusCard(context, isTablet: true),
                                         const SizedBox(height: 14.0),
                                         _buildMyClassroomCard(context, isTablet: true),
                                       ],
                                     ),
                                   ),
                                   const SizedBox(width: 20.0),
-                                  // Right Column: Language Settings, Downloads, Settings, Log Out
                                   Expanded(
                                     child: Column(
                                       children: [
@@ -179,10 +150,9 @@ class ProfileScreen extends StatelessWidget {
                                 ],
                               )
                             else ...[
-                              // Mobile: Single-Column Order
                               _buildProfileHeaderCard(context, isTablet: false),
                               const SizedBox(height: 12.0),
-                              _buildOfflineStatusCard(isTablet: false),
+                              _buildOfflineStatusCard(context, isTablet: false),
                               const SizedBox(height: 12.0),
                               _buildMyClassroomCard(context, isTablet: false),
                               const SizedBox(height: 12.0),
@@ -208,7 +178,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// Decorative Warli corner ornament.
   Widget _buildCornerDecoration({
     required bool isRight,
     required double size,
@@ -234,7 +203,6 @@ class ProfileScreen extends StatelessWidget {
         : imageWidget;
   }
 
-  /// 1. Top Area: Centered AyoVaani Logo
   Widget _buildTopLogo(bool isTablet) {
     return SizedBox(
       width: double.infinity,
@@ -247,11 +215,12 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// 2. Teacher Profile Header Card
   Widget _buildProfileHeaderCard(BuildContext context, {required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFDFBF7), // Warm cream card surface
+        color: const Color(0xFFFDFBF7),
         borderRadius: BorderRadius.circular(18.0),
         border: Border.all(
           color: const Color(0xFFE8DECF),
@@ -268,7 +237,6 @@ class ProfileScreen extends StatelessWidget {
       padding: EdgeInsets.all(isTablet ? 18.0 : 15.0),
       child: Row(
         children: [
-          // Circular Teacher Avatar
           Container(
             width: isTablet ? 64.0 : 54.0,
             height: isTablet ? 64.0 : 54.0,
@@ -287,15 +255,13 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           SizedBox(width: isTablet ? 16.0 : 13.0),
-
-          // Name & Role
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Teacher',
+                  l10n?.profileTeacherName ?? 'Teacher',
                   style: TextStyle(
                     fontFamily: AppTypography.headingFontFamily,
                     fontSize: isTablet ? 20.0 : 18.0,
@@ -306,17 +272,17 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Classroom Educator',
+                  l10n?.profileTeacherRole ?? 'Classroom Educator',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: isTablet ? 13.0 : 12.0,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF8B4B3E), // Warm terracotta accent
+                    color: const Color(0xFF8B4B3E),
                   ),
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Primary Section • Tribal Language Focus',
+                  l10n?.profileTeacherFocus ?? 'Primary Section • Tribal Language Focus',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: isTablet ? 12.0 : 11.0,
@@ -328,8 +294,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8.0),
-
-          // [ Edit Profile ] Button
           Material(
             color: const Color(0xFFF6ECE0),
             borderRadius: BorderRadius.circular(16.0),
@@ -372,7 +336,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 4.0),
                     Text(
-                      'Edit',
+                      l10n?.btnEdit ?? 'Edit',
                       style: TextStyle(
                         fontFamily: AppTypography.bodyFontFamily,
                         fontSize: 11.5,
@@ -390,14 +354,15 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// 3. Offline Ready Status Card (reusing the exact Home screen visual language)
-  Widget _buildOfflineStatusCard({required bool isTablet}) {
+  Widget _buildOfflineStatusCard(BuildContext context, {required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F9F5), // Light cream with soft green tint
+        color: const Color(0xFFF7F9F5),
         borderRadius: BorderRadius.circular(16.0),
         border: Border.all(
-          color: const Color(0xFFD6E3D4), // Subtle soft green/olive border
+          color: const Color(0xFFD6E3D4),
           width: 1.0,
         ),
         boxShadow: const [
@@ -411,7 +376,6 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
       child: Row(
         children: [
-          // Soft green icon circle
           Container(
             width: 34.0,
             height: 34.0,
@@ -426,8 +390,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12.0),
-
-          // Status details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -437,7 +399,7 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        'Offline Ready',
+                        l10n?.labelOfflineReady ?? 'Offline Ready',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -449,7 +411,6 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8.0),
-                    // 24 lessons badge
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8.0,
@@ -460,7 +421,7 @@ class ProfileScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Text(
-                        '24 lessons',
+                        l10n?.profileLessonsSynced ?? '24 lessons',
                         style: TextStyle(
                           fontFamily: AppTypography.bodyFontFamily,
                           fontSize: 10.5,
@@ -473,7 +434,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Content synced today.',
+                  l10n?.homeContentSynced ?? 'Content synced today.',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 12.0,
@@ -483,7 +444,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  '24 lessons available offline',
+                  l10n?.profileLessonsOffline ?? '24 lessons available offline',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.5,
@@ -499,8 +460,9 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// 4. My Classroom Card
   Widget _buildMyClassroomCard(BuildContext context, {required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFFDFBF7),
@@ -537,7 +499,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(width: 8.0),
               Text(
-                'My Classroom',
+                l10n?.profileMyClassroom ?? 'My Classroom',
                 style: TextStyle(
                   fontFamily: AppTypography.headingFontFamily,
                   fontSize: 16.0,
@@ -549,26 +511,24 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12.0),
-
-          // 3 Details Rows: Current Class, Language, Students
           _buildInfoRow(
             icon: Icons.auto_stories_rounded,
-            label: 'Current Class',
+            label: l10n?.profileCurrentClass ?? 'Current Class',
             value: 'Class 1',
             accentColor: AppColors.primaryBurgundy,
           ),
           const Divider(height: 16.0, color: Color(0xFFEFE8DD), thickness: 0.8),
           _buildInfoRow(
             icon: Icons.translate_rounded,
-            label: 'Language',
+            label: l10n?.profileLanguage ?? 'Language',
             value: 'Hindi → Mundari',
             accentColor: const Color(0xFF8B4B3E),
           ),
           const Divider(height: 16.0, color: Color(0xFFEFE8DD), thickness: 0.8),
           _buildInfoRow(
             icon: Icons.groups_rounded,
-            label: 'Students',
-            value: '32 students',
+            label: l10n?.profileStudents ?? 'Students',
+            value: l10n?.profileStudentsCount ?? '32 students',
             accentColor: const Color(0xFF5A7854),
           ),
         ],
@@ -576,7 +536,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// Info row component
   Widget _buildInfoRow({
     required IconData icon,
     required String label,
@@ -614,8 +573,9 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// 5. Language Settings Card
   Widget _buildLanguageSettingsCard(BuildContext context, {required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFFDFBF7),
@@ -652,7 +612,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(width: 8.0),
               Text(
-                'Language Settings',
+                l10n?.profileLanguageSettings ?? 'Language Settings',
                 style: TextStyle(
                   fontFamily: AppTypography.headingFontFamily,
                   fontSize: 16.0,
@@ -664,8 +624,6 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12.0),
-
-          // Teaching Language row with right chevron
           Material(
             color: const Color(0xFFFAF6EE),
             borderRadius: BorderRadius.circular(12.0),
@@ -696,7 +654,7 @@ class ProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Teaching Language',
+                          l10n?.profileTeachingLanguage ?? 'Teaching Language',
                           style: TextStyle(
                             fontFamily: AppTypography.bodyFontFamily,
                             fontSize: 11.5,
@@ -732,8 +690,9 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// 6. Downloaded Content Card
   Widget _buildDownloadsCard(BuildContext context, {required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFFDFBF7),
@@ -770,7 +729,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(width: 8.0),
               Text(
-                'Downloaded Content',
+                l10n?.profileDownloadedContent ?? 'Downloaded Content',
                 style: TextStyle(
                   fontFamily: AppTypography.headingFontFamily,
                   fontSize: 16.0,
@@ -782,8 +741,6 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12.0),
-
-          // Download status items
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -792,7 +749,7 @@ class ProfileScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Available Offline',
+                      l10n?.profileAvailableOffline ?? 'Available Offline',
                       style: TextStyle(
                         fontFamily: AppTypography.bodyFontFamily,
                         fontSize: 11.5,
@@ -802,7 +759,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 2.0),
                     Text(
-                      '24 lessons available offline',
+                      l10n?.profileLessonsOffline ?? '24 lessons available offline',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -820,7 +777,7 @@ class ProfileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'Storage Used',
+                    l10n?.profileStorageUsed ?? 'Storage Used',
                     style: TextStyle(
                       fontFamily: AppTypography.bodyFontFamily,
                       fontSize: 11.5,
@@ -847,27 +804,28 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// 7. App Settings Card (List-style)
   Widget _buildAppSettingsCard(BuildContext context, {required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
+
     final settingsItems = [
-      const _SettingItemData(
+      _SettingItemData(
         icon: Icons.notifications_none_rounded,
-        title: 'Notifications',
-        description: 'Classroom alerts & reminder updates',
+        title: l10n?.profileNotificationsTitle ?? 'Notifications',
+        description: l10n?.profileNotificationsSub ?? 'Classroom alerts & reminder updates',
       ),
-      const _SettingItemData(
+      _SettingItemData(
         icon: Icons.sync_rounded,
-        title: 'Offline Sync',
-        description: 'Sync lessons when Wi-Fi is available',
+        title: l10n?.profileOfflineSyncTitle ?? 'Offline Sync',
+        description: l10n?.profileOfflineSyncSub ?? 'Sync lessons when Wi-Fi is available',
       ),
-      const _SettingItemData(
+      _SettingItemData(
         icon: Icons.help_outline_rounded,
-        title: 'Help & Support',
-        description: 'Teacher guide & classroom FAQs',
+        title: l10n?.profileHelpTitle ?? 'Help & Support',
+        description: l10n?.profileHelpSub ?? 'Teacher guide & classroom FAQs',
       ),
-      const _SettingItemData(
+      _SettingItemData(
         icon: Icons.info_outline_rounded,
-        title: 'About AYOVAANI',
+        title: l10n?.profileAboutTitle ?? 'About AYOVAANI',
         description: 'Version 1.0.0 (MVP Prototype)',
       ),
     ];
@@ -908,7 +866,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(width: 8.0),
               Text(
-                'Settings',
+                l10n?.profileSettingsSection ?? 'Settings',
                 style: TextStyle(
                   fontFamily: AppTypography.headingFontFamily,
                   fontSize: 16.0,
@@ -920,8 +878,6 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10.0),
-
-          // List Items
           for (int i = 0; i < settingsItems.length; i++) ...[
             _buildSettingTile(context, settingsItems[i]),
             if (i < settingsItems.length - 1)
@@ -1002,8 +958,9 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// 8. Log Out Button (subtle deep maroon, visually secondary)
   Widget _buildLogoutButton(BuildContext context, {required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
+
     return Center(
       child: Material(
         color: Colors.transparent,
@@ -1046,7 +1003,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 8.0),
                 Text(
-                  'Log Out',
+                  l10n?.btnLogOut ?? 'Log Out',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 13.5,
