@@ -311,6 +311,7 @@ class _HandyActionsMatchGameState extends State<HandyActionsMatchGame> {
               border: Border.all(color: const Color(0xFFE2D4C0)),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.star_rounded, color: Color(0xFFD49B2A), size: 20.0),
                 const SizedBox(width: 4.0),

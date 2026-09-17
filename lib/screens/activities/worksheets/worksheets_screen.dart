@@ -9,6 +9,7 @@ import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
 import '../../../services/worksheet_pdf_service.dart';
+import '../../../services/content_generation_service.dart';
 
 class OddOneOutRow {
   final List<EnglishMundariWord> items;
@@ -39,9 +40,48 @@ class WorksheetsScreen extends StatefulWidget {
 }
 
 class _WorksheetsScreenState extends State<WorksheetsScreen> {
+  final ContentGenerationService _ragService = ContentGenerationService();
   int _navIndex = 1;
   int _selectedWorksheet = 0;
   bool _isDownloading = false;
+  bool _isRegenerating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWorksheet();
+  }
+
+  Future<void> _loadWorksheet({bool forceRefresh = false}) async {
+    if (forceRefresh) {
+      setState(() => _isRegenerating = true);
+    }
+    try {
+      await _ragService.generateWorksheet(
+        widget.chapterName,
+        widget.className,
+        forceRefresh: forceRefresh,
+      );
+      if (mounted) {
+        setState(() {
+          _isRegenerating = false;
+        });
+        if (forceRefresh) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ RAG कार्यपत्रक (Worksheet) पुनः जनरेट एवं सहेजा गया!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('[RAG] Failed to load/generate worksheet: $e');
+      if (mounted) {
+        setState(() => _isRegenerating = false);
+      }
+    }
+  }
 
   void _handleBack() {
     if (widget.onBack != null) {
@@ -229,6 +269,22 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 8.0),
+          IconButton.filledTonal(
+            onPressed: _isRegenerating ? null : () => _loadWorksheet(forceRefresh: true),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFFC88A22).withValues(alpha: 0.15),
+              foregroundColor: const Color(0xFFC88A22),
+            ),
+            icon: _isRegenerating
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFC88A22)),
+                  )
+                : const Icon(Icons.refresh_rounded, size: 18),
+            tooltip: 'नया RAG वर्कशीट तैयार करें',
           ),
         ],
       ),
@@ -781,33 +837,35 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
             child: Row(
               children: [
                 // Syllable boxes
-                Wrap(
-                  spacing: 6.0,
-                  runSpacing: 4.0,
-                  children: sampleWords[i].syllables.map((syl) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(
-                          color: const Color(0xFFC88A22),
-                          width: 1.2,
+                Expanded(
+                  child: Wrap(
+                    spacing: 6.0,
+                    runSpacing: 4.0,
+                    children: sampleWords[i].syllables.map((syl) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(
+                            color: const Color(0xFFC88A22),
+                            width: 1.2,
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        syl.toLowerCase(),
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: isTablet ? 14.0 : 13.0,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                        child: Text(
+                          syl.toLowerCase(),
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: isTablet ? 14.0 : 13.0,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
-                const SizedBox(width: 10.0),
+                const SizedBox(width: 8.0),
 
                 // Arrow / Connector
                 const Icon(
@@ -1274,8 +1332,10 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
   }
 
   Widget _buildActionButtons(bool isTablet) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 16.0,
+      runSpacing: 12.0,
       children: [
         ElevatedButton.icon(
           onPressed: _isDownloading ? null : () async {
@@ -1320,7 +1380,6 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           ),
         ),
-        const SizedBox(width: 16.0),
         OutlinedButton.icon(
           onPressed: _isDownloading ? null : () async {
             setState(() => _isDownloading = true);

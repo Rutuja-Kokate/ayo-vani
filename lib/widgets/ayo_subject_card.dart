@@ -205,14 +205,18 @@ class AyoSubjectCard extends StatelessWidget {
               color: Color(0xFF385E32),
             ),
             const SizedBox(width: 4.0),
-            Text(
-              'Available',
-              style: TextStyle(
-                fontFamily: AppTypography.bodyFontFamily,
-                fontSize: 11.0,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF385E32),
-                letterSpacing: 0.2,
+            Flexible(
+              child: Text(
+                'Available',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: AppTypography.bodyFontFamily,
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF385E32),
+                  letterSpacing: 0.2,
+                ),
               ),
             ),
           ],
@@ -239,13 +243,17 @@ class AyoSubjectCard extends StatelessWidget {
             color: Color(0xFF8C7C6D),
           ),
           const SizedBox(width: 4.0),
-          Text(
-            'Coming Soon',
-            style: TextStyle(
-              fontFamily: AppTypography.bodyFontFamily,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF8C7C6D),
+          Flexible(
+            child: Text(
+              'Coming Soon',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF8C7C6D),
+              ),
             ),
           ),
         ],
