@@ -216,11 +216,13 @@ void main() {
 
       // Verify Correct Feedback
       expect(find.text('शानदार! सही उत्तर (Excellent! Correct)'), findsOneWidget);
-      expect(find.text('CONTINUE'), findsOneWidget);
+      // Q5 (last question) shows FINISH instead of CONTINUE
+      expect(find.text('FINISH'), findsOneWidget);
 
-      // Tap CONTINUE -> opens Phase 1 Completed Dialog!
-      await tapVisible(tester, find.text('CONTINUE'));
-      expect(find.text('Phase 1 Completed!'), findsOneWidget);
+      // Tap FINISH -> opens Phase Selection popup (not a completion alert)
+      await tapVisible(tester, find.text('FINISH'));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Choose a Phase'), findsOneWidget);
     });
 
     testWidgets('renders Question 5 cleanly on tablet layout without overflow', (tester) async {

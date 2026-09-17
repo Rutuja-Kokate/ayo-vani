@@ -25,11 +25,15 @@ class PhaseSelectionDialog extends StatelessWidget {
     required this.levelNumber,
     required this.levelTitle,
     this.onStartPhase,
+    this.phaseNames,
+    this.phaseSubtitles,
   });
 
   final int levelNumber;
   final String levelTitle;
   final void Function(int phaseNumber)? onStartPhase;
+  final List<String>? phaseNames;
+  final List<String?>? phaseSubtitles;
 
   /// Helper to open the phase selection dialog with smooth transition
   static Future<void> show({
@@ -37,6 +41,8 @@ class PhaseSelectionDialog extends StatelessWidget {
     required int levelNumber,
     required String levelTitle,
     void Function(int phaseNumber)? onStartPhase,
+    List<String>? phaseNames,
+    List<String?>? phaseSubtitles,
   }) {
     return showGeneralDialog<void>(
       context: context,
@@ -49,6 +55,8 @@ class PhaseSelectionDialog extends StatelessWidget {
           levelNumber: levelNumber,
           levelTitle: levelTitle,
           onStartPhase: onStartPhase,
+          phaseNames: phaseNames,
+          phaseSubtitles: phaseSubtitles,
         );
       },
       transitionBuilder: (context, animation, secondaryAnimation, child) {
@@ -63,6 +71,45 @@ class PhaseSelectionDialog extends StatelessWidget {
             child: child,
           ),
         );
+      },
+    );
+  }
+
+  /// Opens the PhaseSelectionDialog from a completed phase question screen,
+  /// triggering any completion callbacks and allowing immediate selection
+  /// and launching of another phase via pushReplacement.
+  static Future<void> showAfterPhaseCompletion({
+    required BuildContext context,
+    int levelNumber = 1,
+    String levelTitle = 'Level 1',
+    VoidCallback? onCompletePhase,
+  }) {
+    onCompletePhase?.call();
+    return show(
+      context: context,
+      levelNumber: levelNumber,
+      levelTitle: levelTitle,
+      onStartPhase: (phaseNumber) {
+        if (!context.mounted) return;
+        if (phaseNumber == 1) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute<void>(
+              builder: (context) => const Phase1Question1Screen(),
+            ),
+          );
+        } else if (phaseNumber == 2) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute<void>(
+              builder: (context) => const Phase2QuestionScreen(),
+            ),
+          );
+        } else if (phaseNumber == 3) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute<void>(
+              builder: (context) => const Phase3QuestionScreen(),
+            ),
+          );
+        }
       },
     );
   }
@@ -297,7 +344,8 @@ class PhaseSelectionDialog extends StatelessWidget {
                         context: context,
                         isUnlocked: true,
                         phaseNumber: 1,
-                        questionCount: '5 Questions',
+                        phaseTitle: _getPhaseTitle(0, 1),
+                        questionCount: _getPhaseSubtitle(0, 1),
                         iconWidget: const _OpenBookPhaseIcon(),
                         onTap: () => _handlePhase1Tap(context),
                       ),
@@ -308,7 +356,8 @@ class PhaseSelectionDialog extends StatelessWidget {
                         context: context,
                         isUnlocked: true,
                         phaseNumber: 2,
-                        questionCount: '5 Questions',
+                        phaseTitle: _getPhaseTitle(1, 2),
+                        questionCount: _getPhaseSubtitle(1, 2),
                         iconWidget: const _PencilPhaseIcon(),
                         onTap: () => _handlePhase2Tap(context),
                       ),
@@ -319,7 +368,8 @@ class PhaseSelectionDialog extends StatelessWidget {
                         context: context,
                         isUnlocked: true,
                         phaseNumber: 3,
-                        questionCount: '5 Questions',
+                        phaseTitle: _getPhaseTitle(2, 3),
+                        questionCount: _getPhaseSubtitle(2, 3),
                         iconWidget: const _TrophyPhaseIcon(),
                         onTap: () => _handlePhase3Tap(context),
                       ),
@@ -334,11 +384,30 @@ class PhaseSelectionDialog extends StatelessWidget {
     );
   }
 
+  String _getPhaseTitle(int index, int phaseNumber) {
+    if (phaseNames != null && index < phaseNames!.length) {
+      return phaseNames![index];
+    }
+    return 'Phase $phaseNumber';
+  }
+
+  String? _getPhaseSubtitle(int index, int phaseNumber) {
+    if (phaseSubtitles != null && index < phaseSubtitles!.length) {
+      return phaseSubtitles![index];
+    }
+    final title = _getPhaseTitle(index, phaseNumber);
+    if (title == 'Learning Phase') {
+      return null;
+    }
+    return '5 Questions';
+  }
+
   Widget _buildPhaseCard({
     required BuildContext context,
     required bool isUnlocked,
     required int phaseNumber,
-    required String questionCount,
+    required String phaseTitle,
+    String? questionCount,
     required Widget iconWidget,
     required VoidCallback onTap,
   }) {
@@ -399,7 +468,7 @@ class PhaseSelectionDialog extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6.0),
                         ),
                         child: Text(
-                          'Phase $phaseNumber',
+                          phaseTitle,
                           style: TextStyle(
                             fontFamily: AppTypography.bodyFontFamily,
                             fontSize: 12.0,
@@ -410,18 +479,19 @@ class PhaseSelectionDialog extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 3.5),
-
-                      // Questions count
-                      Text(
-                        questionCount,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF765E49),
+                      if (questionCount != null && questionCount.isNotEmpty) ...[
+                        const SizedBox(height: 3.5),
+                        // Questions count
+                        Text(
+                          questionCount,
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF765E49),
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
