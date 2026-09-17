@@ -10,6 +10,7 @@ import '../../widgets/ayo_screen_background.dart';
 import '../activities/flashcards/flashcards_screen.dart';
 import '../activities/games/games_screen.dart';
 import '../activities/quizzes/quizzes_screen.dart';
+import '../activities/resources/resources_screen.dart';
 import '../activities/worksheets/worksheets_screen.dart';
 import 'widgets/activity_card_illustrations.dart';
 import 'widgets/learning_option_card.dart';
@@ -158,6 +159,25 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
       ),
     );
   }
+
+  void _navigateToResources() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => ResourcesScreen(
+          className: widget.className,
+          chapterNumber: widget.chapterNumber,
+          chapterName: widget.chapterName,
+          subject: widget.subject,
+          onNavigateTab: widget.onNavigateTab,
+        ),
+      ),
+    );
+  }
+
+  bool get _shouldShowResources =>
+      widget.className.toLowerCase() == 'first' &&
+      widget.subject.toLowerCase() == 'english';
+
 
   Future<void> _showGenerateBottomSheet() async {
     final result = await showModalBottomSheet<GenerationArtifactType>(
@@ -739,11 +759,27 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
             ),
           ],
         ),
+        if (_shouldShowResources) ...[
+          const SizedBox(height: 18.0),
+          // Row 3: Resources
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _buildResourcesCard(isTablet: true),
+              ),
+              const SizedBox(width: 18.0),
+              const Expanded(
+                child: SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
 
-  /// Mobile Single-column List: Flashcards → Worksheets → Games → Quizzes
+  /// Mobile Single-column List: Flashcards → Worksheets → Games → Quizzes → Resources
   Widget _buildMobileOptionsList() {
     return Column(
       children: [
@@ -754,6 +790,10 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
         _buildGamesCard(isTablet: false),
         const SizedBox(height: 14.0),
         _buildQuizzesCard(isTablet: false),
+        if (_shouldShowResources) ...[
+          const SizedBox(height: 14.0),
+          _buildResourcesCard(isTablet: false),
+        ],
       ],
     );
   }
@@ -838,6 +878,23 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
       onTap: _navigateToQuizzes,
     );
   }
+
+  /// 5. Resources Card
+  Widget _buildResourcesCard({required bool isTablet}) {
+    return LearningOptionCard(
+      title: 'Resources',
+      subtitle: 'Additional learning materials',
+      borderColor: const Color(0xFF3B5A82), // Refined Slate Blue outline
+      isTablet: isTablet,
+      iconWidget: _buildResourcesIcon(isTablet),
+      illustration: ResourcesIllustration(
+        chapterNumber: widget.chapterNumber,
+        isCompact: !isTablet,
+      ),
+      onTap: _navigateToResources,
+    );
+  }
+
 
   // --- Left Action Icons strictly styled like the reference ---
 
@@ -1050,6 +1107,72 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
             child: Icon(
               Icons.lightbulb_rounded,
               size: isTablet ? 26.0 : 22.0,
+              color: const Color(0xFFD49B2A),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResourcesIcon(bool isTablet) {
+    final size = isTablet ? 56.0 : 48.0;
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        children: [
+          // Tilted background leaf
+          Positioned(
+            right: 0,
+            top: 2,
+            child: Transform.rotate(
+              angle: 0.18,
+              child: Container(
+                width: size * 0.65,
+                height: size * 0.78,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF2EADC),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(color: const Color(0xFF3B5A82), width: 1.5),
+                ),
+              ),
+            ),
+          ),
+          // Foreground folder with icon
+          Positioned(
+            left: 0,
+            top: 6,
+            child: Transform.rotate(
+              angle: -0.1,
+              child: Container(
+                width: size * 0.68,
+                height: size * 0.8,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(color: const Color(0xFF3B5A82), width: 1.5),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x12000000), blurRadius: 4, offset: Offset(0, 2)),
+                  ],
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.folder_copy_rounded,
+                    size: isTablet ? 22.0 : 18.0,
+                    color: const Color(0xFF3B5A82),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Floating bookmark
+          Positioned(
+            right: 2,
+            bottom: 2,
+            child: Icon(
+              Icons.bookmark_rounded,
+              size: isTablet ? 18.0 : 15.0,
               color: const Color(0xFFD49B2A),
             ),
           ),
