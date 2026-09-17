@@ -8,6 +8,7 @@ class RagFlashcardItem {
   final String meaningHindi;
   final String meaningMundari;
   final String emoji;
+  final String? imageAsset;
 
   RagFlashcardItem({
     required this.id,
@@ -16,6 +17,7 @@ class RagFlashcardItem {
     required this.meaningHindi,
     required this.meaningMundari,
     required this.emoji,
+    this.imageAsset,
   });
 
   factory RagFlashcardItem.fromJson(Map<String, dynamic> json) =>
@@ -26,6 +28,7 @@ class RagFlashcardItem {
         meaningHindi: json['meaning'] as String? ?? '',
         meaningMundari: json['meaning_mundari'] as String? ?? json['meaning'] as String? ?? '',
         emoji: json['emoji'] as String? ?? '✨',
+        imageAsset: json['imageAsset'] as String? ?? json['image_path'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -35,6 +38,7 @@ class RagFlashcardItem {
         'meaning': meaningHindi,
         'meaning_mundari': meaningMundari,
         'emoji': emoji,
+        if (imageAsset != null) 'imageAsset': imageAsset,
       };
 }
 

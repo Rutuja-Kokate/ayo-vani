@@ -7,8 +7,8 @@ import '../../l10n/app_localizations.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
-import '../tools/tools_screen.dart';
 import 'student_levels_screen.dart';
+import 'teacher_levels_screen.dart';
 
 /// Screen: Learn Module Entry Screen for AYOVAANI.
 ///
@@ -65,7 +65,9 @@ class LearnScreen extends StatelessWidget {
     } else {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (context) => const ToolsScreen(),
+          builder: (context) => TeacherLevelsScreen(
+            onNavigateTab: onNavigateTab,
+          ),
         ),
       );
     }

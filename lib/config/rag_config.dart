@@ -6,7 +6,7 @@ library;
 
 /// Your Google Gemini API key.
 /// Get one at: https://aistudio.google.com/app/apikey
-const String kGeminiApiKey = 'AIzaSyDXw8e5_bsMdl0Ipnz2W-R68-WXrFj2gMs';
+const String kGeminiApiKey = 'AIzaSyCPoaNNhtfz3Mi3h9BUIUaIhYhCFR1AXCQ';
 
 /// Gemini model to use for content generation.
 const String kGeminiModel = 'gemini-2.5-flash';
