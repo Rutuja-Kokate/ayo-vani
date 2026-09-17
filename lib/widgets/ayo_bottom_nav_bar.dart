@@ -1,19 +1,10 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../app/responsive/responsive.dart';
 import '../app/theme/app_colors.dart';
 import '../app/theme/app_typography.dart';
 
 /// Fixed 4-destination bottom navigation bar for AYOVAANI.
-///
-/// Strictly reproduces the bottom navigation design shown in:
-/// - Screen 03: Home (Dashboard)
-/// - Panel 22: Design Elements (Bottom Navigation)
-///
-/// Destinations:
-/// 0: Home (house icon)
-/// 1: Learn (open book icon)
-/// 2: Translate (translate icon)
-/// 3: Profile (person icon)
 class AyoBottomNavBar extends StatelessWidget {
   const AyoBottomNavBar({
     super.key,
@@ -27,23 +18,24 @@ class AyoBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isTablet = Responsive.isTabletOrLarger(context);
+    final l10n = AppLocalizations.of(context);
 
-    final items = const [
+    final items = [
       _BottomNavItemData(
         icon: Icons.home_rounded,
-        label: 'Home',
+        label: l10n?.navHome ?? 'Home',
       ),
       _BottomNavItemData(
         icon: Icons.menu_book_rounded,
-        label: 'Learn',
+        label: l10n?.navLearn ?? 'Learn',
       ),
       _BottomNavItemData(
         icon: Icons.translate_rounded,
-        label: 'Translate',
+        label: l10n?.navTranslate ?? 'Translate',
       ),
       _BottomNavItemData(
         icon: Icons.person_rounded,
-        label: 'Profile',
+        label: l10n?.navProfile ?? 'Profile',
       ),
     ];
 
@@ -120,8 +112,8 @@ class _BottomNavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isSelected
-        ? AppColors.primaryBurgundy // #671D21
-        : const Color(0xFF756760); // Muted dark brown/gray
+        ? AppColors.primaryBurgundy
+        : const Color(0xFF756760);
 
     return Material(
       color: Colors.transparent,

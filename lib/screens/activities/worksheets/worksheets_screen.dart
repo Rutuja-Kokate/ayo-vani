@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../app/responsive/responsive.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimens.dart';
@@ -236,11 +237,12 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
   }
 
   Widget _buildWorksheetTabs(bool isTablet) {
+    final l10n = AppLocalizations.of(context);
     final sheets = [
-      '1. Tracing & Writing',
-      '2. Matching & Drawing',
-      '3. Riddles',
-      '4. Odd One Out',
+      l10n?.worksheetTabTracing ?? '1. Tracing & Writing',
+      l10n?.worksheetTabMatching ?? '2. Matching & Drawing',
+      l10n?.worksheetTabRiddles ?? '3. Riddles',
+      l10n?.worksheetTabOddOneOut ?? '4. Odd One Out',
     ];
 
     return Wrap(
@@ -1310,7 +1312,7 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
                 )
               : const Icon(Icons.download_rounded, color: Colors.white, size: 20.0),
           label: Text(
-            _isDownloading ? 'Generating...' : 'Download PDF',
+            _isDownloading ? 'Generating...' : (AppLocalizations.of(context)?.btnDownloadPdf ?? 'Download PDF'),
             style: const TextStyle(
                 fontFamily: 'Inter', color: Colors.white, fontWeight: FontWeight.w600),
           ),
@@ -1344,8 +1346,8 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
             }
           },
           icon: const Icon(Icons.print_rounded, color: AppColors.textPrimary, size: 20.0),
-          label: const Text(
-            'Print',
+          label: Text(
+            AppLocalizations.of(context)?.btnPrint ?? 'Print',
             style: TextStyle(
                 fontFamily: 'Inter',
                 color: AppColors.textPrimary,

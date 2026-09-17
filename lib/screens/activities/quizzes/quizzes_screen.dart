@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../app/responsive/responsive.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimens.dart';
@@ -547,7 +548,9 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                 onPressed: _nextQuestion,
                 icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
                 label: Text(
-                  _currentQuestionIndex < _questions.length - 1 ? 'Next Question' : 'View Results',
+                  _currentQuestionIndex < _questions.length - 1
+                      ? (AppLocalizations.of(context)?.btnNext ?? 'Next Question')
+                      : (AppLocalizations.of(context)?.labelQuizCompleted ?? 'View Results'),
                   style: const TextStyle(fontFamily: 'Inter', color: Colors.white, fontWeight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -670,7 +673,7 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
           const Icon(Icons.emoji_events_rounded, color: Color(0xFFD49B2A), size: 64.0),
           const SizedBox(height: 12.0),
           Text(
-            'Quiz Completed!',
+            AppLocalizations.of(context)?.labelQuizCompleted ?? 'Quiz Completed!',
             style: TextStyle(
               fontFamily: AppTypography.headingFontFamily,
               fontSize: isTablet ? 26.0 : 22.0,
@@ -692,7 +695,10 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
           ElevatedButton.icon(
             onPressed: _restartQuiz,
             icon: const Icon(Icons.replay_rounded, color: Colors.white),
-            label: const Text('Try Again', style: TextStyle(fontFamily: 'Inter', color: Colors.white, fontWeight: FontWeight.w600)),
+            label: Text(
+              AppLocalizations.of(context)?.btnTryAgain ?? 'Try Again',
+              style: const TextStyle(fontFamily: 'Inter', color: Colors.white, fontWeight: FontWeight.w600),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF526B4F),
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),

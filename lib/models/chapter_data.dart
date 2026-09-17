@@ -45,6 +45,49 @@ class ChapterData {
 
 /// Central repository providing curriculum metadata for any chapter across all classes.
 abstract final class ChapterRepository {
+  /// Returns localized contextual topic string for a given class and chapter.
+  static String getLocalizedTopic(BuildContext context, String className, int chapterNumber, String title) {
+    final isHindi = Localizations.localeOf(context).languageCode == 'hi';
+    final lowerTitle = title.toLowerCase();
+
+    if (lowerTitle.contains('fruit') || lowerTitle.contains('color')) {
+      return isHindi ? 'फल एवं रंग।' : 'Fruits & colors.';
+    }
+    if (lowerTitle.contains('hand') || lowerTitle.contains('body') || lowerTitle.contains('myself')) {
+      return isHindi ? 'शरीर के अंग व परिचय।' : 'Body parts & self.';
+    }
+    if (lowerTitle.contains('animal') || lowerTitle.contains('life') || lowerTitle.contains('pet')) {
+      return isHindi ? 'हमारे आसपास के जीव जन्तु।' : 'Animals & nature around us.';
+    }
+    if (lowerTitle.contains('food') || lowerTitle.contains('eat')) {
+      return isHindi ? 'हमारा खान-पान व पोषण।' : 'Food & nutrition.';
+    }
+    if (lowerTitle.contains('number') || lowerTitle.contains('count')) {
+      return isHindi ? 'संख्याएं व गिनती।' : 'Numerals & counting.';
+    }
+    return isHindi ? '$title विषय' : '$title concepts.';
+  }
+
+  /// Returns localized contextual lesson string for a given class and chapter.
+  static String getLocalizedLesson(BuildContext context, String className, int chapterNumber, String title) {
+    final isHindi = Localizations.localeOf(context).languageCode == 'hi';
+    final lowerTitle = title.toLowerCase();
+
+    if (lowerTitle.contains('fruit') || lowerTitle.contains('color')) {
+      return isHindi ? 'बुनियादी शब्दावली।' : 'Basic vocabulary.';
+    }
+    if (lowerTitle.contains('hand') || lowerTitle.contains('body')) {
+      return isHindi ? 'मौखिक संवाद व पहचान।' : 'Expressive dialogue.';
+    }
+    if (lowerTitle.contains('animal') || lowerTitle.contains('life')) {
+      return isHindi ? 'जानवरों के नाम व आवाज़ें।' : 'Animal sounds & terms.';
+    }
+    if (lowerTitle.contains('food')) {
+      return isHindi ? 'दैनिक खान-पान के शब्द।' : 'Daily dietary words.';
+    }
+    return isHindi ? 'बुनियादी कौशल।' : 'Core foundational skills.';
+  }
+
   /// Returns contextual topic string for a given class and chapter.
   static String getTopic(String className, int chapterNumber, String title) {
     final lowerTitle = title.toLowerCase();

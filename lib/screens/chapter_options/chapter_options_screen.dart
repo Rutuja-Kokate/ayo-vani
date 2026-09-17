@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../app/responsive/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_dimens.dart';
@@ -779,14 +780,17 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
 
   /// 1. Flashcards Card
   Widget _buildFlashcardsCard({required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
     return LearningOptionCard(
-      title: 'Flashcards',
-      subtitle: 'Interactive visual aids',
+      title: l10n?.tabFlashcards ?? 'Flashcards',
+      subtitle: l10n?.chapterFlashcardsSub ?? 'Interactive visual aids',
       borderColor: const Color(0xFF671D21), // Deep Burgundy / Maroon outline
       isTablet: isTablet,
       iconWidget: _buildFlashcardIcon(isTablet),
       illustration: FlashcardsIllustration(
-        itemName: widget.chapterName.toLowerCase().contains('fruit') ? 'Apple' : 'Unit 1',
+        itemName: widget.chapterName.toLowerCase().contains('fruit')
+            ? 'Apple'
+            : (l10n?.unitLabel != null ? '${l10n!.unitLabel} 1' : 'Unit 1'),
         itemEmoji: widget.chapterName.toLowerCase().contains('fruit') ? '🍎' : '📖',
         isCompact: !isTablet,
       ),
@@ -796,14 +800,17 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
 
   /// 2. Worksheets Card
   Widget _buildWorksheetsCard({required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
     return LearningOptionCard(
-      title: 'Worksheets',
-      subtitle: 'Downloadable exercises',
+      title: l10n?.tabWorksheets ?? 'Worksheets',
+      subtitle: l10n?.chapterWorksheetsSub ?? 'Downloadable exercises',
       borderColor: const Color(0xFFD49B2A), // Warm Golden Amber outline
       isTablet: isTablet,
       iconWidget: _buildWorksheetIcon(isTablet),
       illustration: WorksheetsIllustration(
-        word: widget.chapterName.toLowerCase().contains('fruit') ? 'Banana' : 'Practice',
+        word: widget.chapterName.toLowerCase().contains('fruit')
+            ? 'Banana'
+            : (l10n?.practiceLabel ?? 'Practice'),
         isCompact: !isTablet,
       ),
       onTap: _navigateToWorksheets,
@@ -812,9 +819,10 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
 
   /// 3. Games Card
   Widget _buildGamesCard({required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
     return LearningOptionCard(
-      title: 'Games',
-      subtitle: 'Fun matching & sorting activities',
+      title: l10n?.tabGames ?? 'Games',
+      subtitle: l10n?.chapterGamesSub ?? 'Fun matching & sorting activities',
       borderColor: const Color(0xFFA85B4F), // Terracotta / Coral brick outline
       isTablet: isTablet,
       iconWidget: _buildGamesIcon(isTablet),
@@ -827,19 +835,24 @@ class _ChapterOptionsScreenState extends State<ChapterOptionsScreen> {
 
   /// 4. Quizzes Card
   Widget _buildQuizzesCard({required bool isTablet}) {
+    final l10n = AppLocalizations.of(context);
     return LearningOptionCard(
-      title: 'Quizes',
-      subtitle: 'Test your knowledge',
+      title: l10n?.tabQuizzes ?? 'Quizzes',
+      subtitle: l10n?.chapterQuizzesSub ?? 'Test your knowledge',
       borderColor: const Color(0xFF526B4F), // Muted Olive Green outline
       isTablet: isTablet,
       iconWidget: _buildQuizzesIcon(isTablet),
       illustration: QuizzesIllustration(
         question: widget.chapterName.toLowerCase().contains('fruit')
-            ? 'Which is a red fruit?'
-            : 'Key chapter question?',
+            ? (l10n?.quizPreviewFruitQuestion ?? 'Which is a red fruit?')
+            : (l10n?.quizPreviewQuestion ?? 'Key chapter question?'),
         options: widget.chapterName.toLowerCase().contains('fruit')
             ? const ['Apple', 'Banana', 'Grapes']
-            : const ['Option A', 'Option B', 'Option C'],
+            : [
+                l10n?.optionA ?? 'Option A',
+                l10n?.optionB ?? 'Option B',
+                l10n?.optionC ?? 'Option C',
+              ],
         isCompact: !isTablet,
       ),
       onTap: _navigateToQuizzes,

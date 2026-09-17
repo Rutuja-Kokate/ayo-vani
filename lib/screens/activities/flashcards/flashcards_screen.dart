@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../app/responsive/responsive.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimens.dart';
@@ -491,7 +492,7 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
               ],
               const SizedBox(height: 8.0),
               Text(
-                'Tap to reveal meaning / translation',
+                AppLocalizations.of(context)?.flashcardTapReveal ?? 'Tap to reveal meaning / translation',
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: 12.0,
@@ -565,7 +566,7 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
               ),
               const SizedBox(height: 12.0),
               Text(
-                'Tap to flip back',
+                AppLocalizations.of(context)?.flashcardTapFlip ?? 'Tap to flip back',
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: 12.0,
