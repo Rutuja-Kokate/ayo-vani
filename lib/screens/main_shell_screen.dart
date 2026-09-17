@@ -6,11 +6,11 @@ import 'first/first_screen.dart';
 import 'home/home_screen.dart';
 import 'learn/learn_screen.dart';
 import 'learn/student_levels_screen.dart';
+import 'learn/teacher_levels_screen.dart';
 import 'live_translate/live_translate_screen.dart';
 import 'profile/profile_screen.dart';
 import 'second/second_screen.dart';
 import 'third/third_screen.dart';
-import 'tools/tools_screen.dart';
 
 /// Main adaptive navigation shell for AYOVAANI.
 ///
@@ -103,11 +103,14 @@ class _MainShellScreenState extends State<MainShellScreen> {
     );
   }
 
-  void _navigateToTeacherTools() {
+  void _navigateToTeacherLevels() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => ToolsScreen(
-          onNavigateToLiveTranslate: _navigateToLiveTranslate,
+        builder: (context) => TeacherLevelsScreen(
+          onNavigateTab: (index) {
+            _onDestinationSelected(index);
+            Navigator.of(context).pop();
+          },
         ),
       ),
     );
@@ -128,7 +131,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
       LearnScreen(
         isShellTab: true,
         onBack: () => _onDestinationSelected(0),
-        onNavigateToTeacher: _navigateToTeacherTools,
+        onNavigateToTeacher: _navigateToTeacherLevels,
         onNavigateToStudent: _navigateToStudentLevels,
         onNavigateToBalvatika: _navigateToBalvatika,
         onNavigateToFirst: _navigateToFirst,

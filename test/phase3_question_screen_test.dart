@@ -150,7 +150,7 @@ void main() {
   // GROUP 3: Evaluation, Progression & Completion
   // ---------------------------------------------------------------------------
   group('Phase3QuestionScreen - Evaluation & Progression', () {
-    testWidgets('Correct word order shows success banner and CONTINUE button', (tester) async {
+    testWidgets('Correct word order on Q1 shows success banner and CONTINUE button', (tester) async {
       tester.view.physicalSize = const Size(393, 851);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -167,7 +167,7 @@ void main() {
       // Tap CHECK
       await tapVisible(tester, find.text('CHECK'));
 
-      // Success feedback banner
+      // Success feedback banner; Q1 is not the last question -> shows CONTINUE
       expect(find.textContaining('शानदार! सही उत्तर'), findsOneWidget);
       expect(find.text('CONTINUE'), findsOneWidget);
     });
@@ -220,7 +220,7 @@ void main() {
       expect(find.text('तिसिङ आम चिलका मेनाःमा?'), findsOneWidget);
     });
 
-    testWidgets('Completing Question 5 triggers onCompletePhase callback', (tester) async {
+    testWidgets('Completing Question 5 shows FINISH and triggers onCompletePhase callback', (tester) async {
       tester.view.physicalSize = const Size(393, 851);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -244,10 +244,13 @@ void main() {
       await tapVisible(tester, find.text('है').first);
 
       await tapVisible(tester, find.text('CHECK'));
-      expect(find.text('CONTINUE'), findsOneWidget);
+      // Q5 is the last question -> shows FINISH instead of CONTINUE
+      expect(find.text('FINISH'), findsOneWidget);
 
-      await tapVisible(tester, find.text('CONTINUE'));
+      await tapVisible(tester, find.text('FINISH'));
       expect(completed, isTrue);
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Choose a Phase'), findsOneWidget);
     });
 
     testWidgets('Mundari sentence speaker tap invokes audio callback', (tester) async {

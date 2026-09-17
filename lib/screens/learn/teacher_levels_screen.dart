@@ -9,23 +9,28 @@ import '../../app/theme/app_typography.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
+import 'teacher_phase_screen.dart';
+import 'teacher_practice_screen.dart';
+import 'teacher_application_screen.dart';
 import 'widgets/phase_selection_dialog.dart';
 import 'widgets/winding_levels_path.dart';
 
 export 'widgets/winding_levels_path.dart' show LevelState, LevelData;
 
-// ---------------------------------------------------------------------------
-// Data model
-// ---------------------------------------------------------------------------
-
-typedef _LevelData = LevelData;
-
-// ---------------------------------------------------------------------------
-// Screen
-// ---------------------------------------------------------------------------
-
-class StudentLevelsScreen extends StatefulWidget {
-  const StudentLevelsScreen({
+/// Screen: Teacher Levels Learning Path Screen for AYOVAANI.
+///
+/// Reuses the visual design of the Student Learning level-path:
+/// - Same AyoVaani branding, warm cream/parchment background & Warli corner art
+/// - Same 10-level winding trail with active/locked nodes, wooden plaques, and decorations
+/// - Preserves initial scroll down to Level 1 on load
+/// - Fixed header with burgundy "For Teachers" badge ("Plan, prepare & teach")
+/// - Selecting a level opens the Phase Selection dialog showing:
+///   1. Learning Phase
+///   2. Practice Phase
+///   3. Application Phase
+/// - Completely separate navigation flow from student flow
+class TeacherLevelsScreen extends StatefulWidget {
+  const TeacherLevelsScreen({
     super.key,
     this.onBack,
     this.onNavigateTab,
@@ -37,27 +42,22 @@ class StudentLevelsScreen extends StatefulWidget {
   final bool isShellTab;
 
   @override
-  State<StudentLevelsScreen> createState() => _StudentLevelsScreenState();
+  State<TeacherLevelsScreen> createState() => _TeacherLevelsScreenState();
 }
 
-class _StudentLevelsScreenState extends State<StudentLevelsScreen>
+class _TeacherLevelsScreenState extends State<TeacherLevelsScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _pulseController;
   late final Animation<double> _pulseAnimation;
   late final ScrollController _scrollController;
   bool _hasScrolledToBottom = false;
 
-  static const List<_LevelData> _levels = [
-    _LevelData(number: 1, label: 'Level 1', subtitle: 'Basics', state: LevelState.active),
-    _LevelData(number: 2, label: 'Level 2', subtitle: 'Coming Soon', state: LevelState.locked),
-    _LevelData(number: 3, label: 'Level 3', subtitle: 'Coming Soon', state: LevelState.locked),
-    _LevelData(number: 4, label: 'Level 4', subtitle: 'Coming Soon', state: LevelState.locked),
-    _LevelData(number: 5, label: 'Level 5', subtitle: 'Coming Soon', state: LevelState.locked),
-    _LevelData(number: 6, label: 'Level 6', subtitle: 'Coming Soon', state: LevelState.locked),
-    _LevelData(number: 7, label: 'Level 7', subtitle: 'Coming Soon', state: LevelState.locked),
-    _LevelData(number: 8, label: 'Level 8', subtitle: 'Coming Soon', state: LevelState.locked),
-    _LevelData(number: 9, label: 'Level 9', subtitle: 'Coming Soon', state: LevelState.locked),
-    _LevelData(number: 10, label: 'Level 10', subtitle: 'Coming Soon', state: LevelState.locked),
+  static const List<LevelData> _levels = kDefaultLevels;
+
+  static const List<String> _teacherPhases = [
+    'Learning Phase',
+    'Practice Phase',
+    'Application Phase',
   ];
 
   @override
@@ -87,7 +87,6 @@ class _StudentLevelsScreenState extends State<StudentLevelsScreen>
           _hasScrolledToBottom = true;
           _scrollController.jumpTo(maxScroll);
         } else {
-          // If layout extent is not yet positive, retry on the next frame
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted || _hasScrolledToBottom) return;
             if (_scrollController.hasClients) {
@@ -123,11 +122,48 @@ class _StudentLevelsScreenState extends State<StudentLevelsScreen>
     }
   }
 
-  void _onLevelTap(BuildContext context, _LevelData level) {
+  void _onLevelTap(BuildContext context, LevelData level) {
     PhaseSelectionDialog.show(
       context: context,
       levelNumber: level.number,
       levelTitle: level.label,
+      phaseNames: _teacherPhases,
+      phaseSubtitles: const [null, '5 Questions', '5 Questions'],
+      onStartPhase: (phaseNumber) async {
+        final phaseName = (phaseNumber >= 1 && phaseNumber <= _teacherPhases.length)
+            ? _teacherPhases[phaseNumber - 1]
+            : 'Phase $phaseNumber';
+
+        if (phaseNumber == 2) {
+          await Navigator.of(context).push<bool>(
+            MaterialPageRoute<bool>(
+              builder: (context) => TeacherPracticeScreen(
+                levelNumber: level.number,
+              ),
+            ),
+          );
+        } else if (phaseNumber == 3) {
+          await Navigator.of(context).push<bool>(
+            MaterialPageRoute<bool>(
+              builder: (context) => TeacherApplicationScreen(
+                levelNumber: level.number,
+              ),
+            ),
+          );
+        } else {
+          await Navigator.of(context).push<bool>(
+            MaterialPageRoute<bool>(
+              builder: (context) => TeacherPhaseScreen(
+                phaseName: phaseName,
+                phaseNumber: phaseNumber,
+                levelNumber: level.number,
+              ),
+            ),
+          );
+        }
+        if (!context.mounted) return;
+        _onLevelTap(context, level);
+      },
     );
   }
 
@@ -240,30 +276,30 @@ class _StudentLevelsScreenState extends State<StudentLevelsScreen>
           ),
           const SizedBox(height: 8.0),
 
-          // "For Students" badge
+          // "For Teachers" badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 4.5),
             decoration: BoxDecoration(
-              color: const Color(0xFFEAF3E8),
+              color: const Color(0xFFF7EBEB),
               borderRadius: BorderRadius.circular(AppRadius.pill),
-              border: Border.all(color: const Color(0xFFB8D6B2), width: 1.0),
+              border: Border.all(color: const Color(0xFFE5B5B8), width: 1.0),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(
-                  Icons.face_rounded,
+                  Icons.co_present_rounded,
                   size: 15.0,
-                  color: Color(0xFF416B3C),
+                  color: AppColors.primaryBurgundy,
                 ),
                 const SizedBox(width: 6.0),
                 Text(
-                  'For Students',
+                  'For Teachers',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: isTablet ? 13.0 : 12.0,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF416B3C),
+                    color: AppColors.primaryBurgundy,
                   ),
                 ),
               ],
@@ -285,9 +321,9 @@ class _StudentLevelsScreenState extends State<StudentLevelsScreen>
           ),
           const SizedBox(height: 3.0),
 
-          // "Learn, practice & grow" Subtitle
+          // "Plan, prepare & teach" Subtitle
           Text(
-            'Learn, practice & grow',
+            'Plan, prepare & teach',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: AppTypography.bodyFontFamily,
@@ -338,4 +374,3 @@ class _StudentLevelsScreenState extends State<StudentLevelsScreen>
     );
   }
 }
-
