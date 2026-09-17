@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../app/theme/app_colors.dart';
 import '../app/theme/app_dimens.dart';
 import '../app/theme/app_typography.dart';
+import '../screens/settings/settings_screen.dart';
 import 'ayo_badges.dart';
 import 'ayo_buttons.dart';
 import 'ayo_logo.dart';
@@ -126,7 +127,7 @@ class AyoTopHeader extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onSettingsTap ?? () => _showDefaultSettingsSheet(context),
+          onTap: onSettingsTap ?? () => SettingsScreen.show(context),
           borderRadius: BorderRadius.circular(AppRadius.pill),
           child: Container(
             width: 38,
@@ -148,88 +149,6 @@ class AyoTopHeader extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showDefaultSettingsSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.borderWarm,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              'Teacher Profile & Settings',
-              style: TextStyle(
-                fontFamily: AppTypography.headingFontFamily,
-                fontSize: 20.0,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Manage classroom defaults, offline language packs, and AI translation preferences.',
-              style: TextStyle(
-                fontFamily: AppTypography.bodyFontFamily,
-                fontSize: 13.5,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            ListTile(
-              leading: const Icon(Icons.school_rounded, color: AppColors.primaryBurgundy),
-              title: Text(
-                'Classroom: Grade 4 - Mother Tongue Medium',
-                style: TextStyle(fontFamily: AppTypography.bodyFontFamily),
-              ),
-              subtitle: Text(
-                'Primary: Hindi • Mother-Tongue: Gondi',
-                style: TextStyle(fontFamily: AppTypography.bodyFontFamily),
-              ),
-              contentPadding: EdgeInsets.zero,
-            ),
-            ListTile(
-              leading: const Icon(Icons.download_for_offline_rounded, color: AppColors.oliveGreen),
-              title: Text(
-                'Offline Content Packages',
-                style: TextStyle(fontFamily: AppTypography.bodyFontFamily),
-              ),
-              subtitle: Text(
-                '3.2 GB downloaded • All lessons available offline',
-                style: TextStyle(fontFamily: AppTypography.bodyFontFamily),
-              ),
-              contentPadding: EdgeInsets.zero,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            AyoPrimaryButton(
-              label: 'Done',
-              isFullWidth: true,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
         ),
       ),
     );

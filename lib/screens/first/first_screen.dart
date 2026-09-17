@@ -3,19 +3,15 @@ import '../../app/responsive/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_dimens.dart';
 import '../../app/theme/app_typography.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/subject_data.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
-import '../../widgets/ayo_coming_soon.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/ayo_subject_card.dart';
 import 'first_english_chapters_screen.dart';
 
 /// Screen: First / Grade 1 Subject Selection for AYOVAANI Teacher App.
-///
-/// In this prototype/MVP scope:
-/// - English: ACTIVE / AVAILABLE (Navigates to 12 English Chapters)
-/// - Hindi, Mathematics, EVS: COMING SOON (Disabled, non-clickable)
 class FirstScreen extends StatefulWidget {
   const FirstScreen({
     super.key,
@@ -78,7 +74,6 @@ class _FirstScreenState extends State<FirstScreen> {
           bottom: false,
           child: Stack(
             children: [
-              // Top-left Warli Corner Ornament
               Positioned(
                 top: 0,
                 left: 0,
@@ -89,8 +84,6 @@ class _FirstScreenState extends State<FirstScreen> {
                   ),
                 ),
               ),
-
-              // Top-right Warli Corner Ornament (Horizontally Mirrored)
               Positioned(
                 top: 0,
                 right: 0,
@@ -101,8 +94,6 @@ class _FirstScreenState extends State<FirstScreen> {
                   ),
                 ),
               ),
-
-              // Bottom-left Warli Corner Ornament
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -116,8 +107,6 @@ class _FirstScreenState extends State<FirstScreen> {
                   ),
                 ),
               ),
-
-              // Bottom-right Warli Corner Ornament
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -132,8 +121,6 @@ class _FirstScreenState extends State<FirstScreen> {
                   ),
                 ),
               ),
-
-              // Main Scrollable Content
               LayoutBuilder(
                 builder: (context, constraints) {
                   final horizontalPadding = isTablet ? 44.0 : AppSpacing.lg;
@@ -153,30 +140,11 @@ class _FirstScreenState extends State<FirstScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 1. Top Bar: Back Button + Centered AyoVaani Logo
                             _buildTopBar(isTablet),
-
                             SizedBox(height: isTablet ? 14.0 : 12.0),
-
-                            // 2. Class 1 Header: Title Info + Info Card
                             _buildClass1Header(isTablet),
-
                             SizedBox(height: isTablet ? 18.0 : 16.0),
-
-                            // 3. Subject Selection Container
                             _buildSubjectsContainer(isTablet),
-
-                            SizedBox(height: isTablet ? 16.0 : 14.0),
-
-                            // 4. Supporting Coming Soon Note
-                            const AyoComingSoonCard(
-                              isCompact: true,
-                              title: 'Additional Subjects In Development',
-                              message:
-                                  'Hindi, Mathematics, and Environmental Studies modules are currently being prepared for Grade 1.',
-                              badgeText: 'Coming Soon',
-                              icon: Icons.auto_awesome_rounded,
-                            ),
                           ],
                         ),
                       ),
@@ -195,7 +163,6 @@ class _FirstScreenState extends State<FirstScreen> {
     );
   }
 
-  /// Top decorative Warli corner ornament.
   Widget _buildCornerDecoration({
     required bool isRight,
     required double size,
@@ -221,7 +188,6 @@ class _FirstScreenState extends State<FirstScreen> {
         : imageWidget;
   }
 
-  /// 1. Top Bar: Back Button at top-left, Centered AyoVaani Logo
   Widget _buildTopBar(bool isTablet) {
     final logoHeight = isTablet ? 100.0 : 80.0;
 
@@ -236,7 +202,6 @@ class _FirstScreenState extends State<FirstScreen> {
             child: InkWell(
               onTap: _handleBack,
               borderRadius: BorderRadius.circular(20.0),
-              splashColor: AppColors.primaryBurgundy.withValues(alpha: 0.12),
               child: Container(
                 width: 40.0,
                 height: 40.0,
@@ -273,8 +238,9 @@ class _FirstScreenState extends State<FirstScreen> {
     );
   }
 
-  /// 2. Header: Class 1 / First
   Widget _buildClass1Header(bool isTablet) {
+    final l10n = AppLocalizations.of(context);
+
     final titleBlock = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -311,7 +277,7 @@ class _FirstScreenState extends State<FirstScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'First',
+                l10n?.classFirst ?? 'First',
                 style: TextStyle(
                   fontFamily: AppTypography.headingFontFamily,
                   fontSize: isTablet ? 26.0 : 22.0,
@@ -323,7 +289,7 @@ class _FirstScreenState extends State<FirstScreen> {
               ),
               const SizedBox(height: 3.0),
               Text(
-                'Grade 1 | Learn, Listen, Speak',
+                l10n?.tagGrade1 ?? 'Grade 1 | Learn, Listen, Speak',
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: isTablet ? 13.5 : 12.5,
@@ -333,7 +299,7 @@ class _FirstScreenState extends State<FirstScreen> {
               ),
               const SizedBox(height: 2.0),
               Text(
-                'Select a subject to begin teaching and exploring curriculum lessons.',
+                l10n?.firstDesc ?? 'Explore Grade 1 learning modules and activities.',
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: isTablet ? 13.0 : 12.0,
@@ -393,7 +359,7 @@ class _FirstScreenState extends State<FirstScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Curriculum',
+                  l10n?.firstModulesTitle ?? 'Grade 1 Modules',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.5,
@@ -402,7 +368,7 @@ class _FirstScreenState extends State<FirstScreen> {
                   ),
                 ),
                 Text(
-                  '4 Subjects',
+                  l10n?.countSubjects(4) ?? '4 Subjects',
                   style: TextStyle(
                     fontFamily: AppTypography.headingFontFamily,
                     fontSize: isTablet ? 21.0 : 19.0,
@@ -413,7 +379,7 @@ class _FirstScreenState extends State<FirstScreen> {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Active Subject',
+                  l10n?.labelSubjectStatus ?? 'Subject Status',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.0,
@@ -422,12 +388,10 @@ class _FirstScreenState extends State<FirstScreen> {
                   ),
                 ),
                 Text(
-                  'English (12 Chapters)',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  '1 Active',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
-                    fontSize: 12.5,
+                    fontSize: 13.0,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF385E32),
                   ),
@@ -460,9 +424,9 @@ class _FirstScreenState extends State<FirstScreen> {
     }
   }
 
-  /// 3. Subject Selection Container
   Widget _buildSubjectsContainer(bool isTablet) {
     final subjects = Subject.class1Subjects;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -484,7 +448,6 @@ class _FirstScreenState extends State<FirstScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Title Pill
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
             decoration: BoxDecoration(
@@ -495,13 +458,13 @@ class _FirstScreenState extends State<FirstScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(
-                  Icons.school_rounded,
+                  Icons.menu_book_rounded,
                   color: Colors.white,
                   size: 16.0,
                 ),
                 const SizedBox(width: 6.0),
                 Text(
-                  'Subjects',
+                  l10n?.firstModulesTitle ?? 'Grade 1 Modules',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 13.0,
@@ -514,61 +477,18 @@ class _FirstScreenState extends State<FirstScreen> {
             ),
           ),
           SizedBox(height: isTablet ? 16.0 : 12.0),
-
-          // Subjects Grid / List
-          if (isTablet)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      AyoSubjectCard(
-                        subject: subjects[0], // English (Available)
-                        onTap: _navigateToEnglishChapters,
-                        isTablet: true,
-                      ),
-                      const SizedBox(height: 12.0),
-                      AyoSubjectCard(
-                        subject: subjects[2], // Mathematics (Coming Soon)
-                        isTablet: true,
-                      ),
-                    ],
-                  ),
+          Column(
+            children: [
+              for (int i = 0; i < subjects.length; i++) ...[
+                AyoSubjectCard(
+                  subject: subjects[i],
+                  onTap: subjects[i].isAvailable ? _navigateToEnglishChapters : null,
+                  isTablet: isTablet,
                 ),
-                const SizedBox(width: 14.0),
-                Expanded(
-                  child: Column(
-                    children: [
-                      AyoSubjectCard(
-                        subject: subjects[1], // Hindi (Coming Soon)
-                        isTablet: true,
-                      ),
-                      const SizedBox(height: 12.0),
-                      AyoSubjectCard(
-                        subject: subjects[3], // EVS (Coming Soon)
-                        isTablet: true,
-                      ),
-                    ],
-                  ),
-                ),
+                if (i < subjects.length - 1) const SizedBox(height: 10.0),
               ],
-            )
-          else
-            Column(
-              children: [
-                for (int i = 0; i < subjects.length; i++) ...[
-                  AyoSubjectCard(
-                    subject: subjects[i],
-                    onTap: subjects[i].isAvailable
-                        ? _navigateToEnglishChapters
-                        : null,
-                    isTablet: false,
-                  ),
-                  if (i < subjects.length - 1) const SizedBox(height: 10.0),
-                ],
-              ],
-            ),
+            ],
+          ),
         ],
       ),
     );

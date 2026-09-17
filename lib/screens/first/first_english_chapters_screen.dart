@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../app/responsive/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_dimens.dart';
@@ -29,19 +30,25 @@ class FirstEnglishChaptersScreen extends StatefulWidget {
     BalvatikaChapter(
       number: 1,
       title: 'Two Little Hands',
+      titleHindi: 'दो छोटे हाथ',
       description: "Let's learn the parts of our body",
+      descriptionHindi: 'आइए अपने शरीर के अंगों को सीखें',
       icon: Icons.accessibility_new_rounded,
     ),
     BalvatikaChapter(
       number: 2,
       title: 'Life Around Us',
+      titleHindi: 'हमारे आसपास का जीवन',
       description: "Let's learn about animals around us",
+      descriptionHindi: 'आइए अपने आसपास के जानवरों के बारे में जानें',
       icon: Icons.pets_rounded,
     ),
     BalvatikaChapter(
       number: 3,
       title: 'The Food We Eat',
+      titleHindi: 'हमारा भोजन',
       description: "Let's learn about the food we eat",
+      descriptionHindi: 'आइए अपने भोजन के बारे में जानें',
       icon: Icons.restaurant_rounded,
     ),
   ];
@@ -118,17 +125,19 @@ class _FirstEnglishChaptersScreenState
         builder: (context) => ChapterOptionsScreen(
           className: 'First',
           chapterNumber: chapter.number,
-          chapterName: chapter.title,
+          chapterName: chapter.getLocalizedTitle(context),
           subject: 'English',
-          chapterDescription: "Let's learn and practice.",
+          chapterDescription: chapter.getLocalizedDescription(context),
           topic: chapter.topic ??
-              ChapterRepository.getTopic(
+              ChapterRepository.getLocalizedTopic(
+                context,
                 'First',
                 chapter.number,
                 chapter.title,
               ),
           lesson: chapter.lesson ??
-              ChapterRepository.getLesson(
+              ChapterRepository.getLocalizedLesson(
+                context,
                 'First',
                 chapter.number,
                 chapter.title,
@@ -347,6 +356,8 @@ class _FirstEnglishChaptersScreenState
 
   /// 2. Header: English Class 1
   Widget _buildEnglishHeader(bool isTablet) {
+    final l10n = AppLocalizations.of(context);
+
     final titleBlock = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -388,7 +399,7 @@ class _FirstEnglishChaptersScreenState
               Row(
                 children: [
                   Text(
-                    'English',
+                    l10n?.english ?? 'English',
                     style: TextStyle(
                       fontFamily: AppTypography.headingFontFamily,
                       fontSize: isTablet ? 26.0 : 22.0,
@@ -414,7 +425,7 @@ class _FirstEnglishChaptersScreenState
                       ),
                     ),
                     child: Text(
-                      'Available',
+                      l10n?.labelAvailable ?? 'Available',
                       style: TextStyle(
                         fontFamily: AppTypography.bodyFontFamily,
                         fontSize: 11.0,
@@ -427,7 +438,7 @@ class _FirstEnglishChaptersScreenState
               ),
               const SizedBox(height: 3.0),
               Text(
-                'Grade 1 | Learn, Listen, Speak',
+                l10n?.tagGrade1 ?? 'Grade 1 | Learn, Listen, Speak',
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: isTablet ? 13.5 : 12.5,
@@ -437,7 +448,7 @@ class _FirstEnglishChaptersScreenState
               ),
               const SizedBox(height: 2.0),
               Text(
-                'Explore foundational English chapters, audio vocabulary & activities.',
+                l10n?.tagEnglishSubtitle ?? 'Explore foundational English chapters, audio vocabulary & activities.',
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: isTablet ? 13.0 : 12.0,
@@ -501,7 +512,7 @@ class _FirstEnglishChaptersScreenState
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Total Chapters',
+                  l10n?.labelTotalChapters ?? 'Total Chapters',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.5,
@@ -521,7 +532,7 @@ class _FirstEnglishChaptersScreenState
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Subject Status',
+                  l10n?.labelSubjectStatus ?? 'Subject Status',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.0,
@@ -530,7 +541,7 @@ class _FirstEnglishChaptersScreenState
                   ),
                 ),
                 Text(
-                  'Functional',
+                  l10n?.labelFunctional ?? 'Functional',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 13.0,
@@ -569,6 +580,7 @@ class _FirstEnglishChaptersScreenState
   /// 3. Main Chapter Listing Container
   Widget _buildChaptersContainer(bool isTablet) {
     final chapters = _filteredChapters;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -655,8 +667,8 @@ class _FirstEnglishChaptersScreenState
                       const SizedBox(width: 6.0),
                       Text(
                         _showAllChapters
-                            ? 'Show Less'
-                            : 'View More Chapters',
+                            ? (l10n?.btnShowLess ?? 'Show Less')
+                            : (l10n?.btnViewMoreChapters ?? 'View More Chapters'),
                         style: TextStyle(
                           fontFamily: AppTypography.bodyFontFamily,
                           fontSize: 13.0,
@@ -677,6 +689,8 @@ class _FirstEnglishChaptersScreenState
 
   /// Header Controls: "Chapters" pill on left, search + filter on right
   Widget _buildChapterControlsRow(bool isTablet) {
+    final l10n = AppLocalizations.of(context);
+
     final chaptersPill = Container(
       padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -693,7 +707,7 @@ class _FirstEnglishChaptersScreenState
           ),
           const SizedBox(width: 6.0),
           Text(
-            'Chapters',
+            l10n?.labelChapters ?? 'Chapters',
             style: TextStyle(
               fontFamily: AppTypography.bodyFontFamily,
               fontSize: 13.0,
@@ -737,7 +751,7 @@ class _FirstEnglishChaptersScreenState
               decoration: InputDecoration(
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
-                hintText: 'Search chapters...',
+                hintText: l10n?.hintSearchChapters ?? 'Search chapters...',
                 hintStyle: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: 12.5,
@@ -804,7 +818,7 @@ class _FirstEnglishChaptersScreenState
               ),
               const SizedBox(width: 6.0),
               Text(
-                'Filter',
+                l10n?.btnFilter ?? 'Filter',
                 style: TextStyle(
                   fontFamily: AppTypography.bodyFontFamily,
                   fontSize: 12.5,
@@ -984,7 +998,7 @@ class _FirstEnglishChaptersScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      chapter.title,
+                      chapter.getLocalizedTitle(context),
                       style: TextStyle(
                         fontFamily: AppTypography.headingFontFamily,
                         fontSize: 15.0,
@@ -995,7 +1009,7 @@ class _FirstEnglishChaptersScreenState
                     ),
                     const SizedBox(height: 2.0),
                     Text(
-                      chapter.description,
+                      chapter.getLocalizedDescription(context),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1024,6 +1038,8 @@ class _FirstEnglishChaptersScreenState
 
   /// 4. "Keep Learning!" Encouragement Card
   Widget _buildKeepLearningCard(bool isTablet) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -1059,7 +1075,7 @@ class _FirstEnglishChaptersScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Keep Learning!',
+                  l10n?.cardKeepLearningTitle ?? 'Keep Learning!',
                   style: TextStyle(
                     fontFamily: AppTypography.headingFontFamily,
                     fontSize: 15.0,
@@ -1069,7 +1085,7 @@ class _FirstEnglishChaptersScreenState
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Practice flashcards, games & worksheets with your students every day.',
+                  l10n?.cardKeepLearningSub ?? 'Practice flashcards, games & worksheets with your students every day.',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 12.0,

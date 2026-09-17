@@ -2,22 +2,13 @@ import 'package:flutter/material.dart';
 import '../app/responsive/responsive.dart';
 import '../app/theme/app_colors.dart';
 import '../app/theme/app_typography.dart';
+import '../l10n/app_localizations.dart';
 import '../screens/balvatika/balvatika_screen.dart';
 import '../screens/first/first_screen.dart';
 import '../screens/second/second_screen.dart';
 import '../screens/third/third_screen.dart';
 
 /// Reusable Class Selection 2 × 2 Grid for AYOVAANI.
-///
-/// Shared directly between:
-/// - Screen 03: Home (Dashboard)
-/// - Tab 02: Learn (Class Selection)
-///
-/// Cards:
-/// 1. Balvatika (Terracotta / Earth)
-/// 2. First / Grade 1 (Soft Olive)
-/// 3. Second / Grade 2 (Warm Bronze)
-/// 4. Third / Grade 3 (Deep Maroon)
 class AyoClassSelectionGrid extends StatelessWidget {
   const AyoClassSelectionGrid({
     super.key,
@@ -27,7 +18,7 @@ class AyoClassSelectionGrid extends StatelessWidget {
     this.onNavigateToThird,
     this.isTablet,
     this.showSectionTitle = true,
-    this.sectionTitle = 'Classes',
+    this.sectionTitle,
   });
 
   final VoidCallback? onNavigateToBalvatika;
@@ -36,18 +27,20 @@ class AyoClassSelectionGrid extends StatelessWidget {
   final VoidCallback? onNavigateToThird;
   final bool? isTablet;
   final bool showSectionTitle;
-  final String sectionTitle;
+  final String? sectionTitle;
 
   @override
   Widget build(BuildContext context) {
     final tablet = isTablet ?? Responsive.isTabletOrLarger(context);
+    final l10n = AppLocalizations.of(context);
+    final effectiveTitle = sectionTitle ?? (l10n?.labelClasses ?? 'Classes');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (showSectionTitle) ...[
           Text(
-            sectionTitle,
+            effectiveTitle,
             style: TextStyle(
               fontFamily: AppTypography.headingFontFamily,
               fontSize: tablet ? 20.0 : 18.0,
@@ -65,9 +58,9 @@ class AyoClassSelectionGrid extends StatelessWidget {
             Expanded(
               child: _buildQuickToolCard(
                 context: context,
-                label: 'Balvatika',
+                label: l10n?.classBalvatika ?? 'Balvatika',
                 icon: Icons.g_translate_rounded,
-                iconColor: const Color(0xFF8B4B3E), // Warm terracotta
+                iconColor: const Color(0xFF8B4B3E),
                 iconBgColor: const Color(0xFFF7EBE7),
                 onTap: () {
                   if (onNavigateToBalvatika != null) {
@@ -87,9 +80,9 @@ class AyoClassSelectionGrid extends StatelessWidget {
             Expanded(
               child: _buildQuickToolCard(
                 context: context,
-                label: 'First',
+                label: l10n?.classFirst ?? 'First',
                 icon: Icons.description_outlined,
-                iconColor: const Color(0xFF5A7854), // Soft olive
+                iconColor: const Color(0xFF5A7854),
                 iconBgColor: const Color(0xFFEFF5ED),
                 onTap: () {
                   if (onNavigateToFirst != null) {
@@ -113,9 +106,9 @@ class AyoClassSelectionGrid extends StatelessWidget {
             Expanded(
               child: _buildQuickToolCard(
                 context: context,
-                label: 'Second',
+                label: l10n?.classSecond ?? 'Second',
                 icon: Icons.style_outlined,
-                iconColor: const Color(0xFF756E4E), // Warm bronze / olive
+                iconColor: const Color(0xFF756E4E),
                 iconBgColor: const Color(0xFFF7F6EB),
                 onTap: () {
                   if (onNavigateToSecond != null) {
@@ -135,9 +128,9 @@ class AyoClassSelectionGrid extends StatelessWidget {
             Expanded(
               child: _buildQuickToolCard(
                 context: context,
-                label: 'Third',
+                label: l10n?.classThird ?? 'Third',
                 icon: Icons.sports_esports_rounded,
-                iconColor: const Color(0xFF8C3238), // Maroon
+                iconColor: const Color(0xFF8C3238),
                 iconBgColor: const Color(0xFFF8EBEB),
                 onTap: () {
                   if (onNavigateToThird != null) {
@@ -169,7 +162,7 @@ class AyoClassSelectionGrid extends StatelessWidget {
     bool isTablet = false,
   }) {
     return Material(
-      color: const Color(0xFFFDFBF7), // Cream card surface
+      color: const Color(0xFFFDFBF7),
       borderRadius: BorderRadius.circular(16.0),
       child: InkWell(
         onTap: onTap,
@@ -184,7 +177,7 @@ class AyoClassSelectionGrid extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16.0),
             border: Border.all(
-              color: const Color(0xFFE8DECF), // Subtle warm border
+              color: const Color(0xFFE8DECF),
               width: 1.0,
             ),
             boxShadow: const [
