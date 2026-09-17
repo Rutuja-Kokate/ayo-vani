@@ -12,8 +12,6 @@ import '../../../services/tts_service.dart';
 
 
 import '../../../services/content_generation_service.dart';
-import '../../../rag/models/rag_flashcard.dart';
-import 'package:flutter/foundation.dart';
 
 /// Interactive Flashcard item model
 class FlashcardItem {
@@ -24,6 +22,7 @@ class FlashcardItem {
     required this.emoji,
     this.mundariRoman,
     this.mundariDevanagari,
+    this.imageAsset,
   });
 
   final String word;
@@ -32,6 +31,7 @@ class FlashcardItem {
   final String emoji;
   final String? mundariRoman;
   final String? mundariDevanagari;
+  final String? imageAsset;
 
   String? get mundariOdia => mundariDevanagari;
 
@@ -92,38 +92,57 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
     _loadCards();
   }
 
-  Future<void> _loadCards() async {
-    final cached = await _ragService.isCached(widget.chapterName, GenerationArtifactType.flashcard);
-    if (cached) {
-      try {
-        final ragSet = await _ragService.generateFlashcards(widget.chapterName, widget.className, subject: widget.subject);
-        final ragItems = ragSet.cards.map((c) {
-          return FlashcardItem(
-            word: c.wordHindi,
-            meaning: c.meaningHindi,
-            pronunciation: c.wordMundari.isNotEmpty ? c.wordMundari : 'RAG Generated',
-            emoji: c.emoji.isNotEmpty ? c.emoji : '✨',
-            mundariDevanagari: c.wordMundari,
+  bool _isRegenerating = false;
+
+  Future<void> _loadCards({bool forceRefresh = false}) async {
+    if (forceRefresh) {
+      setState(() => _isRegenerating = true);
+    }
+    try {
+      final ragSet = await _ragService.generateFlashcards(
+        widget.chapterName,
+        widget.className,
+        forceRefresh: forceRefresh,
+        subject: widget.subject,
+      );
+      final ragItems = ragSet.cards.map((c) {
+        return FlashcardItem(
+          word: c.wordHindi,
+          meaning: c.meaningHindi,
+          pronunciation: c.wordMundari.isNotEmpty ? c.wordMundari : 'RAG Generated',
+          emoji: c.emoji.isNotEmpty ? c.emoji : '✨',
+          mundariDevanagari: c.wordMundari,
+          imageAsset: c.imageAsset,
+        );
+      }).toList();
+
+      if (mounted) {
+        setState(() {
+          _cards = ragItems;
+          _isLoading = false;
+          _isRegenerating = false;
+          _currentIndex = 0;
+        });
+        if (forceRefresh) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ RAG फ़्लैशकार्ड्स पुनः जनरेट एवं सहेजे गए!'),
+              backgroundColor: Colors.green,
+            ),
           );
-        }).toList();
-        
-        if (mounted) {
-          setState(() {
-            _cards = ragItems;
-            _isLoading = false;
-          });
-          WidgetsBinding.instance.addPostFrameCallback((_) => _autoPlayCurrentCard());
         }
-        return;
-      } catch (e) {
-        debugPrint('[RAG] Failed to load cached flashcards: $e');
+        WidgetsBinding.instance.addPostFrameCallback((_) => _autoPlayCurrentCard());
       }
+      return;
+    } catch (e) {
+      debugPrint('[RAG] Failed to load/generate flashcards: $e');
     }
 
     if (mounted) {
       setState(() {
         _cards = _generateCards();
         _isLoading = false;
+        _isRegenerating = false;
       });
       WidgetsBinding.instance.addPostFrameCallback((_) => _autoPlayCurrentCard());
     }
@@ -380,55 +399,86 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
         border: Border.all(color: const Color(0xFFE8DECF)),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-            decoration: BoxDecoration(
-              color: AppColors.primaryBurgundy,
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Text(
-              '${widget.className} • Ch ${widget.chapterNumber}',
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 12.0,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBurgundy,
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: Text(
+                    '${widget.className} • Ch ${widget.chapterNumber}',
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8.0),
+                Flexible(
+                  child: Text(
+                    widget.chapterName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: AppTypography.headingFontFamily,
+                      fontSize: isTablet ? 18.0 : 15.0,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 10.0),
-          Text(
-            widget.chapterName,
-            style: TextStyle(
-              fontFamily: AppTypography.headingFontFamily,
-              fontSize: isTablet ? 18.0 : 16.0,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(width: 10.0),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5E5E2),
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            child: Text(
-              'Card ${_currentIndex + 1}/${_cards.length}',
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryBurgundy,
+          const SizedBox(width: 8.0),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5E5E2),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: Text(
+                  'Card ${_currentIndex + 1}/${_cards.length}',
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryBurgundy,
+                  ),
+                ),
               ),
+              const SizedBox(width: 6.0),
+              IconButton.filledTonal(
+                onPressed: _isRegenerating ? null : () => _loadCards(forceRefresh: true),
+                style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFFD49B2A).withValues(alpha: 0.15),
+              foregroundColor: AppColors.primaryBurgundy,
             ),
+            icon: _isRegenerating
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBurgundy),
+                  )
+                : const Icon(Icons.refresh_rounded, size: 18),
+            tooltip: 'नया RAG फ़्लैशकार्ड्स तैयार करें',
           ),
         ],
       ),
-    );
-  }
+    ],
+  ),
+);
+}
 
   Widget _buildCardFront(FlashcardItem item, bool isTablet) {
     final width = isTablet ? 420.0 : double.infinity;
@@ -460,10 +510,24 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                item.emoji,
-                style: TextStyle(fontSize: isTablet ? 72.0 : 58.0),
-              ),
+              if (item.imageAsset != null && item.imageAsset!.isNotEmpty)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    item.imageAsset!,
+                    height: isTablet ? 120.0 : 90.0,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Text(
+                      item.emoji,
+                      style: TextStyle(fontSize: isTablet ? 72.0 : 58.0),
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  item.emoji,
+                  style: TextStyle(fontSize: isTablet ? 72.0 : 58.0),
+                ),
               const SizedBox(height: 10.0),
               Text(
                 item.word,

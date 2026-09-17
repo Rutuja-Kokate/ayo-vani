@@ -70,36 +70,56 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
     _loadQuestions();
   }
 
-  Future<void> _loadQuestions() async {
-    final cached = await _ragService.isCached(widget.chapterName, GenerationArtifactType.quiz);
-    if (cached) {
-      try {
-        final ragQuiz = await _ragService.generateQuiz(widget.chapterName, widget.className);
-        final ragItems = ragQuiz.questions.map((q) => QuizQuestion(
-          question: q.questionHindi,
-          options: q.optionsHindi,
-          correctIndex: q.answerIndex,
-          explanation: q.explanationHindi,
-          questionOdia: q.questionMundari,
-          optionsOdia: q.optionsMundari,
-        )).toList();
-        
-        if (mounted) {
-          setState(() {
-            _questions = ragItems;
-            _isLoading = false;
-          });
+  bool _isRegenerating = false;
+
+  Future<void> _loadQuestions({bool forceRefresh = false}) async {
+    if (forceRefresh) {
+      setState(() => _isRegenerating = true);
+    }
+    try {
+      final ragQuiz = await _ragService.generateQuiz(
+        widget.chapterName,
+        widget.className,
+        forceRefresh: forceRefresh,
+      );
+      final ragItems = ragQuiz.questions.map((q) => QuizQuestion(
+        question: q.questionHindi,
+        options: q.optionsHindi,
+        correctIndex: q.answerIndex,
+        explanation: q.explanationHindi,
+        questionOdia: q.questionMundari,
+        optionsOdia: q.optionsMundari,
+      )).toList();
+      
+      if (mounted) {
+        setState(() {
+          _questions = ragItems;
+          _isLoading = false;
+          _isRegenerating = false;
+          _currentQuestionIndex = 0;
+          _score = 0;
+          _selectedAnswerIndex = null;
+          _isAnswerSubmitted = false;
+        });
+        if (forceRefresh) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ RAG क्विज़ पुनः जनरेट एवं सहेजा गया!'),
+              backgroundColor: Colors.green,
+            ),
+          );
         }
-        return;
-      } catch (e) {
-        debugPrint('[RAG] Failed to load cached quiz: $e');
       }
+      return;
+    } catch (e) {
+      debugPrint('[RAG] Failed to load/generate quiz: $e');
     }
 
     if (mounted) {
       setState(() {
         _questions = _generateQuestions();
         _isLoading = false;
+        _isRegenerating = false;
       });
     }
   }
@@ -401,6 +421,22 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                 color: AppColors.textSecondary,
               ),
             ),
+          const SizedBox(width: 8.0),
+          IconButton.filledTonal(
+            onPressed: _isRegenerating ? null : () => _loadQuestions(forceRefresh: true),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFF526B4F).withValues(alpha: 0.15),
+              foregroundColor: const Color(0xFF526B4F),
+            ),
+            icon: _isRegenerating
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF526B4F)),
+                  )
+                : const Icon(Icons.refresh_rounded, size: 18),
+            tooltip: 'नया RAG क्विज़ तैयार करें',
+          ),
         ],
       ),
     );
