@@ -4,13 +4,13 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_dimens.dart';
 import '../../app/theme/app_typography.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/hitl_validation_models.dart';
+import '../../services/hitl_validation_service.dart';
 import '../../widgets/ayo_class_selection_grid.dart';
 import '../../widgets/ayo_logo.dart';
 import '../live_translate/live_translate_screen.dart';
 import '../settings/settings_screen.dart';
 import '../validation/hitl_validation_screen.dart';
-import '../../services/hitl_validation_service.dart';
-import '../../models/hitl_validation_models.dart';
 
 /// Screen 03 — Home / Dashboard for AYOVAANI Teacher App.
 ///
@@ -224,7 +224,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2.0),
-              // Option B Header Whitespace: Plain text last sync info
               Text(
                 l10n?.homeHeaderLastSync ?? 'Last sync: Today 9:00 AM',
                 style: const TextStyle(
@@ -563,7 +562,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// Section 2: Enhanced "Continue" Card with static progress bar and next lesson preview
+  /// Section 2: Clean Live Translation Shortcut Card (Simplified - No subject/lesson details)
   Widget _buildTodaysLessonSection(BuildContext context, {bool isTablet = false}) {
     final l10n = AppLocalizations.of(context);
 
@@ -571,7 +570,7 @@ class HomeScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n?.homeLetsStart ?? "Let's Start",
+          l10n?.toolsLiveTranslate ?? 'Live Speech Translation',
           style: TextStyle(
             fontFamily: AppTypography.headingFontFamily,
             fontSize: isTablet ? 20.0 : 18.0,
@@ -602,94 +601,50 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Container(
+                    width: isTablet ? 44.0 : 38.0,
+                    height: isTablet ? 44.0 : 38.0,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF7EBE7),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: const Icon(
+                      Icons.record_voice_over_rounded,
+                      color: AppColors.primaryBurgundy,
+                      size: 22.0,
+                    ),
+                  ),
+                  const SizedBox(width: 12.0),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          l10n?.math ?? 'Mathematics',
+                          l10n?.translateTitle ?? 'Live Speech Translation',
                           style: TextStyle(
                             fontFamily: AppTypography.headingFontFamily,
-                            fontSize: isTablet ? 20.0 : 18.5,
+                            fontSize: isTablet ? 18.0 : 16.5,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: AppColors.primaryBurgundy,
                           ),
                         ),
-                        const SizedBox(height: 4.0),
+                        const SizedBox(height: 2.0),
                         Text(
-                          l10n?.homeFeaturedLessonTitle ?? 'Numbers 1–20',
+                          l10n?.translateSubtitle ?? 'Speak in Hindi, listen & read in Mundari',
                           style: TextStyle(
                             fontFamily: AppTypography.bodyFontFamily,
-                            fontSize: isTablet ? 15.0 : 14.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 3.0),
-                        Text(
-                          '${l10n?.labelClassWithNumber('2') ?? 'Class 2'} • Santhali',
-                          style: TextStyle(
-                            fontFamily: AppTypography.bodyFontFamily,
-                            fontSize: isTablet ? 13.0 : 12.5,
+                            fontSize: isTablet ? 13.0 : 12.0,
                             fontWeight: FontWeight.w400,
                             color: AppColors.textSecondary,
                           ),
-                        ),
-                        const SizedBox(height: 3.0),
-                        // Next Lesson Preview
-                        Text(
-                          l10n?.homeNextLessonPreview ?? 'Next lesson: Addition Practice',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF8B4B3E),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 14.0),
-                  // Lightweight illustration asset
-                  Container(
-                    width: isTablet ? 78.0 : 72.0,
-                    height: isTablet ? 78.0 : 72.0,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2E6D5),
-                      borderRadius: BorderRadius.circular(14.0),
-                      border: Border.all(
-                        color: const Color(0xFFE2D4C0),
-                        width: 1.0,
-                      ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.asset(
-                          'assets/images/warli_background.png',
-                          fit: BoxFit.cover,
-                          alignment: const Alignment(-0.25, 0.65),
-                        ),
-                        Container(
-                          color: const Color(0x10671D21),
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12.0),
-
-              // Thin Static Progress Bar (60% completion of "Numbers 1-20")
-              _buildStaticProgressBar(0.60),
-
               SizedBox(height: isTablet ? 16.0 : 14.0),
-
               SizedBox(
                 width: double.infinity,
                 height: 46.0,
@@ -739,28 +694,6 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  /// Static, non-animated progress bar with zero recomposition or GPU overhead
-  Widget _buildStaticProgressBar(double ratio) {
-    return Container(
-      width: double.infinity,
-      height: 4.0,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEFE8DD),
-        borderRadius: BorderRadius.circular(2.0),
-      ),
-      child: FractionallySizedBox(
-        alignment: Alignment.centerLeft,
-        widthFactor: ratio,
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.primaryBurgundy,
-            borderRadius: BorderRadius.circular(2.0),
-          ),
-        ),
-      ),
     );
   }
 
