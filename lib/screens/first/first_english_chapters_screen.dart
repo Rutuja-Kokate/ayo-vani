@@ -30,7 +30,7 @@ class FirstEnglishChaptersScreen extends StatefulWidget {
     BalvatikaChapter(
       number: 1,
       title: 'Two Little Hands',
-      titleHindi: 'दो छोटे हाथ',
+      titleHindi: 'Two Little Hands',
       description: "Let's learn the parts of our body",
       descriptionHindi: 'आइए अपने शरीर के अंगों को सीखें',
       icon: Icons.accessibility_new_rounded,
@@ -38,7 +38,7 @@ class FirstEnglishChaptersScreen extends StatefulWidget {
     BalvatikaChapter(
       number: 2,
       title: 'Life Around Us',
-      titleHindi: 'हमारे आसपास का जीवन',
+      titleHindi: 'Life Around Us',
       description: "Let's learn about animals around us",
       descriptionHindi: 'आइए अपने आसपास के जानवरों के बारे में जानें',
       icon: Icons.pets_rounded,
@@ -46,7 +46,7 @@ class FirstEnglishChaptersScreen extends StatefulWidget {
     BalvatikaChapter(
       number: 3,
       title: 'The Food We Eat',
-      titleHindi: 'हमारा भोजन',
+      titleHindi: 'The Food We Eat',
       description: "Let's learn about the food we eat",
       descriptionHindi: 'आइए अपने भोजन के बारे में जानें',
       icon: Icons.restaurant_rounded,
