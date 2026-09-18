@@ -12,6 +12,7 @@ import '../../widgets/ayo_screen_background.dart';
 import 'teacher_phase_screen.dart';
 import 'teacher_practice_screen.dart';
 import 'teacher_application_screen.dart';
+import '../validation/hitl_validation_screen.dart';
 import 'widgets/phase_selection_dialog.dart';
 import 'widgets/winding_levels_path.dart';
 
@@ -272,6 +273,40 @@ class _TeacherLevelsScreenState extends State<TeacherLevelsScreen>
                 ),
               ),
               AyoLogo(height: logoHeight),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Material(
+                  color: Colors.white,
+                  shape: const CircleBorder(),
+                  elevation: 1.5,
+                  shadowColor: Colors.black.withValues(alpha: 0.10),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const HitlValidationScreen()),
+                      );
+                    },
+                    splashColor: AppColors.primaryBurgundy.withValues(alpha: 0.12),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFFE8DECF),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.verified_user_rounded,
+                        color: AppColors.primaryBurgundy,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8.0),
