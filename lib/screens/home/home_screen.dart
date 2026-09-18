@@ -8,6 +8,9 @@ import '../../widgets/ayo_class_selection_grid.dart';
 import '../../widgets/ayo_logo.dart';
 import '../live_translate/live_translate_screen.dart';
 import '../settings/settings_screen.dart';
+import '../validation/hitl_validation_screen.dart';
+import '../../services/hitl_validation_service.dart';
+import '../../models/hitl_validation_models.dart';
 
 /// Screen 03 — Home / Dashboard for AYOVAANI Teacher App.
 ///
@@ -112,6 +115,11 @@ class HomeScreen extends StatelessWidget {
 
                       // 4. Offline Status Card
                       _buildOfflineStatusCard(context),
+
+                      SizedBox(height: sectionSpacing),
+
+                      // 4b. Teacher HITL Validation Center Card
+                      _buildHitlValidationCard(context),
 
                       SizedBox(height: sectionSpacing + 2.0),
 
@@ -443,6 +451,114 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHitlValidationCard(BuildContext context) {
+    final pendingCount = HitlValidationService().flaggedTranslations.where((t) => t.status == HitlStatusEnum.flagged).length;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const HitlValidationScreen()),
+          );
+        },
+        borderRadius: BorderRadius.circular(14.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFFDF8F0),
+            borderRadius: BorderRadius.circular(14.0),
+            border: Border.all(
+              color: const Color(0xFFE8DECF),
+              width: 1.0,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x064A3B32),
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+          child: Row(
+            children: [
+              Container(
+                width: 34.0,
+                height: 34.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF7EBEB),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.verified_user_rounded,
+                  color: AppColors.primaryBurgundy,
+                  size: 20.0,
+                ),
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Flexible(
+                          child: Text(
+                            'शिक्षक सुधार केंद्र (Teacher Validation)',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryBurgundy,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8.0),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 2.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF7EBEB),
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Text(
+                            '$pendingCount लंबित',
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 11.0,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryBurgundy,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2.0),
+                    const Text(
+                      'कम विश्वास वाले अनुवादों की समीक्षा करें (Review Low-Confidence)',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary, size: 22),
+            ],
+          ),
+        ),
       ),
     );
   }

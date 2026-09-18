@@ -11,6 +11,8 @@ import '../../widgets/ayo_cards.dart';
 import '../../widgets/ayo_dividers.dart';
 import '../../widgets/ayo_inputs.dart';
 import '../../widgets/ayo_screen_background.dart';
+import '../validation/hitl_validation_screen.dart';
+import '../audio/audio_training_data_screen.dart';
 
 /// Teacher Profile & Classroom Settings destination / modal.
 /// Accessible directly from the top-right header action.
@@ -330,19 +332,77 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       AyoCard(
-                        child: SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            'Require Teacher Approval for New Words',
-                            style: TextStyle(fontFamily: AppTypography.bodyFontFamily),
-                          ),
-                          subtitle: Text(
-                            'Flag AI-translated phrases for teacher review before adding to student flashcards',
-                            style: TextStyle(fontFamily: AppTypography.bodyFontFamily),
-                          ),
-                          value: _requireHumanVerification,
-                          activeThumbColor: AppColors.primaryBurgundy,
-                          onChanged: (val) => setState(() => _requireHumanVerification = val),
+                        child: Column(
+                          children: [
+                            SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                'Require Teacher Approval for New Words',
+                                style: TextStyle(fontFamily: AppTypography.bodyFontFamily),
+                              ),
+                              subtitle: Text(
+                                'Flag AI-translated phrases for teacher review before adding to student flashcards',
+                                style: TextStyle(fontFamily: AppTypography.bodyFontFamily),
+                              ),
+                              value: _requireHumanVerification,
+                              activeThumbColor: AppColors.primaryBurgundy,
+                              onChanged: (val) => setState(() => _requireHumanVerification = val),
+                            ),
+                            const Divider(height: 24.0),
+                            ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF7EBEB),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: const Icon(Icons.verified_user_rounded, color: AppColors.primaryBurgundy),
+                              ),
+                              title: const Text(
+                                'शिक्षक सुधार केंद्र (Teacher Validation)',
+                                style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, fontSize: 14.5),
+                              ),
+                              subtitle: const Text(
+                                'सत्यापित और संशोधित अनुवाद समीक्षा (Review Flagged Translations)',
+                                style: TextStyle(fontFamily: 'Inter', fontSize: 12.0),
+                              ),
+                              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context) => const HitlValidationScreen()),
+                                );
+                              },
+                            ),
+                            const Divider(height: 24.0),
+                            ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFF8E1),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: const Icon(Icons.mic_rounded, color: Color(0xFFC88A22)),
+                              ),
+                              title: const Text(
+                                'ऑडियो ट्रेनिंग डेटा संग्रह (Audio Training System)',
+                                style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, fontSize: 14.5),
+                              ),
+                              subtitle: const Text(
+                                'Opus संपीड़ित ऑडियो रिकॉर्डिंग व सिंक प्रबंधन (STT Fine-Tuning Data)',
+                                style: TextStyle(fontFamily: 'Inter', fontSize: 12.0),
+                              ),
+                              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context) => const AudioTrainingDataScreen()),
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ),
 

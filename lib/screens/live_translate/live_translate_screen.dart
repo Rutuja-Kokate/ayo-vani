@@ -14,6 +14,7 @@ import '../../pipeline/fuzzy_matcher.dart';
 import '../../pipeline/hindi_stt_service.dart';
 import '../../services/audio_player_service.dart';
 import '../../services/speech_to_speech_service.dart';
+import '../../services/tts_service.dart';
 import '../../widgets/ayo_badges.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
@@ -61,6 +62,7 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
   bool _isListening = false;
   bool _isProcessing = false;
   bool _isModelLoading = true;
+  bool _isContinuousLoop = false;
 
   String _sourceText = '';
   String _translatedMundariText = '';
@@ -149,13 +151,58 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
 
   @override
   void dispose() {
+    _isContinuousLoop = false;
     _amplitudeSub?.cancel();
     _maxRecordingTimer?.cancel();
     _audioRecorder.dispose();
     super.dispose();
   }
 
-  void _addTranslationToHistory(String hindi, String mundari) {
+  Future<void> _playMundariAudio(String arg1, String arg2) async {
+    if (arg1.isEmpty || arg2.isEmpty) return;
+
+    if (_direction == TranslationDirection.mundariToHindi) {
+      debugPrint('[LiveTranslate] Mundari->Hindi TTS speaking Hindi output: $arg2');
+      await TtsService().speakHindi(arg2);
+      return;
+    }
+
+    final hindi = arg1;
+    final mundari = arg2;
+    try {
+      final cacheManager = context.read<DemoCacheManager>();
+      await cacheManager.initialize();
+      if (!mounted) return;
+
+      final match = FuzzyMatcher.findBestMatch(hindi, cacheManager, threshold: 0.3);
+      String? audioPath;
+      if (match.entry != null) {
+        audioPath = cacheManager.getAudioAssetPath(match.entry!);
+      }
+
+      if (audioPath != null) {
+        debugPrint('[LiveTranslate] Playing audio asset from demo cache: $audioPath');
+        await context.read<S2SAudioPlayerService>().playTranslationResult(
+          S2STranslationResult(
+            hindiText: hindi,
+            mundariText: mundari,
+            audioBytes: null,
+            audioPath: audioPath,
+            source: TranslationSource.demoCache,
+            latencyMs: 0,
+          ),
+        );
+      } else {
+        debugPrint('[LiveTranslate] No asset in demo cache for "$hindi", synthesizing via TTS for: $mundari');
+        await TtsService().speakCodeMixedClassroomScript(mundari);
+      }
+    } catch (e) {
+      debugPrint('[LiveTranslate] Error playing audio: $e');
+      await TtsService().speakCodeMixedClassroomScript(mundari);
+    }
+  }
+
+  void _addTranslationToHistory(String hindi, String mundari, {bool playAudio = true}) {
     final cleanHindi = hindi.trim();
     final cleanMundari = mundari.trim();
     if (cleanHindi.isEmpty || cleanMundari.isEmpty) return;
@@ -180,38 +227,142 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
       }
     });
 
-    context.read<S2SAudioPlayerService>().playTranslationResult(
-      S2STranslationResult(
-        hindiText: cleanHindi,
-        mundariText: cleanMundari,
-        audioBytes: null,
-        source: TranslationSource.demoCache,
-        latencyMs: 0,
-      ),
-    );
+    if (playAudio) {
+      _playMundariAudio(cleanHindi, cleanMundari);
+    }
   }
 
   Future<void> _toggleListening() async {
     if (_isModelLoading || _isProcessing) return;
 
-    final hindiStt = context.read<HindiSttService>();
-    final cacheManager = context.read<DemoCacheManager>();
+    if (_direction == TranslationDirection.mundariToHindi) {
+      _isContinuousLoop = false;
+      if (_isListening) {
+        await _stopListeningAndProcess(cancelOnly: true);
+      } else {
+        await _startListening();
+      }
+      return;
+    }
 
-    if (_isListening) {
-      _amplitudeSub?.cancel();
-      _maxRecordingTimer?.cancel();
-      _silenceMs = 0;
+    if (_isListening || _isContinuousLoop) {
+      _isContinuousLoop = false;
+      await _stopListeningAndProcess(cancelOnly: true);
+    } else {
+      _isContinuousLoop = true;
+      await _startListening();
+    }
+  }
+
+  Future<void> _startListening() async {
+    if (!mounted) return;
+    if (_direction == TranslationDirection.hindiToMundari && !_isContinuousLoop) return;
+
+    if (await _audioRecorder.hasPermission()) {
+      final tempDir = await getTemporaryDirectory();
+      _audioPath = '${tempDir.path}/live_record_${DateTime.now().millisecondsSinceEpoch}.wav';
+
+      await _audioRecorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.wav,
+          sampleRate: 16000,
+          numChannels: 1,
+        ),
+        path: _audioPath!,
+      );
 
       if (!mounted) return;
       setState(() {
-        _isListening = false;
-        _isProcessing = true;
-        _sourceText = 'प्रोसेस हो रहा है...';
+        _isListening = true;
+        _isProcessing = false;
+        _sourceText = _direction == TranslationDirection.mundariToHindi
+            ? 'मुंडारी में सुन रहा है...'
+            : 'सुन रहा है...';
+        _translatedMundariText = '';
       });
 
+      _silenceMs = 0;
+      _amplitudeSub?.cancel();
+      _amplitudeSub = null;
+      _maxRecordingTimer?.cancel();
+      _maxRecordingTimer = null;
+
+      _amplitudeSub = _audioRecorder.onAmplitudeChanged(const Duration(milliseconds: 100)).listen((amp) {
+        if (!_isListening || _isProcessing) return;
+
+        if (amp.current < -35.0) {
+          _silenceMs += 100;
+          if (_silenceMs >= 1500 && _isListening && !_isProcessing) {
+            _amplitudeSub?.cancel();
+            _amplitudeSub = null;
+            _maxRecordingTimer?.cancel();
+            _maxRecordingTimer = null;
+            _stopListeningAndProcess();
+          }
+        } else {
+          _silenceMs = 0;
+        }
+      });
+
+      _maxRecordingTimer = Timer(const Duration(seconds: 4), () {
+        if (_isListening && !_isProcessing) {
+          _amplitudeSub?.cancel();
+          _amplitudeSub = null;
+          _maxRecordingTimer?.cancel();
+          _maxRecordingTimer = null;
+          _stopListeningAndProcess();
+        }
+      });
+    }
+  }
+
+  Future<void> _stopListeningAndProcess({bool cancelOnly = false}) async {
+    _amplitudeSub?.cancel();
+    _amplitudeSub = null;
+    _maxRecordingTimer?.cancel();
+    _maxRecordingTimer = null;
+    _silenceMs = 0;
+
+    if (!_isListening && !_isProcessing && !cancelOnly) return;
+
+    if (cancelOnly) {
+      if (!mounted) return;
+      setState(() {
+        _isListening = false;
+        _isProcessing = false;
+        _sourceText = 'अनुवाद रोका गया';
+      });
       try {
-        final path = await _audioRecorder.stop();
-        if (path != null && mounted) {
+        await _audioRecorder.stop();
+      } catch (e) {
+        debugPrint('Audio recorder stop error: $e');
+      }
+      return;
+    }
+
+    if (_isProcessing) return;
+
+    if (!mounted) return;
+    setState(() {
+      _isListening = false;
+      _isProcessing = true;
+      _sourceText = 'प्रोसेस हो रहा है...';
+    });
+
+    try {
+      final path = await _audioRecorder.stop();
+      if (path != null && mounted) {
+        if (_direction == TranslationDirection.mundariToHindi) {
+          final mockMundari = 'मैडम, इंग नेया काजी रुआड़ सनाइंग तना।';
+          final mockHindi = 'मैडम, मैं इसका जवाब देना चाहता हूँ।';
+
+          if (mounted) {
+            _addTranslationToHistory(mockMundari, mockHindi, playAudio: false);
+            await TtsService().speakHindi(mockHindi);
+          }
+        } else {
+          final hindiStt = context.read<HindiSttService>();
+          final cacheManager = context.read<DemoCacheManager>();
           final transcribedHindi = await hindiStt.transcribe(path);
           final trimmedText = transcribedHindi.trim();
 
@@ -223,6 +374,9 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                 _translatedMundariText = '';
               });
             }
+            if (_isContinuousLoop && mounted) {
+              _scheduleNextContinuousListen();
+            }
             return;
           }
 
@@ -233,65 +387,38 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
               'जोहार $trimmedText';
 
           if (mounted) {
-            _addTranslationToHistory(finalHindi, resultMundari);
+            _addTranslationToHistory(finalHindi, resultMundari, playAudio: false);
+            await _playMundariAudio(finalHindi, resultMundari);
           }
         }
-      } catch (e) {
-        debugPrint('STT Processing Error: $e');
-        if (mounted) {
-          setState(() {
-            _sourceText = 'त्रुटि हुई। फिर कोशिश करें।';
-            _translatedMundariText = '';
-          });
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isProcessing = false;
-          });
-        }
       }
-    } else {
-      if (await _audioRecorder.hasPermission()) {
-        final tempDir = await getTemporaryDirectory();
-        _audioPath = '${tempDir.path}/live_record_${DateTime.now().millisecondsSinceEpoch}.wav';
-
-        await _audioRecorder.start(
-          const RecordConfig(
-            encoder: AudioEncoder.wav,
-            sampleRate: 16000,
-            numChannels: 1,
-          ),
-          path: _audioPath!,
-        );
-
-        if (!mounted) return;
+    } catch (e) {
+      debugPrint('STT Processing Error: $e');
+      if (mounted) {
         setState(() {
-          _isListening = true;
-          _isProcessing = false;
-          _sourceText = 'सुन रहा है...';
+          _sourceText = 'त्रुटि हुई। फिर कोशिश करें।';
           _translatedMundariText = '';
         });
-
-        _silenceMs = 0;
-        _amplitudeSub = _audioRecorder.onAmplitudeChanged(const Duration(milliseconds: 100)).listen((amp) {
-          if (amp.current < -35.0) {
-            _silenceMs += 100;
-            if (_silenceMs >= 1500 && _isListening && !_isProcessing) {
-              _toggleListening();
-            }
-          } else {
-            _silenceMs = 0;
-          }
-        });
-
-        _maxRecordingTimer = Timer(const Duration(seconds: 4), () {
-          if (_isListening && !_isProcessing) {
-            _toggleListening();
-          }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
         });
       }
+      if (_direction == TranslationDirection.hindiToMundari && _isContinuousLoop && mounted) {
+        _scheduleNextContinuousListen();
+      }
     }
+  }
+
+  void _scheduleNextContinuousListen() {
+    if (_direction == TranslationDirection.mundariToHindi) return;
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (_isContinuousLoop && mounted && !_isListening && !_isProcessing) {
+        _startListening();
+      }
+    });
   }
 
   void _showTypeDialog(BuildContext context) {
@@ -544,7 +671,9 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n?.hindi ?? 'Hindi',
+            _direction == TranslationDirection.hindiToMundari
+                ? (l10n?.hindi ?? 'Hindi')
+                : 'Mundari',
             style: const TextStyle(
               fontFamily: 'Inter',
               fontSize: 11.5,
@@ -593,9 +722,11 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Mundari',
-                style: TextStyle(
+              Text(
+                _direction == TranslationDirection.hindiToMundari
+                    ? 'Mundari'
+                    : (l10n?.hindi ?? 'Hindi'),
+                style: const TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,
@@ -612,15 +743,31 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
             ],
           ),
           const SizedBox(height: 8.0),
-          Text(
-            hasText ? _translatedMundariText : (l10n?.translateTargetPlaceholder ?? 'अनुवाद यहां दिखेगा'),
-            style: TextStyle(
-              fontFamily: AppTypography.headingFontFamily,
-              fontSize: isTablet ? 22.0 : 18.0,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              height: 1.3,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  hasText ? _translatedMundariText : (l10n?.translateTargetPlaceholder ?? 'अनुवाद यहां दिखेगा'),
+                  style: TextStyle(
+                    fontFamily: AppTypography.headingFontFamily,
+                    fontSize: isTablet ? 22.0 : 18.0,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+              if (hasText) ...[
+                const SizedBox(width: 8.0),
+                MundariAudioButton(
+                  text: _translatedMundariText,
+                  color: const Color(0xFFFFD700),
+                  iconSize: 26.0,
+                  onTap: () => _playMundariAudio(_sourceText, _translatedMundariText),
+                ),
+              ],
+            ],
           ),
 
           if (hasText) ...[
@@ -630,6 +777,30 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                InkWell(
+                  onTap: () => _playMundariAudio(_sourceText, _translatedMundariText),
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.volume_up_rounded, size: 16.0, color: Color(0xFFFFD700)),
+                        SizedBox(width: 4.0),
+                        Text(
+                          'सुनें',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFFFD700),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14.0),
                 InkWell(
                   onTap: () => _copyToClipboard(context, _translatedMundariText),
                   borderRadius: BorderRadius.circular(8.0),
@@ -712,6 +883,39 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
 
     return Column(
       children: [
+        if (_isContinuousLoop)
+          Container(
+            margin: const EdgeInsets.only(bottom: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F5E9),
+              borderRadius: BorderRadius.circular(20.0),
+              border: Border.all(color: const Color(0xFF81C784)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8.0,
+                  height: 8.0,
+                  decoration: const BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8.0),
+                const Text(
+                  'सतत अनुवाद सक्रिय (Continuous Listen & Play)',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+              ],
+            ),
+          ),
         GestureDetector(
           onTap: _toggleListening,
           child: Container(
@@ -825,6 +1029,7 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                         _sourceText = _recentHistory[i].hindi;
                         _translatedMundariText = _recentHistory[i].mundari;
                       });
+                      _playMundariAudio(_recentHistory[i].hindi, _recentHistory[i].mundari);
                     },
                     borderRadius: BorderRadius.circular(12.0),
                     child: Container(
@@ -870,10 +1075,11 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                             ),
                           ),
                           const SizedBox(width: 8.0),
-                          const Icon(
-                            Icons.chevron_right_rounded,
-                            size: 18.0,
-                            color: AppColors.textMuted,
+                          MundariAudioButton(
+                            text: _recentHistory[i].mundari,
+                            color: AppColors.primaryBurgundy,
+                            iconSize: 22.0,
+                            onTap: () => _playMundariAudio(_recentHistory[i].hindi, _recentHistory[i].mundari),
                           ),
                         ],
                       ),
