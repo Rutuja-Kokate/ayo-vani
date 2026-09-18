@@ -53,10 +53,9 @@ class HitlValidationService {
             _metadata = SyncMetadata.fromJson(data['metadata'] as Map<String, dynamic>);
           }
         }
-      } else {
-        _seedDefaultItems();
-        await _saveToDisk();
       }
+      _seedDefaultItems();
+      await _saveToDisk();
     } catch (e) {
       debugPrint('[HITL] Initialization error: $e');
       _seedDefaultItems();
@@ -65,8 +64,8 @@ class HitlValidationService {
   }
 
   void _seedDefaultItems() {
-    if (_flaggedTranslations.isNotEmpty) return;
-    _flaggedTranslations.addAll([
+    final defaultList = [
+      // Hindi -> Mundari
       FlaggedTranslation(
         id: 'flag_001',
         sourceText: 'आज बहुत गर्मी है।',
@@ -84,6 +83,56 @@ class HitlValidationService {
         timestamp: DateTime.now().subtract(const Duration(hours: 2)),
       ),
       FlaggedTranslation(
+        id: 'flag_004',
+        sourceText: 'अपनी किताब खोलो और पाठ तीन पढ़ो।',
+        targetText: 'अमाः पुथी उइड़मे आड़ो पाठ आपी पढ़ावमे।',
+        confidence: 0.64,
+        languagePair: LanguagePairEnum.hindiToMundari,
+        timestamp: DateTime.now().subtract(const Duration(hours: 4)),
+      ),
+      FlaggedTranslation(
+        id: 'flag_005',
+        sourceText: 'कल स्कूल में छुट्टी रहेगी।',
+        targetText: 'गापा इशकुल रे छुटी ताइना।',
+        confidence: 0.69,
+        languagePair: LanguagePairEnum.hindiToMundari,
+        timestamp: DateTime.now().subtract(const Duration(hours: 5)),
+      ),
+      FlaggedTranslation(
+        id: 'flag_006',
+        sourceText: 'गुरुजी ने बच्चों को कहानी सुनाई।',
+        targetText: 'माहातोय होनकोके कहानी काजी आद्या।',
+        confidence: 0.55,
+        languagePair: LanguagePairEnum.hindiToMundari,
+        timestamp: DateTime.now().subtract(const Duration(hours: 6)),
+      ),
+      FlaggedTranslation(
+        id: 'flag_007',
+        sourceText: 'पेड़ पर मीठे आम लगे हैं।',
+        targetText: 'दारू रे शिबिल उली जोअ काना।',
+        confidence: 0.67,
+        languagePair: LanguagePairEnum.hindiToMundari,
+        timestamp: DateTime.now().subtract(const Duration(hours: 8)),
+      ),
+      FlaggedTranslation(
+        id: 'flag_008',
+        sourceText: 'सभी बच्चे मिलकर गाना गाओ।',
+        targetText: 'सोबेन होनको मीसाकाते दुरं दुरं पे।',
+        confidence: 0.60,
+        languagePair: LanguagePairEnum.hindiToMundari,
+        timestamp: DateTime.now().subtract(const Duration(hours: 10)),
+      ),
+      FlaggedTranslation(
+        id: 'flag_009',
+        sourceText: 'नदी का पानी बहुत साफ है।',
+        targetText: 'गाड़ा राः दाः खूबे फुरछा गेया।',
+        confidence: 0.53,
+        languagePair: LanguagePairEnum.hindiToMundari,
+        timestamp: DateTime.now().subtract(const Duration(hours: 12)),
+      ),
+
+      // Mundari -> Hindi
+      FlaggedTranslation(
         id: 'flag_003',
         sourceText: 'कटा रे मेडः',
         targetText: 'पैरों में आँखें',
@@ -91,7 +140,54 @@ class HitlValidationService {
         languagePair: LanguagePairEnum.mundariToHindi,
         timestamp: DateTime.now().subtract(const Duration(hours: 3)),
       ),
-    ]);
+      FlaggedTranslation(
+        id: 'flag_010',
+        sourceText: 'तेञ़ इशकुल रे होनको मंडी जोोम तना।',
+        targetText: 'आज स्कूल में बच्चे खाना खा रहे हैं।',
+        confidence: 0.61,
+        languagePair: LanguagePairEnum.mundariToHindi,
+        timestamp: DateTime.now().subtract(const Duration(hours: 7)),
+      ),
+      FlaggedTranslation(
+        id: 'flag_011',
+        sourceText: 'अइंयाः नुतूम रमेश तना।',
+        targetText: 'मेरा नाम रमेश है।',
+        confidence: 0.68,
+        languagePair: LanguagePairEnum.mundariToHindi,
+        timestamp: DateTime.now().subtract(const Duration(hours: 9)),
+      ),
+      FlaggedTranslation(
+        id: 'flag_012',
+        sourceText: 'दाः जाड़ी तना, ओड़ाः रे ताइनपे।',
+        targetText: 'बारिश हो रही है, घर में रहो।',
+        confidence: 0.57,
+        languagePair: LanguagePairEnum.mundariToHindi,
+        timestamp: DateTime.now().subtract(const Duration(hours: 11)),
+      ),
+      FlaggedTranslation(
+        id: 'flag_013',
+        sourceText: 'मारंग माहातोय होनकोके पढ़ाव तादकोआ।',
+        targetText: 'मुख्य शिक्षक ने बच्चों को पढ़ाया।',
+        confidence: 0.63,
+        languagePair: LanguagePairEnum.mundariToHindi,
+        timestamp: DateTime.now().subtract(const Duration(hours: 14)),
+      ),
+      FlaggedTranslation(
+        id: 'flag_014',
+        sourceText: 'सोबेन को मीसाकाते रोपोड़ पे।',
+        targetText: 'सब मिलकर बातचीत करो।',
+        confidence: 0.59,
+        languagePair: LanguagePairEnum.mundariToHindi,
+        timestamp: DateTime.now().subtract(const Duration(hours: 16)),
+      ),
+    ];
+
+    for (final item in defaultList) {
+      final exists = _flaggedTranslations.any((e) => e.id == item.id || e.sourceText.trim() == item.sourceText.trim());
+      if (!exists) {
+        _flaggedTranslations.add(item);
+      }
+    }
   }
 
   Future<void> _saveToDisk() async {
