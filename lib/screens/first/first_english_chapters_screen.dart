@@ -25,7 +25,7 @@ class FirstEnglishChaptersScreen extends StatefulWidget {
   final VoidCallback? onBack;
   final ValueChanged<int>? onNavigateTab;
 
-  /// Class 1 English Curriculum prototype chapters (3 chapters for hackathon)
+  /// Class 1 English Curriculum chapters (12 Chapters fully populated with English & Hindi localizations)
   static const List<BalvatikaChapter> englishChapters = [
     BalvatikaChapter(
       number: 1,
@@ -50,6 +50,78 @@ class FirstEnglishChaptersScreen extends StatefulWidget {
       description: "Let's learn about the food we eat",
       descriptionHindi: 'आइए अपने भोजन के बारे में जानें',
       icon: Icons.restaurant_rounded,
+    ),
+    BalvatikaChapter(
+      number: 4,
+      title: 'My Family',
+      titleHindi: 'मेरा परिवार',
+      description: "Let's learn about our family members",
+      descriptionHindi: 'आइए अपने परिवार के सदस्यों के बारे में जानें',
+      icon: Icons.family_restroom_rounded,
+    ),
+    BalvatikaChapter(
+      number: 5,
+      title: 'My House',
+      titleHindi: 'मेरा घर',
+      description: "Let's explore parts of our home",
+      descriptionHindi: 'आइए अपने घर के हिस्सों को जानें',
+      icon: Icons.home_rounded,
+    ),
+    BalvatikaChapter(
+      number: 6,
+      title: 'Fun with Animals',
+      titleHindi: 'जानवरों के साथ मज़ा',
+      description: "Let's learn animal names and sounds",
+      descriptionHindi: 'आइए जानवरों के नाम और आवाज़ें सीखें',
+      icon: Icons.cruelty_free_rounded,
+    ),
+    BalvatikaChapter(
+      number: 7,
+      title: 'Plants Around Us',
+      titleHindi: 'पेड़-पौधे हमारे आसपास',
+      description: "Let's explore trees, leaves and flowers",
+      descriptionHindi: 'आइए पेड़-पौधों और फूलों के बारे में जानें',
+      icon: Icons.park_rounded,
+    ),
+    BalvatikaChapter(
+      number: 8,
+      title: 'Colors and Shapes',
+      titleHindi: 'रंग और आकृतियां',
+      description: "Let's identify basic colors and shapes",
+      descriptionHindi: 'आइए रंगों और आकृतियों की पहचान करें',
+      icon: Icons.palette_rounded,
+    ),
+    BalvatikaChapter(
+      number: 9,
+      title: 'Numbers Around Us',
+      titleHindi: 'संख्याएं हमारे आसपास',
+      description: "Let's count objects from 1 to 20",
+      descriptionHindi: 'आइए 1 से 20 तक की वस्तुओं को गिनें',
+      icon: Icons.filter_9_plus_rounded,
+    ),
+    BalvatikaChapter(
+      number: 10,
+      title: 'Good Habits',
+      titleHindi: 'अच्छी आदतें',
+      description: "Let's practice healthy daily routines",
+      descriptionHindi: 'आइए दैनिक अच्छी आदतों का अभ्यास करें',
+      icon: Icons.clean_hands_rounded,
+    ),
+    BalvatikaChapter(
+      number: 11,
+      title: 'Seasons and Weather',
+      titleHindi: 'मौसम और ऋतुएं',
+      description: "Let's observe sunny, rainy and cold days",
+      descriptionHindi: 'आइए धूप, बारिश और ठंड के मौसम को जानें',
+      icon: Icons.wb_sunny_rounded,
+    ),
+    BalvatikaChapter(
+      number: 12,
+      title: 'Community Helpers',
+      titleHindi: 'सामुदायिक मददगार',
+      description: "Let's learn about teachers, doctors and farmers",
+      descriptionHindi: 'आइए शिक्षकों, डॉक्टरों और किसानों के बारे में जानें',
+      icon: Icons.engineering_rounded,
     ),
   ];
 
