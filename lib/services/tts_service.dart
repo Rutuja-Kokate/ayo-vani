@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -77,7 +78,7 @@ class TtsService {
           vits: sherpa.OfflineTtsVitsModelConfig(
             model: modelFile.path,
             tokens: tokensFile.path,
-            lexicon: '',
+            lexicon: tokensFile.path,
           ),
           numThreads: 2,
           debug: false,
@@ -138,8 +139,9 @@ class TtsService {
       return text.toLowerCase();
     }
 
-    // Normalize nukta variations (composite vs combining nukta)
+    // Normalize nukta variations (composite vs combining nukta) & hyphens
     String input = text
+        .replaceAll('-', ' ')
         .replaceAll('ड़', 'r')
         .replaceAll('ढ़', 'rh')
         .replaceAll('ड़', 'r')
@@ -259,6 +261,18 @@ class TtsService {
     await speakCodeMixedClassroomScript(text);
   }
 
+  /// Synthesize and play Hindi text directly using System FlutterTts in hi-IN voice.
+  Future<void> speakHindi(String text) async {
+    if (!_initialized) await init();
+    try {
+      await _flutterTts.setLanguage('hi-IN');
+      await _flutterTts.stop();
+      await _flutterTts.speak(text);
+    } catch (e) {
+      debugPrint('Hindi TTS playback error: $e');
+    }
+  }
+
   /// Synthesize and play code-mixed (Mundari + English) classroom scripts using local ONNX Mundari TTS.
   Future<void> speakCodeMixedClassroomScript(String scriptText) async {
     if (!_initialized) await init();
@@ -289,8 +303,19 @@ class TtsService {
           final tempWav = File('${tempDir.path}/mundari_tts_output.wav');
           await tempWav.writeAsBytes(wavBytes);
           await _audioPlayer.stop();
+
+          final completer = Completer<void>();
+          StreamSubscription? sub;
+          sub = _audioPlayer.onPlayerStateChanged.listen((state) {
+            if (state == PlayerState.completed || state == PlayerState.stopped) {
+              if (!completer.isCompleted) completer.complete();
+              sub?.cancel();
+            }
+          });
+
           await _audioPlayer.play(DeviceFileSource(tempWav.path));
           debugPrint('[TTS] Playing synthesized Mundari ONNX audio ✓');
+          await completer.future;
           return;
         }
       } catch (e) {
