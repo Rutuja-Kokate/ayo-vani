@@ -9,6 +9,7 @@ import '../../../widgets/ayo_screen_background.dart';
 import 'explore_find_quest_game.dart';
 import 'food_power_sorting_game.dart';
 import 'handy_actions_match_game.dart';
+import '../../../services/activity_database_service.dart';
 
 class GameItem {
   GameItem({
@@ -121,6 +122,14 @@ class _GamesScreenState extends State<GamesScreen> {
         item.isSorted = true;
         _score += 10;
       });
+      if (_items.every((it) => it.isSorted)) {
+        ActivityDatabaseService.instance.recordEvent(
+          chapter: widget.chapterName,
+          activityType: 'game',
+          correct: _items.length,
+          total: _items.length,
+        );
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Correct! ${item.emoji} sorted into $_selectedCategory basket! (+10 pts)'),

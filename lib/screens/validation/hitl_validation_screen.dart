@@ -271,18 +271,27 @@ class _HitlCardState extends State<_HitlCard> {
 
   @override
   Widget build(BuildContext context) {
-    final confPercent = (widget.item.confidence * 100).toInt();
-    final confColor = widget.item.confidence >= 0.8
-        ? const Color(0xFF2E7D32)
-        : widget.item.confidence >= 0.6
-            ? const Color(0xFFC88A22)
-            : const Color(0xFFC62828);
+    final conf = widget.item.confidence;
+    final confPercent = conf != null ? (conf * 100).toInt() : null;
+    final confColor = conf == null
+        ? const Color(0xFF616161)
+        : conf >= 0.8
+            ? const Color(0xFF2E7D32)
+            : conf >= 0.6
+                ? const Color(0xFFC88A22)
+                : const Color(0xFFC62828);
 
-    final confBg = widget.item.confidence >= 0.8
-        ? const Color(0xFFE8F5E9)
-        : widget.item.confidence >= 0.6
-            ? const Color(0xFFFFF8E1)
-            : const Color(0xFFFFEBEE);
+    final confBg = conf == null
+        ? const Color(0xFFEEEEEE)
+        : conf >= 0.8
+            ? const Color(0xFFE8F5E9)
+            : conf >= 0.6
+                ? const Color(0xFFFFF8E1)
+                : const Color(0xFFFFEBEE);
+
+    final confBadgeText = confPercent != null
+        ? 'विश्वास: $confPercent%'
+        : 'विश्वास अनुपलब्ध (Confidence unavailable)';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14.0),
@@ -327,7 +336,7 @@ class _HitlCardState extends State<_HitlCard> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 child: Text(
-                  'विश्वास: $confPercent%',
+                  confBadgeText,
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 11.5,

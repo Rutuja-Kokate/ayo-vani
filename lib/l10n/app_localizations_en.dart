@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -871,7 +872,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toolsReviewNoticeMsg =>
-      '2 AI-suggested Gondi translations require teacher confirmation before printing.';
+      '2 AI-suggested Mundari translations require teacher confirmation before printing.';
 
   @override
   String get studentLevelsTitle => 'Student Learning Levels';

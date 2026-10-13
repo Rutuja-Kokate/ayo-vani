@@ -1,12 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 import '../config/rag_config.dart';
-import '../data/english_activities_data.dart';
 import '../rag/models/rag_flashcard.dart';
 import '../rag/models/rag_quiz.dart';
 import '../rag/models/rag_worksheet.dart';
@@ -14,13 +12,38 @@ import 'mt_translation_service.dart';
 
 enum GenerationArtifactType { flashcard, quiz, worksheet }
 
-/// Service that calls the Gemini API to generate educational content
+/// Exception thrown when a chapter has no corresponding entry in assets/textbook_assets/manifest.json.
+class ChapterIndexNotFoundException implements Exception {
+  final String chapterId;
+  const ChapterIndexNotFoundException(this.chapterId);
+
+  @override
+  String toString() =>
+      'ChapterIndexNotFoundException: Chapter "$chapterId" does not have an index in manifest.json.';
+}
+
+/// Typed exception thrown when content generation fails (Gemini API error, missing candidates, network issue).
+class ContentGenerationException implements Exception {
+  final String message;
+  final dynamic cause;
+  const ContentGenerationException(this.message, [this.cause]);
+
+  @override
+  String toString() =>
+      'ContentGenerationException: $message${cause != null ? " (cause: $cause)" : ""}';
+}
+
+/// Service that calls the Gemini API to generate pedagogical content
 /// (Flashcards, Quizzes, Worksheets) for a given chapter, then translates
-/// them to Mundari using an MT service. Results are cached on-device.
+/// them to Mundari using [MtTranslationService]. Results are cached on-device.
 class ContentGenerationService {
   final Dio _dio;
+  final MtTranslationService _mtService;
+  Map<String, String>? _manifest;
 
-  ContentGenerationService() : _dio = Dio();
+  ContentGenerationService({Dio? dio, MtTranslationService? mtService})
+      : _dio = dio ?? Dio(),
+        _mtService = mtService ?? MtTranslationService.instance;
 
   // ── Cache helpers ──────────────────────────────────────────────────────────
 
@@ -71,81 +94,82 @@ class ContentGenerationService {
   // ── Gemini API ─────────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> _callGemini(String prompt) async {
-    if (kGeminiApiKey == 'YOUR_GEMINI_API_KEY_HERE' || kGeminiApiKey.isEmpty) {
-      throw StateError(
-          'Gemini API key not set. Please update lib/config/rag_config.dart.');
+    if (!hasGeminiKey) {
+      throw const MissingApiKeyException();
     }
     const model = kGeminiModel;
     final url =
         'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$kGeminiApiKey';
 
-    final response = await _dio.post(
-      url,
-      data: {
-        'contents': [
-          {
-            'role': 'user',
-            'parts': [
-              {'text': prompt}
-            ]
-          }
-        ],
-        'generationConfig': {
-          'temperature': 0.2,
-          'responseMimeType': 'application/json',
+    try {
+      final response = await _dio.post(
+        url,
+        data: {
+          'contents': [
+            {
+              'role': 'user',
+              'parts': [
+                {'text': prompt}
+              ]
+            }
+          ],
+          'generationConfig': {
+            'temperature': 0.2,
+            'responseMimeType': 'application/json',
+          },
         },
-      },
-      options: Options(
-        headers: {'Content-Type': 'application/json'},
-        sendTimeout: const Duration(seconds: 90),
-        receiveTimeout: const Duration(seconds: 90),
-      ),
-    );
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          sendTimeout: const Duration(seconds: 90),
+          receiveTimeout: const Duration(seconds: 90),
+        ),
+      );
 
-    final candidates = response.data['candidates'] as List<dynamic>?;
-    if (candidates == null || candidates.isEmpty) {
-      throw Exception('Gemini returned no candidates');
+      final candidates = response.data['candidates'] as List<dynamic>?;
+      if (candidates == null || candidates.isEmpty) {
+        throw const ContentGenerationException('Gemini returned no candidates');
+      }
+      final rawText = candidates.first['content']['parts'][0]['text'] as String;
+      return jsonDecode(rawText) as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw ContentGenerationException(
+          'Gemini API request failed (${e.type}): ${e.message}', e);
+    } catch (e) {
+      if (e is ContentGenerationException || e is MissingApiKeyException) rethrow;
+      throw ContentGenerationException(
+          'Failed to communicate with Gemini API: $e', e);
     }
-    final rawText = candidates.first['content']['parts'][0]['text'] as String;
-    return jsonDecode(rawText) as Map<String, dynamic>;
   }
 
   // ── MT Translation ─────────────────────────────────────────────────────────
 
-  final MtTranslationService _mtService = MtTranslationService();
-
-  Future<List<String>> _translateBatch(List<String> hindiTexts) async {
+  Future<List<MtTranslationResult>> _translateBatch(List<String> hindiTexts) async {
     if (hindiTexts.isEmpty) return [];
-
-    try {
-      // Load MT model on 2 threads for batch translation
-      await _mtService.loadModel(numThreads: 2);
-      return await _mtService.translateBatch(hindiTexts);
-    } finally {
-      // Always unload MT model when translation completes to free RAM and avoid app crash / device slowdown
-      await _mtService.unloadModel();
-    }
+    return await _mtService.translateBatch(hindiTexts);
   }
 
   // ── Flashcard Generation ───────────────────────────────────────────────────
 
   Future<RagFlashcardSet> generateFlashcards(
-      String chapterName, String className, {bool forceRefresh = false, String subject = 'Hindi'}) async {
+      String chapterName, String className,
+      {bool forceRefresh = false, String subject = 'Hindi'}) async {
     // Check cache first
     if (!forceRefresh) {
-      final cached = await _loadCache(chapterName, GenerationArtifactType.flashcard);
+      final cached =
+          await _loadCache(chapterName, GenerationArtifactType.flashcard);
       if (cached != null) {
         debugPrint('[RAG] Loaded flashcards from cache for "$chapterName"');
         return RagFlashcardSet.fromJson(cached);
       }
     }
 
-    // Try loading extracted textbook JSON asset index
+    // Try loading extracted textbook JSON asset index via explicit manifest
     final localRAG = await _loadLocalChapterRAG(chapterName);
-    final rawVocab = (localRAG?['cards'] as List<dynamic>? ?? []);
+    final rawVocab = (localRAG['cards'] as List<dynamic>? ?? []);
 
     if (rawVocab.isNotEmpty) {
-      debugPrint('[RAG] Building flashcards from local extracted textbook assets for "$chapterName"');
+      debugPrint(
+          '[RAG] Building flashcards from local extracted textbook assets for "$chapterName"');
       final cardsList = <Map<String, dynamic>>[];
       for (int i = 0; i < rawVocab.length; i++) {
         final item = rawVocab[i] as Map<String, dynamic>;
@@ -157,6 +181,7 @@ class ContentGenerationService {
           'meaning_mundari': '[मुंडारी अर्थ]',
           'emoji': item['emoji'] as String? ?? '📖',
           if (item['imageAsset'] != null) 'imageAsset': item['imageAsset'],
+          'source': 'curated',
         });
       }
 
@@ -172,19 +197,23 @@ class ContentGenerationService {
       return RagFlashcardSet.fromJson(localResult);
     }
 
-    debugPrint('[RAG] Generating flashcards via Gemini for "$chapterName" (subject: $subject)...');
+    debugPrint(
+        '[RAG] Generating flashcards via Gemini for "$chapterName" (subject: $subject)...');
 
-    // Determine content language based on subject
     final isEnglish = subject.toLowerCase() == 'english';
     final contentLang = isEnglish ? 'English' : 'Hindi';
     final exampleWord = isEnglish ? 'Eye' : 'आँख';
-    final exampleMeaning = isEnglish
-        ? 'The organ used for seeing'
-        : 'देखने का अंग';
+    final exampleMeaning =
+        isEnglish ? 'The organ used for seeing' : 'देखने का अंग';
+
+    final textbookContext = localRAG['full_chapter_text'] as String?;
+    final contextPrompt = (textbookContext != null && textbookContext.isNotEmpty)
+        ? '\nTextbook content:\n"""\n$textbookContext\n"""\n'
+        : '';
 
     final prompt = '''
 You are an educational content creator for Indian primary school students (Grade: $className, Subject: $subject).
-Generate a set of 8 vocabulary flashcards for the chapter: "$chapterName".
+Generate a set of 8 vocabulary flashcards for the chapter: "$chapterName".$contextPrompt
 Each flashcard should be a key concept, object, or word from the chapter.
 
 IMPORTANT: Since this is a $subject subject, ALL words and meanings MUST be in $contentLang.
@@ -206,57 +235,55 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
 }
 ''';
 
-    try {
-      final hindiJson = await _callGemini(prompt);
+    final hindiJson = await _callGemini(prompt);
 
-      // Extract all strings for translation
-      final cards = (hindiJson['cards'] as List<dynamic>? ?? []);
-      final toTranslate = <String>[];
-      for (final card in cards) {
-        toTranslate.add(card['word'] as String? ?? '');
-        toTranslate.add(card['meaning'] as String? ?? '');
-      }
-      toTranslate.add(hindiJson['title'] as String? ?? chapterName);
-
-      final translated = await _translateBatch(toTranslate);
-
-      // Reconstruct with Mundari translations
-      int tIdx = 0;
-      final mundariCards = <Map<String, dynamic>>[];
-      for (int i = 0; i < cards.length; i++) {
-        final card = cards[i] as Map<String, dynamic>;
-        mundariCards.add({
-          'id': card['id'],
-          'word': card['word'],
-          'word_mundari': translated[tIdx++],
-          'meaning': card['meaning'],
-          'meaning_mundari': translated[tIdx++],
-          'emoji': card['emoji'],
-        });
-      }
-
-      final titleMundari = translated[tIdx];
-      final resultJson = {
-        'id': hindiJson['id'],
-        'title': hindiJson['title'],
-        'title_mundari': titleMundari,
-        'chapterName': chapterName,
-        'cards': mundariCards,
-      };
-
-      await _saveCache(chapterName, GenerationArtifactType.flashcard, resultJson);
-      return RagFlashcardSet.fromJson(resultJson);
-    } catch (e) {
-      debugPrint('[RAG] Gemini call failed for flashcards, building dynamic local fallback: $e');
-      final fallbackSet = _buildFallbackFlashcards(chapterName, className, localRAG, subject);
-      await _saveCache(chapterName, GenerationArtifactType.flashcard, fallbackSet);
-      return RagFlashcardSet.fromJson(fallbackSet);
+    // Extract all strings for translation
+    final cards = (hindiJson['cards'] as List<dynamic>? ?? []);
+    final toTranslate = <String>[];
+    for (final card in cards) {
+      toTranslate.add(card['word'] as String? ?? '');
+      toTranslate.add(card['meaning'] as String? ?? '');
     }
+    toTranslate.add(hindiJson['title'] as String? ?? chapterName);
+
+    final translated = await _translateBatch(toTranslate);
+
+    int tIdx = 0;
+    final mundariCards = <Map<String, dynamic>>[];
+    for (int i = 0; i < cards.length; i++) {
+      final card = cards[i] as Map<String, dynamic>;
+      final wordRes = translated[tIdx++];
+      final meaningRes = translated[tIdx++];
+      final cardSource =
+          wordRes.source == MtResultSource.glossary ? 'glossary' : 'nmt';
+      mundariCards.add({
+        'id': card['id'],
+        'word': card['word'],
+        'word_mundari': wordRes.text,
+        'meaning': card['meaning'],
+        'meaning_mundari': meaningRes.text,
+        'emoji': card['emoji'],
+        'source': cardSource,
+      });
+    }
+
+    final titleMundari = translated[tIdx].text;
+    final resultJson = {
+      'id': hindiJson['id'],
+      'title': hindiJson['title'],
+      'title_mundari': titleMundari,
+      'chapterName': chapterName,
+      'cards': mundariCards,
+    };
+
+    await _saveCache(chapterName, GenerationArtifactType.flashcard, resultJson);
+    return RagFlashcardSet.fromJson(resultJson);
   }
 
   // ── Quiz Generation ────────────────────────────────────────────────────────
 
-  Future<RagQuiz> generateQuiz(String chapterName, String className, {bool forceRefresh = false}) async {
+  Future<RagQuiz> generateQuiz(String chapterName, String className,
+      {bool forceRefresh = false}) async {
     if (!forceRefresh) {
       final cached = await _loadCache(chapterName, GenerationArtifactType.quiz);
       if (cached != null) {
@@ -268,9 +295,14 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
     final localRAG = await _loadLocalChapterRAG(chapterName);
     debugPrint('[RAG] Generating quiz via Gemini for "$chapterName"...');
 
+    final textbookContext = localRAG['full_chapter_text'] as String?;
+    final contextPrompt = (textbookContext != null && textbookContext.isNotEmpty)
+        ? '\nTextbook content:\n"""\n$textbookContext\n"""\n'
+        : '';
+
     final prompt = '''
 You are an educational content creator for Indian primary school students (Grade: $className).
-Generate a 10-question multiple-choice quiz for the chapter: "$chapterName".
+Generate a 10-question multiple-choice quiz for the chapter: "$chapterName".$contextPrompt
 Each question should have:
 - A clear question in Hindi
 - 4 options in Hindi
@@ -300,54 +332,55 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
 }
 ''';
 
-    try {
-      final hindiJson = await _callGemini(prompt);
+    final hindiJson = await _callGemini(prompt);
 
-      final questions = (hindiJson['questions'] as List<dynamic>? ?? []);
-      final toTranslate = <String>[];
-      for (final q in questions) {
-        toTranslate.add(q['question'] as String? ?? '');
-        toTranslate.addAll(
-            (q['options'] as List<dynamic>? ?? []).map((e) => e.toString()));
-        toTranslate.add(q['explanation'] as String? ?? '');
-      }
-
-      final translated = await _translateBatch(toTranslate);
-
-      int tIdx = 0;
-      final mundariQuestions = <Map<String, dynamic>>[];
-      for (final q in questions) {
-        final qMap = q as Map<String, dynamic>;
-        final optionCount = (qMap['options'] as List<dynamic>? ?? []).length;
-        mundariQuestions.add({
-          ...qMap,
-          'question_mundari': translated[tIdx++],
-          'options_mundari': translated.sublist(tIdx, tIdx + optionCount),
-          'explanation_mundari': translated[tIdx + optionCount],
-        });
-        tIdx += optionCount + 1;
-      }
-
-      final resultJson = {
-        ...hindiJson,
-        'chapterName': chapterName,
-        'questions': mundariQuestions,
-      };
-
-      await _saveCache(chapterName, GenerationArtifactType.quiz, resultJson);
-      return RagQuiz.fromJson(resultJson);
-    } catch (e) {
-      debugPrint('[RAG] Gemini call failed for quiz, building dynamic local fallback: $e');
-      final fallbackQuiz = _buildFallbackQuiz(chapterName, className, localRAG);
-      await _saveCache(chapterName, GenerationArtifactType.quiz, fallbackQuiz);
-      return RagQuiz.fromJson(fallbackQuiz);
+    final questions = (hindiJson['questions'] as List<dynamic>? ?? []);
+    final toTranslate = <String>[];
+    for (final q in questions) {
+      toTranslate.add(q['question'] as String? ?? '');
+      toTranslate.addAll(
+          (q['options'] as List<dynamic>? ?? []).map((e) => e.toString()));
+      toTranslate.add(q['explanation'] as String? ?? '');
     }
+
+    final translated = await _translateBatch(toTranslate);
+
+    int tIdx = 0;
+    final mundariQuestions = <Map<String, dynamic>>[];
+    for (final q in questions) {
+      final qMap = q as Map<String, dynamic>;
+      final optionCount = (qMap['options'] as List<dynamic>? ?? []).length;
+      final qMundari = translated[tIdx++];
+      final optionsMundari = translated
+          .sublist(tIdx, tIdx + optionCount)
+          .map((r) => r.text)
+          .toList();
+      final explMundari = translated[tIdx + optionCount];
+      mundariQuestions.add({
+        ...qMap,
+        'question_mundari': qMundari.text,
+        'options_mundari': optionsMundari,
+        'explanation_mundari': explMundari.text,
+        'source': 'gemini',
+      });
+      tIdx += optionCount + 1;
+    }
+
+    final resultJson = {
+      ...hindiJson,
+      'chapterName': chapterName,
+      'questions': mundariQuestions,
+    };
+
+    await _saveCache(chapterName, GenerationArtifactType.quiz, resultJson);
+    return RagQuiz.fromJson(resultJson);
   }
 
   // ── Worksheet Generation ───────────────────────────────────────────────────
 
   Future<RagWorksheet> generateWorksheet(
-      String chapterName, String className, {bool forceRefresh = false}) async {
+      String chapterName, String className,
+      {bool forceRefresh = false}) async {
     if (!forceRefresh) {
       final cached =
           await _loadCache(chapterName, GenerationArtifactType.worksheet);
@@ -360,9 +393,14 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
     final localRAG = await _loadLocalChapterRAG(chapterName);
     debugPrint('[RAG] Generating worksheet via Gemini for "$chapterName"...');
 
+    final textbookContext = localRAG['full_chapter_text'] as String?;
+    final contextPrompt = (textbookContext != null && textbookContext.isNotEmpty)
+        ? '\nTextbook content:\n"""\n$textbookContext\n"""\n'
+        : '';
+
     final prompt = '''
 You are an educational content creator for Indian primary school students (Grade: $className).
-Generate a worksheet for the chapter: "$chapterName" with three sections:
+Generate a worksheet for the chapter: "$chapterName" with three sections:$contextPrompt
 1. Fill in the blanks (5 items) — with a blank marked as "______" and a word bank
 2. Match the following (5 pairs) — Column A to Column B
 3. Short answer questions (3 items) — with a sample answer and max marks
@@ -400,129 +438,152 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
 }
 ''';
 
-    try {
-      final hindiJson = await _callGemini(prompt);
+    final hindiJson = await _callGemini(prompt);
 
-      // Collect all strings for translation
-      final toTranslate = <String>[];
-      final fibs = hindiJson['fillInTheBlanks'] as List<dynamic>? ?? [];
-      final mps = hindiJson['matchPairs'] as List<dynamic>? ?? [];
-      final sas = hindiJson['shortAnswers'] as List<dynamic>? ?? [];
+    // Collect all strings for translation
+    final toTranslate = <String>[];
+    final fibs = hindiJson['fillInTheBlanks'] as List<dynamic>? ?? [];
+    final mps = hindiJson['matchPairs'] as List<dynamic>? ?? [];
+    final sas = hindiJson['shortAnswers'] as List<dynamic>? ?? [];
 
-      for (final fib in fibs) {
-        toTranslate.add((fib as Map)['promptWithBlank'] as String? ?? '');
-        toTranslate.add(fib['answer'] as String? ?? '');
-        toTranslate.addAll((fib['wordBank'] as List<dynamic>? ?? []).map((e) => e.toString()));
-      }
-      for (final mp in mps) {
-        toTranslate.add((mp as Map)['columnA'] as String? ?? '');
-        toTranslate.add(mp['columnB'] as String? ?? '');
-      }
-      for (final sa in sas) {
-        toTranslate.add((sa as Map)['question'] as String? ?? '');
-        toTranslate.add(sa['sampleAnswer'] as String? ?? '');
-      }
-
-      final translated = await _translateBatch(toTranslate);
-      int tIdx = 0;
-
-      final mundariFibs = <Map<String, dynamic>>[];
-      for (final fib in fibs) {
-        final fibMap = fib as Map<String, dynamic>;
-        final wbCount = (fibMap['wordBank'] as List<dynamic>? ?? []).length;
-        mundariFibs.add({
-          ...fibMap,
-          'promptWithBlank_mundari': translated[tIdx++],
-          'answer_mundari': translated[tIdx++],
-          'wordBank_mundari': translated.sublist(tIdx, tIdx + wbCount),
-        });
-        tIdx += wbCount;
-      }
-
-      final mundariMps = <Map<String, dynamic>>[];
-      for (final mp in mps) {
-        mundariMps.add({
-          ...(mp as Map<String, dynamic>),
-          'columnA_mundari': translated[tIdx++],
-          'columnB_mundari': translated[tIdx++],
-        });
-      }
-
-      final mundariSas = <Map<String, dynamic>>[];
-      for (final sa in sas) {
-        mundariSas.add({
-          ...(sa as Map<String, dynamic>),
-          'question_mundari': translated[tIdx++],
-          'sampleAnswer_mundari': translated[tIdx++],
-        });
-      }
-
-      final resultJson = {
-        ...hindiJson,
-        'chapterName': chapterName,
-        'fillInTheBlanks': mundariFibs,
-        'matchPairs': mundariMps,
-        'shortAnswers': mundariSas,
-      };
-
-      await _saveCache(chapterName, GenerationArtifactType.worksheet, resultJson);
-      return RagWorksheet.fromJson(resultJson);
-    } catch (e) {
-      debugPrint('[RAG] Gemini call failed for worksheet, building dynamic local fallback: $e');
-      final fallbackWs = _buildFallbackWorksheet(chapterName, className, localRAG);
-      await _saveCache(chapterName, GenerationArtifactType.worksheet, fallbackWs);
-      return RagWorksheet.fromJson(fallbackWs);
+    for (final fib in fibs) {
+      toTranslate.add((fib as Map)['promptWithBlank'] as String? ?? '');
+      toTranslate.add(fib['answer'] as String? ?? '');
+      toTranslate
+          .addAll((fib['wordBank'] as List<dynamic>? ?? []).map((e) => e.toString()));
     }
+    for (final mp in mps) {
+      toTranslate.add((mp as Map)['columnA'] as String? ?? '');
+      toTranslate.add(mp['columnB'] as String? ?? '');
+    }
+    for (final sa in sas) {
+      toTranslate.add((sa as Map)['question'] as String? ?? '');
+      toTranslate.add(sa['sampleAnswer'] as String? ?? '');
+    }
+
+    final translated = await _translateBatch(toTranslate);
+    int tIdx = 0;
+
+    final mundariFibs = <Map<String, dynamic>>[];
+    for (final fib in fibs) {
+      final fibMap = fib as Map<String, dynamic>;
+      final wbCount = (fibMap['wordBank'] as List<dynamic>? ?? []).length;
+      final promptMundari = translated[tIdx++];
+      final answerMundari = translated[tIdx++];
+      final wbMundari =
+          translated.sublist(tIdx, tIdx + wbCount).map((r) => r.text).toList();
+      mundariFibs.add({
+        ...fibMap,
+        'promptWithBlank_mundari': promptMundari.text,
+        'answer_mundari': answerMundari.text,
+        'wordBank_mundari': wbMundari,
+        'source': 'gemini',
+      });
+      tIdx += wbCount;
+    }
+
+    final mundariMps = <Map<String, dynamic>>[];
+    for (final mp in mps) {
+      final colAMundari = translated[tIdx++];
+      final colBMundari = translated[tIdx++];
+      mundariMps.add({
+        ...(mp as Map<String, dynamic>),
+        'columnA_mundari': colAMundari.text,
+        'columnB_mundari': colBMundari.text,
+        'source': 'gemini',
+      });
+    }
+
+    final mundariSas = <Map<String, dynamic>>[];
+    for (final sa in sas) {
+      final qMundari = translated[tIdx++];
+      final saMundari = translated[tIdx++];
+      mundariSas.add({
+        ...(sa as Map<String, dynamic>),
+        'question_mundari': qMundari.text,
+        'sampleAnswer_mundari': saMundari.text,
+        'source': 'gemini',
+      });
+    }
+
+    final resultJson = {
+      ...hindiJson,
+      'chapterName': chapterName,
+      'fillInTheBlanks': mundariFibs,
+      'matchPairs': mundariMps,
+      'shortAnswers': mundariSas,
+    };
+
+    await _saveCache(chapterName, GenerationArtifactType.worksheet, resultJson);
+    return RagWorksheet.fromJson(resultJson);
   }
 
-  /// Helper to load extracted textbook JSON index assets from assets/textbook_assets/
-  Future<Map<String, dynamic>?> _loadLocalChapterRAG(String chapterName) async {
-    final lowerName = chapterName.toLowerCase();
-    final cleanSlug = lowerName.replaceAll(RegExp(r'[^a-z0-9]'), '_');
-
-    final candidatePaths = [
-      'assets/textbook_assets/${cleanSlug}_index.json',
-      'assets/textbook_assets/ch_${cleanSlug}_index.json',
-      'assets/textbook_assets/ch_1_${cleanSlug}_index.json',
-      'assets/textbook_assets/ch_2_${cleanSlug}_index.json',
-      'assets/textbook_assets/ch_1_two_little_hands_index.json',
-      'assets/textbook_assets/ch_2_greetings_index.json',
-      'assets/textbook_assets/ch_1_the_four_seasons_index.json',
-      'assets/textbook_assets/aemr109_index.json',
-    ];
-
-    if (lowerName.contains('hand') || lowerName.contains('little') || lowerName.contains('two')) {
-      candidatePaths.insert(0, 'assets/textbook_assets/ch_1_two_little_hands_index.json');
-    }
-    if (lowerName.contains('greet') || lowerName.contains('welcome') || lowerName.contains('namaste')) {
-      candidatePaths.insert(0, 'assets/textbook_assets/ch_2_greetings_index.json');
-    }
-    if (lowerName.contains('season') || lowerName.contains('four') || lowerName.contains('weather')) {
-      candidatePaths.insert(0, 'assets/textbook_assets/ch_1_the_four_seasons_index.json');
-    }
-
-    for (final path in candidatePaths) {
+  /// Helper to load extracted textbook JSON index assets using assets/textbook_assets/manifest.json
+  Future<Map<String, dynamic>> _loadLocalChapterRAG(String chapterName) async {
+    if (_manifest == null) {
       try {
-        final raw = await rootBundle.loadString(path);
-        final parsed = jsonDecode(raw);
-        if (parsed is Map<String, dynamic>) {
-          debugPrint('[RAG] Loaded local textbook index from $path');
-          if (parsed['full_chapter_text'] is String) {
-            parsed['full_chapter_text'] = _cleanTextbookText(parsed['full_chapter_text'] as String);
-          }
-          return parsed;
-        } else if (parsed is List<dynamic>) {
-          debugPrint('[RAG] Loaded list index from $path');
-          return {
-            'chapter_slug': cleanSlug,
-            'cards': parsed,
-          };
-        }
-      } catch (_) {
-        // Continue trying candidates
+        final manifestStr =
+            await rootBundle.loadString('assets/textbook_assets/manifest.json');
+        final decoded = jsonDecode(manifestStr) as Map<String, dynamic>;
+        _manifest = decoded.map((k, v) =>
+            MapEntry(k.toString().toLowerCase().trim(), v.toString()));
+      } catch (e) {
+        throw ContentGenerationException(
+            'Failed to load textbook manifest assets/textbook_assets/manifest.json',
+            e);
       }
     }
-    return null;
+
+    final trimmed = chapterName.trim().toLowerCase();
+    final slug = trimmed.replaceAll(RegExp(r'[^a-z0-9]'), '_');
+
+    String? indexPath = _manifest![trimmed] ?? _manifest![slug];
+    if (indexPath == null) {
+      for (final entry in _manifest!.entries) {
+        final key = entry.key;
+        if (key.isNotEmpty &&
+            (trimmed.contains(key) ||
+                key.contains(trimmed) ||
+                slug.contains(key) ||
+                key.contains(slug))) {
+          indexPath = entry.value;
+          break;
+        }
+      }
+    }
+
+    if (indexPath == null) {
+      throw ChapterIndexNotFoundException(chapterName);
+    }
+
+    try {
+      final raw = await rootBundle.loadString(indexPath);
+      final parsed = jsonDecode(raw);
+      if (parsed is Map<String, dynamic>) {
+        debugPrint('[RAG] Loaded local textbook index from $indexPath');
+        if (parsed['full_chapter_text'] is String) {
+          parsed['full_chapter_text'] =
+              _cleanTextbookText(parsed['full_chapter_text'] as String);
+        }
+        return parsed;
+      } else if (parsed is List<dynamic>) {
+        debugPrint('[RAG] Loaded list index from $indexPath');
+        return {
+          'chapter_slug': slug,
+          'cards': parsed,
+        };
+      } else {
+        throw ContentGenerationException(
+            'Unexpected JSON structure in chapter index: $indexPath');
+      }
+    } catch (e) {
+      if (e is ChapterIndexNotFoundException ||
+          e is ContentGenerationException) {
+        rethrow;
+      }
+      throw ContentGenerationException(
+          'Failed to read textbook index asset "$indexPath"', e);
+    }
   }
 
   /// Cleans textbook RAG text: removes reprint headers, Unit/Chapter filler titles, copyright metadata, and cuts off exercises/questions/activities
@@ -542,7 +603,8 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
           l.startsWith('page ') ||
           l.startsWith('unit ') ||
           l.startsWith('chapter ') ||
-          RegExp(r'^(unit|chapter|खंड|इकाई)\s*[\d\-:]*$', caseSensitive: false).hasMatch(l) ||
+          RegExp(r'^(unit|chapter|खंड|इकाई)\s*[\d\-:]*$', caseSensitive: false)
+              .hasMatch(l) ||
           RegExp(r'^\d+\s*$').hasMatch(l)) {
         return false;
       }
@@ -578,219 +640,9 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
     return cleaned.trim();
   }
 
-  Map<String, dynamic> _buildFallbackFlashcards(
-    String chapterName,
-    String className,
-    Map<String, dynamic>? localRAG,
-    String subject,
-  ) {
-    final rawVocab = (localRAG?['vocabulary_image_assets'] as List<dynamic>? ?? localRAG?['cards'] as List<dynamic>? ?? []);
-    final cardsList = <Map<String, dynamic>>[];
-
-    if (rawVocab.isNotEmpty) {
-      for (int i = 0; i < rawVocab.length; i++) {
-        final item = rawVocab[i] as Map<String, dynamic>;
-        cardsList.add({
-          'id': 'fc_${i + 1}',
-          'word': item['word'] as String? ?? 'शब्द',
-          'word_mundari': item['word_mundari'] as String? ?? '[मुंडारी]',
-          'meaning': item['meaning'] as String? ?? 'Meaning',
-          'meaning_mundari': '[मुंडारी अर्थ]',
-          'emoji': item['emoji'] as String? ?? '📖',
-          if (item['imageAsset'] != null) 'imageAsset': item['imageAsset'],
-        });
-      }
-    } else {
-      final hardcoded = EnglishActivitiesData.getWords(chapterName);
-      if (hardcoded != null && hardcoded.isNotEmpty) {
-        for (int i = 0; i < hardcoded.length; i++) {
-          final w = hardcoded[i];
-          cardsList.add({
-            'id': 'fc_${i + 1}',
-            'word': w.english,
-            'word_mundari': w.mundariDevanagari.isNotEmpty ? w.mundariDevanagari : w.mundariRoman,
-            'meaning': w.meaning,
-            'meaning_mundari': w.mundariDisplay,
-            'emoji': w.emoji,
-          });
-        }
-      } else {
-        cardsList.addAll([
-          {
-            'id': 'fc_1',
-            'word': chapterName,
-            'word_mundari': '[मुंडारी] $chapterName',
-            'meaning': 'अध्याय मुख्य विषय',
-            'meaning_mundari': 'पाठ्य अभ्यास',
-            'emoji': '📖',
-          },
-          {
-            'id': 'fc_2',
-            'word': 'कक्षा अभ्यास',
-            'word_mundari': 'इतु-पाठ',
-            'meaning': 'छात्र शिक्षण गतिविधियां',
-            'meaning_mundari': 'होन को शिक्षण',
-            'emoji': '🌟',
-          },
-        ]);
-      }
-    }
-
-    return {
-      'id': 'fc_${chapterName.toLowerCase().replaceAll(' ', '_')}',
-      'title': chapterName,
-      'title_mundari': '[मुंडारी] $chapterName',
-      'chapterName': chapterName,
-      'cards': cardsList,
-    };
-  }
-
-  Map<String, dynamic> _buildFallbackQuiz(
-    String chapterName,
-    String className,
-    Map<String, dynamic>? localRAG,
-  ) {
-    final stanzas = (localRAG?['stanzas_verbatim'] as List<dynamic>? ?? []);
-    final questions = <Map<String, dynamic>>[];
-
-    if (stanzas.isNotEmpty) {
-      for (int i = 0; i < stanzas.length; i++) {
-        final stanza = stanzas[i] as Map<String, dynamic>;
-        final txt = stanza['text_verbatim'] as String? ?? '';
-        final line = txt.split('\n').firstWhere((l) => l.trim().isNotEmpty, orElse: () => txt);
-        questions.add({
-          'id': 'q_${i + 1}',
-          'question': 'पंक्ति पहचानें: "$line" किस पाठ से है?',
-          'question_mundari': 'निया काजी: "$line" अको पाठ रेयाः तना?',
-          'options': [chapterName, 'अन्य पाठ', 'बाल कविता', 'व्याकरण'],
-          'options_mundari': [chapterName, 'अन्य पाठ', 'बाल कविता', 'व्याकरण'],
-          'answerIndex': 0,
-          'explanation': 'यह पंक्ति $chapterName से ली गई है।',
-          'explanation_mundari': 'निया पंक्ति $chapterName रेयाः तना।',
-          'difficulty': i % 2 == 0 ? 'easy' : 'medium',
-          'points': i % 2 == 0 ? 1 : 2,
-        });
-      }
-    } else {
-      final hardcoded = EnglishActivitiesData.getQuizQuestions(chapterName);
-      if (hardcoded != null && hardcoded.isNotEmpty) {
-        for (int i = 0; i < hardcoded.length; i++) {
-          final q = hardcoded[i];
-          questions.add({
-            'id': 'q_${i + 1}',
-            'question': q.question,
-            'question_mundari': q.questionOdia,
-            'options': q.options,
-            'options_mundari': q.optionsOdia,
-            'answerIndex': q.correctIndex,
-            'explanation': q.explanation,
-            'explanation_mundari': 'बुगी उत्तर ओलोः पे।',
-            'difficulty': 'easy',
-            'points': 1,
-          });
-        }
-      }
-    }
-
-    if (questions.isEmpty) {
-      questions.add({
-        'id': 'q_1',
-        'question': '$chapterName अध्याय का मुख्य उद्देश्य क्या है?',
-        'question_mundari': '$chapterName उद्देश्य चिनाः तना?',
-        'options': ['पाठ्य अभ्यास एवं भाषा ज्ञान', 'केवल खेल', 'गणित', 'चित्रकला'],
-        'options_mundari': ['अभ्यास आर भाषा', 'खेल', 'गणित', 'चित्रकला'],
-        'answerIndex': 0,
-        'explanation': 'पाठ्य पुस्तक में भाषा और संकल्पनाओं का अभ्यास कराया जाता है।',
-        'explanation_mundari': 'भाषा अभ्यास कराया जाता है।',
-        'difficulty': 'easy',
-        'points': 1,
-      });
-    }
-
-    return {
-      'id': 'quiz_${chapterName.toLowerCase().replaceAll(' ', '_')}',
-      'title': '$chapterName - पूरक RAG क्विज़',
-      'chapterName': chapterName,
-      'durationMinutes': 15,
-      'totalPoints': questions.length * 2,
-      'questions': questions,
-    };
-  }
-
-  Map<String, dynamic> _buildFallbackWorksheet(
-    String chapterName,
-    String className,
-    Map<String, dynamic>? localRAG,
-  ) {
-    final vocab = (localRAG?['vocabulary_image_assets'] as List<dynamic>? ?? localRAG?['cards'] as List<dynamic>? ?? []);
-    final fibs = <Map<String, dynamic>>[];
-    final mps = <Map<String, dynamic>>[];
-    final sas = <Map<String, dynamic>>[];
-
-    if (vocab.isNotEmpty) {
-      for (int i = 0; i < min(5, vocab.length); i++) {
-        final v = vocab[i] as Map<String, dynamic>;
-        final w = v['word'] as String? ?? 'शब्द';
-        final wm = v['word_mundari'] as String? ?? '[मुंडारी]';
-        fibs.add({
-          'id': 'fib_${i + 1}',
-          'promptWithBlank': 'चित्र एवं पाठ के अनुसार रिक्त स्थान भरें: ______ ($w)',
-          'promptWithBlank_mundari': 'चित्र नेल ते सही शब्द ऑल पे: ______ ($wm)',
-          'answer': w,
-          'answer_mundari': wm,
-          'wordBank': [w, 'हाथ', 'नमस्ते', 'सूरज', 'अध्याय'],
-          'wordBank_mundari': [wm, 'ती', 'जोहार', 'सिङ्गि', 'पाठ'],
-        });
-
-        mps.add({
-          'id': 'mp_${i + 1}',
-          'columnA': w,
-          'columnA_mundari': wm,
-          'columnB': v['meaning'] as String? ?? 'अर्थ',
-          'columnB_mundari': '[मुंडारी अर्थ]',
-        });
-      }
-    } else {
-      fibs.add({
-        'id': 'fib_1',
-        'promptWithBlank': '$chapterName पाठ्य अभ्यास: ______',
-        'promptWithBlank_mundari': '$chapterName अभ्यास: ______',
-        'answer': 'पाठ',
-        'answer_mundari': 'पाठ',
-        'wordBank': ['पाठ', 'चित्र', 'शब्द', 'कविता'],
-        'wordBank_mundari': ['पाठ', 'चित्र', 'शब्द', 'कविता'],
-      });
-
-      mps.add({
-        'id': 'mp_1',
-        'columnA': chapterName,
-        'columnA_mundari': chapterName,
-        'columnB': 'पाठ्य अध्याय',
-        'columnB_mundari': 'अध्याय',
-      });
-    }
-
-    sas.add({
-      'id': 'sa_1',
-      'question': '$chapterName से आपने क्या सीखा?',
-      'question_mundari': '$chapterName एते चिनाः पे इतुआना?',
-      'sampleAnswer': '$chapterName के नए शब्द और मुंडारी अनुवाद का अभ्यास किया।',
-      'sampleAnswer_mundari': 'इतु-पाठ अभ्यास।',
-      'maxMarks': 5,
-    });
-
-    return {
-      'id': 'ws_${chapterName.toLowerCase().replaceAll(' ', '_')}',
-      'title': '$chapterName - पूरक RAG कार्यपत्रक (Worksheet)',
-      'chapterName': chapterName,
-      'fillInTheBlanks': fibs,
-      'matchPairs': mps,
-      'shortAnswers': sas,
-    };
-  }
-
   /// Generates all artifact types (Flashcards, Quiz, Worksheet) for a chapter simultaneously.
-  Future<void> generateAll(String chapterName, String className, {bool forceRefresh = false}) async {
+  Future<void> generateAll(String chapterName, String className,
+      {bool forceRefresh = false}) async {
     await Future.wait([
       generateFlashcards(chapterName, className, forceRefresh: forceRefresh),
       generateQuiz(chapterName, className, forceRefresh: forceRefresh),

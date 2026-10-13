@@ -38,7 +38,7 @@ class ThemePreviewScreen extends StatefulWidget {
 class _ThemePreviewScreenState extends State<ThemePreviewScreen> {
   int _selectedTab = 0;
   String _sourceLang = 'Hindi';
-  String _targetLang = 'Gondi';
+  String _targetLang = 'Mundari';
   bool _isAudioPlaying = false;
 
   @override
@@ -216,7 +216,7 @@ class _ThemePreviewScreenState extends State<ThemePreviewScreen> {
                     runSpacing: AppSpacing.sm,
                     children: const [
                       AyoBadge(label: 'Offline Ready', variant: AyoBadgeVariant.offline),
-                      AyoBadge(label: 'Hindi → Gondi', variant: AyoBadgeVariant.motherTongue),
+                      AyoBadge(label: 'Hindi → Mundari', variant: AyoBadgeVariant.motherTongue),
                       AyoBadge(label: 'Teacher Verified', variant: AyoBadgeVariant.verified),
                       AyoBadge(label: 'Review Needed', variant: AyoBadgeVariant.reviewNeeded),
                       AyoBadge(label: 'Live Mode', variant: AyoBadgeVariant.live),
@@ -286,7 +286,7 @@ class _ThemePreviewScreenState extends State<ThemePreviewScreen> {
                 const SizedBox(height: AppSpacing.md),
                 const AyoReviewBanner(
                   title: 'AI Translation Review',
-                  message: 'Verify 3 Gondi vocabulary terms before printing worksheets.',
+                  message: 'Verify 3 Mundari vocabulary terms before printing worksheets.',
                   pendingCount: 3,
                 ),
                 const SizedBox(height: AppSpacing.md),

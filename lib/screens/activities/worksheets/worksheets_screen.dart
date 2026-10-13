@@ -12,6 +12,7 @@ import '../../../widgets/ayo_screen_background.dart';
 import '../../../widgets/mundari_audio_text.dart';
 import '../../../services/worksheet_pdf_service.dart';
 import '../../../services/content_generation_service.dart';
+import '../../../services/activity_database_service.dart';
 
 class OddOneOutRow {
   final List<EnglishMundariWord> items;
@@ -81,6 +82,12 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
       debugPrint('[RAG] Failed to load/generate worksheet: $e');
       if (mounted) {
         setState(() => _isRegenerating = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -1346,10 +1353,17 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
           onPressed: _isDownloading ? null : () async {
             setState(() => _isDownloading = true);
             try {
+              final words = _getChapterWords();
               await WorksheetPdfService.printOrShare(
                 chapterName: widget.chapterName,
                 className: widget.className,
-                words: _getChapterWords(),
+                words: words,
+              );
+              await ActivityDatabaseService.instance.recordEvent(
+                chapter: widget.chapterName,
+                activityType: 'worksheet',
+                correct: words.length,
+                total: words.length,
               );
             } catch (e) {
               if (mounted) {
@@ -1389,10 +1403,17 @@ class _WorksheetsScreenState extends State<WorksheetsScreen> {
           onPressed: _isDownloading ? null : () async {
             setState(() => _isDownloading = true);
             try {
+              final words = _getChapterWords();
               await WorksheetPdfService.printOrShare(
                 chapterName: widget.chapterName,
                 className: widget.className,
-                words: _getChapterWords(),
+                words: words,
+              );
+              await ActivityDatabaseService.instance.recordEvent(
+                chapter: widget.chapterName,
+                activityType: 'worksheet',
+                correct: words.length,
+                total: words.length,
               );
             } catch (e) {
               if (mounted) {

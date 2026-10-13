@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Secrets — never commit files containing real API keys or credentials
+lib/config/rag_config.dart.local
+.env
+*.keystore
+key.properties
+local.properties

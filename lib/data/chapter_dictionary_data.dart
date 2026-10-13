@@ -1,7 +1,12 @@
-/// Dictionary data model and repository for Class 1 English Chapters.
+/// Curated dictionary repository for Class 1 English Chapters (source: curated).
+/// English -> Mundari in Devanagari script.
 ///
-/// Translations generated directly using the project's MtTranslationService
-/// (English -> Mundari in Devanagari script).
+/// CONTENT RESOLUTION PRECEDENCE RULE:
+/// 1. CURATED CONTENT (assets/content/curated_chapter_dictionary.json & ChapterDictionaryData):
+///    Primary verified lexicon for chapter vocabulary.
+/// 2. CACHED GENERATED CONTENT (RAG / NMT cache in app_rag_cache):
+///    Secondary dictionary terms produced by runtime translation and review.
+/// 3. RUNTIME PIPELINE (RealMtStage): On-demand translation for unknown words.
 library;
 
 enum DictionaryCategory {

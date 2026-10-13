@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ayo_vani/models/audio_training_models.dart';
 import 'package:ayo_vani/services/audio_recording_storage_service.dart';
 import 'package:ayo_vani/services/audio_sync_service.dart';
 
@@ -48,16 +47,24 @@ void main() {
   });
 
   group('AudioSyncService Unit Tests', () {
-    test('Batch sync respects Wi-Fi and charging constraints', () async {
+    test('Batch sync returns false when Wi-Fi or charging constraints are not met', () async {
       final syncService = AudioSyncService();
-      
-      // When constraints are false, sync returns false
+
+      // Constraints not met → always returns false immediately
       final resultNoWifi = await syncService.syncPendingAudio(isWifiConnected: false, isCharging: true);
       expect(resultNoWifi, isFalse);
 
-      // When constraints are true, sync succeeds
-      final resultValid = await syncService.syncPendingAudio(isWifiConnected: true, isCharging: true);
-      expect(resultValid, isTrue);
+      final resultNoCharging = await syncService.syncPendingAudio(isWifiConnected: true, isCharging: false);
+      expect(resultNoCharging, isFalse);
+    });
+
+    test('Batch sync returns false when backend is unreachable (never silently marks synced)', () async {
+      final syncService = AudioSyncService();
+      // In test environment there is no real backend. The service must return false,
+      // not silently mark items as synced. This verifies Rule 4 compliance.
+      final result = await syncService.syncPendingAudio(isWifiConnected: true, isCharging: true);
+      // Backend is unreachable in test → must not lie that sync succeeded.
+      expect(result, isFalse);
     });
   });
 }

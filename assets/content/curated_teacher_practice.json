@@ -1,0 +1,47 @@
+{
+  "source": "curated",
+  "version": "1.0",
+  "language": "Mundari (Devanagari)",
+  "targetLanguageCode": "unr",
+  "precedenceRule": "1. Curated Content (assets/content/ & curated data models) -> 2. Local Cached Generated Content (app_rag_cache) -> 3. Realtime Pipeline Generation (RAG / RealMtStage)",
+  "matchingQuestion": {
+    "questionNumber": 1,
+    "instruction": "शब्दों को उनके सही अर्थ से मिलाएँ (Match the Words)",
+    "englishHelperText": "Match the Mundari words on the left with their Hindi meanings on the right.",
+    "leftColumnHeading": "Mundari (मुण्डारी)",
+    "rightColumnHeading": "Hindi (हिंदी)",
+    "pairs": [
+      {"mundari": "होन", "hindi": "बच्चा"},
+      {"mundari": "दअः", "hindi": "पानी"},
+      {"mundari": "जोम-नू", "hindi": "खाना"},
+      {"mundari": "ओड़अः", "hindi": "घर"},
+      {"mundari": "दुब", "hindi": "बैठना"}
+    ]
+  },
+  "multipleChoiceQuestions": [
+    {
+      "questionNumber": 2,
+      "promptHindi": "बैठो। (Sit down)",
+      "correctMundari": "दुब मे।",
+      "distractors": ["सेनोः मे।", "जोम मे।", "ती साबोः मे।"]
+    },
+    {
+      "questionNumber": 3,
+      "promptHindi": "किताब खोलो। (Open your book)",
+      "correctMundari": "पुथी ओलाङ मे।",
+      "distractors": ["पुथी बंधाव मे।", "होन को नेल मे।", "ओड़अः ते सेनोः मे।"]
+    },
+    {
+      "questionNumber": 4,
+      "promptHindi": "आपका नाम क्या है? (What is your name?)",
+      "correctMundari": "अमाः नुतुम चेनाः?",
+      "distractors": ["अमाः ओड़अः ओकोते?", "अम चिनाः जोम ताना?", "अम ओकोय तनी?"]
+    },
+    {
+      "questionNumber": 5,
+      "promptHindi": "पानी चाहिए? (Do you want water?)",
+      "correctMundari": "दअः दरकार?",
+      "distractors": ["मंडी दरकार?", "चा दरकार?", "होन दरकार?"]
+    }
+  ]
+}

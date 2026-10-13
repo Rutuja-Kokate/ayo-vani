@@ -4,17 +4,190 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_dimens.dart';
 import '../../app/theme/app_typography.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/app_storage_service.dart';
+import '../../services/teacher_profile_service.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 
 /// Screen: Teacher Profile for AYOVAANI Teacher App.
-class ProfileScreen extends StatelessWidget {
+///
+/// Features:
+/// - Dynamic educator identity with persistent edit form modal
+/// - Computed offline lesson count from curriculum and local RAG cache
+/// - Computed storage footprint from disk
+/// - Language pair settings and offline sync controls
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
     super.key,
     this.onNavigateTab,
   });
 
   final ValueChanged<int>? onNavigateTab;
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  TeacherProfile? _profile;
+  AppStorageStats _storageStats = const AppStorageStats(
+    offlineLessonCount: 24,
+    storageUsedBytes: 128 * 1024 * 1024,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    try {
+      final profile = await TeacherProfileService.instance.getProfile();
+      final stats = await AppStorageService.instance.computeStats();
+      if (mounted) {
+        setState(() {
+          _profile = profile;
+          _storageStats = stats;
+        });
+      }
+    } catch (e) {
+      debugPrint('[ProfileScreen] Error loading profile: $e');
+    }
+  }
+
+  Future<void> _showEditProfileDialog(BuildContext context) async {
+    final profile = _profile ??
+        const TeacherProfile(
+          teacherId: 'teacher_01',
+          name: 'Teacher',
+          role: 'Classroom Educator',
+          className: 'Class 1',
+          focus: 'Primary Section • Tribal Language Focus',
+          studentsCount: 32,
+        );
+
+    final nameController = TextEditingController(text: profile.name);
+    final roleController = TextEditingController(text: profile.role);
+    final classController = TextEditingController(text: profile.className);
+    final studentsController =
+        TextEditingController(text: '${profile.studentsCount}');
+
+    final formKey = GlobalKey<FormState>();
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: const Color(0xFFFDFBF7),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        title: Text(
+          'Edit Educator Profile',
+          style: TextStyle(
+            fontFamily: AppTypography.headingFontFamily,
+            color: AppColors.primaryBurgundy,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Teacher Name',
+                    prefixIcon: Icon(Icons.person_outline),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Please enter teacher name' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: roleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Educator Role',
+                    prefixIcon: Icon(Icons.badge_outlined),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Please enter role' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: classController,
+                  decoration: const InputDecoration(
+                    labelText: 'Class / Grade',
+                    prefixIcon: Icon(Icons.school_outlined),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Please enter class' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: studentsController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Number of Students',
+                    prefixIcon: Icon(Icons.groups_outlined),
+                  ),
+                  validator: (v) {
+                    final n = int.tryParse(v?.trim() ?? '');
+                    if (n == null || n <= 0) return 'Enter a valid student count';
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontFamily: AppTypography.bodyFontFamily,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (formKey.currentState?.validate() ?? false) {
+                final updated = profile.copyWith(
+                  name: nameController.text.trim(),
+                  role: roleController.text.trim(),
+                  className: classController.text.trim(),
+                  studentsCount: int.parse(studentsController.text.trim()),
+                );
+                final navigator = Navigator.of(dialogCtx);
+                final messenger = ScaffoldMessenger.of(context);
+                await TeacherProfileService.instance.saveProfile(updated);
+                navigator.pop();
+                if (!mounted) return;
+                setState(() {
+                  _profile = updated;
+                });
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('Profile updated successfully!'),
+                    backgroundColor: Color(0xFF385E32),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryBurgundy,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Save Profile', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +282,8 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4.0),
                             Text(
-                              l10n?.profileScreenSub ?? 'Classroom settings, offline sync status, and educator preferences.',
+                              l10n?.profileScreenSub ??
+                                  'Classroom settings, offline sync status, and educator preferences.',
                               style: TextStyle(
                                 fontFamily: AppTypography.bodyFontFamily,
                                 fontSize: isTablet ? 13.5 : 12.5,
@@ -217,6 +391,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildProfileHeaderCard(BuildContext context, {required bool isTablet}) {
     final l10n = AppLocalizations.of(context);
+    final profile = _profile;
 
     return Container(
       decoration: BoxDecoration(
@@ -261,7 +436,7 @@ class ProfileScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  l10n?.profileTeacherName ?? 'Teacher',
+                  profile?.name ?? 'Teacher',
                   style: TextStyle(
                     fontFamily: AppTypography.headingFontFamily,
                     fontSize: isTablet ? 20.0 : 18.0,
@@ -272,7 +447,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  l10n?.profileTeacherRole ?? 'Classroom Educator',
+                  profile?.role ?? 'Classroom Educator',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: isTablet ? 13.0 : 12.0,
@@ -282,7 +457,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  l10n?.profileTeacherFocus ?? 'Primary Section • Tribal Language Focus',
+                  profile?.focus ?? 'Primary Section • Tribal Language Focus',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: isTablet ? 12.0 : 11.0,
@@ -298,23 +473,7 @@ class ProfileScreen extends StatelessWidget {
             color: const Color(0xFFF6ECE0),
             borderRadius: BorderRadius.circular(16.0),
             child: InkWell(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Profile editing will be available in the next release.',
-                      style: TextStyle(fontFamily: AppTypography.bodyFontFamily),
-                    ),
-                    backgroundColor: const Color(0xFF4A3B32),
-                    duration: const Duration(seconds: 1),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    margin: const EdgeInsets.all(16.0),
-                  ),
-                );
-              },
+              onTap: () => _showEditProfileDialog(context),
               borderRadius: BorderRadius.circular(16.0),
               splashColor: AppColors.primaryBurgundy.withValues(alpha: 0.1),
               child: Container(
@@ -356,6 +515,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildOfflineStatusCard(BuildContext context, {required bool isTablet}) {
     final l10n = AppLocalizations.of(context);
+    final count = _storageStats.offlineLessonCount;
 
     return Container(
       decoration: BoxDecoration(
@@ -421,7 +581,7 @@ class ProfileScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Text(
-                        l10n?.profileLessonsSynced ?? '24 lessons',
+                        '$count lessons',
                         style: TextStyle(
                           fontFamily: AppTypography.bodyFontFamily,
                           fontSize: 10.5,
@@ -444,7 +604,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  l10n?.profileLessonsOffline ?? '24 lessons available offline',
+                  '$count lessons available offline',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.5,
@@ -462,6 +622,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildMyClassroomCard(BuildContext context, {required bool isTablet}) {
     final l10n = AppLocalizations.of(context);
+    final profile = _profile;
 
     return Container(
       decoration: BoxDecoration(
@@ -514,7 +675,7 @@ class ProfileScreen extends StatelessWidget {
           _buildInfoRow(
             icon: Icons.auto_stories_rounded,
             label: l10n?.profileCurrentClass ?? 'Current Class',
-            value: 'Class 1',
+            value: profile?.className ?? 'Class 1',
             accentColor: AppColors.primaryBurgundy,
           ),
           const Divider(height: 16.0, color: Color(0xFFEFE8DD), thickness: 0.8),
@@ -528,7 +689,7 @@ class ProfileScreen extends StatelessWidget {
           _buildInfoRow(
             icon: Icons.groups_rounded,
             label: l10n?.profileStudents ?? 'Students',
-            value: l10n?.profileStudentsCount ?? '32 students',
+            value: '${profile?.studentsCount ?? 32} students',
             accentColor: const Color(0xFF5A7854),
           ),
         ],
@@ -692,6 +853,8 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildDownloadsCard(BuildContext context, {required bool isTablet}) {
     final l10n = AppLocalizations.of(context);
+    final count = _storageStats.offlineLessonCount;
+    final storageStr = _storageStats.formattedStorage;
 
     return Container(
       decoration: BoxDecoration(
@@ -759,7 +922,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 2.0),
                     Text(
-                      l10n?.profileLessonsOffline ?? '24 lessons available offline',
+                      '$count lessons available offline',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -787,7 +950,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 2.0),
                   Text(
-                    '128 MB',
+                    storageStr,
                     style: TextStyle(
                       fontFamily: AppTypography.headingFontFamily,
                       fontSize: 14.0,

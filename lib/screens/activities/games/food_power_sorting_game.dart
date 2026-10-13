@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../../app/responsive/responsive.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimens.dart';
@@ -8,6 +7,7 @@ import '../../../data/english_activities_data.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
+import '../../../services/activity_database_service.dart';
 
 class FoodCategory {
   final String id;
@@ -144,6 +144,12 @@ class _FoodPowerSortingGameState extends State<FoodPowerSortingGame> {
 
         if (_gameWords.isEmpty) {
           _isFinished = true;
+          ActivityDatabaseService.instance.recordEvent(
+            chapter: widget.chapterName,
+            activityType: 'game',
+            correct: (_score ~/ 10).clamp(0, 6),
+            total: 6,
+          );
         }
       });
 

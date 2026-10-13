@@ -39,9 +39,6 @@ class _ChapterVideoPlayerScreenState extends State<ChapterVideoPlayerScreen> {
 
   static const List<String> _videoAssetCandidates = [
     _primaryVideoAsset,
-    'assets/resources/first standard/english/chapter 1/2lh video.mp4',
-    'assets/resources/first standard/english/chapter 1/2lh-video.mp4',
-    'assets/resources/first_standard/english/chapter_1/2lh video.mp4',
   ];
 
   @override

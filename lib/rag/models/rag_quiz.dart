@@ -11,6 +11,7 @@ class RagQuizQuestion {
   final String explanationMundari;
   final String difficulty;
   final int points;
+  final String source; // curated | gemini | nmt | glossary
 
   RagQuizQuestion({
     required this.id,
@@ -23,6 +24,7 @@ class RagQuizQuestion {
     required this.explanationMundari,
     this.difficulty = 'medium',
     this.points = 1,
+    this.source = 'gemini',
   });
 
   factory RagQuizQuestion.fromJson(Map<String, dynamic> json) => RagQuizQuestion(
@@ -37,6 +39,7 @@ class RagQuizQuestion {
         explanationMundari: json['explanation_mundari'] as String? ?? json['explanation'] as String? ?? '',
         difficulty: json['difficulty'] as String? ?? 'medium',
         points: json['points'] as int? ?? 1,
+        source: json['source'] as String? ?? 'gemini',
       );
 
   Map<String, dynamic> toJson() => {
@@ -50,6 +53,7 @@ class RagQuizQuestion {
         'explanation_mundari': explanationMundari,
         'difficulty': difficulty,
         'points': points,
+        'source': source,
       };
 }
 

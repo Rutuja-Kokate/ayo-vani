@@ -1,0 +1,68 @@
+{
+  "source": "curated",
+  "version": "1.0",
+  "language": "Mundari (Devanagari)",
+  "targetLanguageCode": "unr",
+  "precedenceRule": "1. Curated Content (assets/content/ & curated data models) -> 2. Local Cached Generated Content (app_rag_cache) -> 3. Realtime Pipeline Generation (RAG / RealMtStage)",
+  "worksheetLabels": {
+    "AYOVAANI Classroom Worksheet": "आयोवाणी श्रेणी कार्यपत्र",
+    "Name:": "नुतुम:",
+    "Date:": "तिति:",
+    "Exercise: Trace and write the words below": "अभ्यास: निचेत शब्द को त्रेस ओड़ोः ओला मे",
+    "Exercise 1: Draw lines to match each picture to its sentence": "अभ्यास १: छवि ओड़ोः जगर मिला लागि रेखा ताण मे",
+    "Exercise 2: Fun with Words - Read the syllables": "अभ्यास २: शब्द रा रसिका - वर्णांश पढ़ मे",
+    "Exercise: Read the riddles and write the answers below": "अभ्यास: दाये पढ़ ओड़ोः जाबाब ओला मे",
+    "Answer:": "जाबाब:",
+    "Exercise: Circle the odd one out in each row below": "अभ्यास: धाड़ि रे अलग गोल कर मे"
+  },
+  "chapters": {
+    "Two Little Hands": {
+      "chapterNumber": 1,
+      "words": [
+        {"english": "Hand", "mundariRoman": "Tii", "mundariDevanagari": "ती", "meaning": "Used to hold, write, and clap.", "pronunciation": "hand", "emoji": "✋", "syllables": ["Hand"]},
+        {"english": "Leg", "mundariRoman": "Kata", "mundariDevanagari": "कटा", "meaning": "Used to walk and run.", "pronunciation": "leg", "emoji": "🦵", "syllables": ["Leg"]},
+        {"english": "Head", "mundariRoman": "Boo", "mundariDevanagari": "बो", "meaning": "Top part of body with hair and brain.", "pronunciation": "hed", "emoji": "🗣️", "syllables": ["Head"]},
+        {"english": "Eye", "mundariRoman": "Med", "mundariDevanagari": "मेद", "meaning": "Used to see colors and shapes.", "pronunciation": "ai", "emoji": "👁️", "syllables": ["Eye"]},
+        {"english": "Ear", "mundariRoman": "Lutur", "mundariDevanagari": "लुतुर", "meaning": "Used to hear sounds and music.", "pronunciation": "eer", "emoji": "👂", "syllables": ["Ear"]},
+        {"english": "Nose", "mundariRoman": "Muhu", "mundariDevanagari": "मुहु", "meaning": "Used to smell flowers and food.", "pronunciation": "nohz", "emoji": "👃", "syllables": ["Nose"]},
+        {"english": "Mouth", "mundariRoman": "Moca", "mundariDevanagari": "मोचा", "meaning": "Used to speak and eat food.", "pronunciation": "mowth", "emoji": "👄", "syllables": ["Mouth"]},
+        {"english": "Skin", "mundariRoman": "Uru", "mundariDevanagari": "उरु", "meaning": "Covers body and feels touch.", "pronunciation": "skin", "emoji": "🖐️", "syllables": ["Skin"]},
+        {"english": "Arm", "mundariRoman": "Kidi", "mundariDevanagari": "कीड़ी", "meaning": "Upper limb between shoulder and hand.", "pronunciation": "aarm", "emoji": "💪", "syllables": ["Arm"]},
+        {"english": "Foot", "mundariRoman": "Kata", "mundariDevanagari": "कटा", "meaning": "Bottom part of leg used for standing.", "pronunciation": "fut", "emoji": "🦶", "syllables": ["Foot"]},
+        {"english": "Shoulder", "mundariRoman": "Taran", "mundariDevanagari": "तारन", "meaning": "Joint connecting arm to body.", "pronunciation": "shohl-der", "emoji": "👕", "syllables": ["Shoul", "der"]},
+        {"english": "Knee", "mundariRoman": "Mukuni", "mundariDevanagari": "मुकुनी", "meaning": "Middle joint of the leg.", "pronunciation": "nee", "emoji": "🦵", "syllables": ["Knee"]},
+        {"english": "Toe", "mundariRoman": "Daro", "mundariDevanagari": "दारो", "meaning": "One of five small digits on foot.", "pronunciation": "toh", "emoji": "🦶", "syllables": ["Toe"]},
+        {"english": "Cheek", "mundariRoman": "Jowa", "mundariDevanagari": "जोबा", "meaning": "Side of face below the eye.", "pronunciation": "cheek", "emoji": "😊", "syllables": ["Cheek"]},
+        {"english": "Tongue", "mundariRoman": "Alang", "mundariDevanagari": "आलांग", "meaning": "Used inside mouth to taste food.", "pronunciation": "tung", "emoji": "👅", "syllables": ["Tongue"]}
+      ],
+      "sentences": [
+        {"englishSentence": "Two little hands to clap clap clap.", "mundariRoman": "Bariya huding tii rapu-rapu lagi.", "mundariDevanagari": "बारिया हुडिंग ती रापु-रापु लागि।", "relatedWord": "Hand"},
+        {"englishSentence": "Two little legs to tap tap tap.", "mundariRoman": "Bariya huding kata thoko-thoko lagi.", "mundariDevanagari": "बारिया हुडिंग कटा ठोको-ठोको लागि।", "relatedWord": "Leg"},
+        {"englishSentence": "Two little eyes are open wide.", "mundariRoman": "Bariya huding med marang leka otangakana.", "mundariDevanagari": "बारिया हुडिंग मेद मारांग लेका ओतांगअकाना।", "relatedWord": "Eye"},
+        {"englishSentence": "One little head goes side to side.", "mundariRoman": "Miyad huding boo sa-sa senoa.", "mundariDevanagari": "मियाद हुडिंग बो सा-सा सेनोआ।", "relatedWord": "Head"}
+      ]
+    },
+    "Life Around Us": {
+      "chapterNumber": 6,
+      "words": [
+        {"english": "Lion", "mundariRoman": "Kula", "mundariDevanagari": "कुला", "meaning": "King of the jungle that roars loud.", "pronunciation": "lai-un", "emoji": "🦁", "syllables": ["Li", "on"]},
+        {"english": "Monkey", "mundariRoman": "Gari", "mundariDevanagari": "गड़ि", "meaning": "Playful animal that jumps on trees.", "pronunciation": "mung-kee", "emoji": "🐒", "syllables": ["Mon", "key"]},
+        {"english": "Fish", "mundariRoman": "Hai", "mundariDevanagari": "हाइ", "meaning": "Swims in water using fins.", "pronunciation": "fish", "emoji": "🐟", "syllables": ["Fish"]},
+        {"english": "Elephant", "mundariRoman": "Hati", "mundariDevanagari": "हाति", "meaning": "Huge animal with long trunk and big ears.", "pronunciation": "el-uh-funt", "emoji": "🐘", "syllables": ["El", "e", "phant"]},
+        {"english": "Frog", "mundariRoman": "Choke", "mundariDevanagari": "चोके", "meaning": "Green animal that hops near ponds.", "pronunciation": "frog", "emoji": "🐸", "syllables": ["Frog"]},
+        {"english": "Rabbit", "mundariRoman": "Kulai", "mundariDevanagari": "कुलइ", "meaning": "Small fluffy animal with long ears.", "pronunciation": "rab-it", "emoji": "🐰", "syllables": ["Rab", "bit"]}
+      ]
+    },
+    "The Food We Eat": {
+      "chapterNumber": 5,
+      "words": [
+        {"english": "Roti", "mundariRoman": "Lad", "mundariDevanagari": "लाद", "meaning": "Round flatbread made from wheat flour.", "pronunciation": "roh-tee", "emoji": "🫓", "syllables": ["Ro", "ti"]},
+        {"english": "Poori", "mundariRoman": "Puri", "mundariDevanagari": "पुरी", "meaning": "Deep-fried puffy Indian bread.", "pronunciation": "poo-ree", "emoji": "🍞", "syllables": ["Poo", "ri"]},
+        {"english": "Idli", "mundariRoman": "Idli", "mundariDevanagari": "इड़लि", "meaning": "Soft steamed rice cake.", "pronunciation": "id-lee", "emoji": "🍚", "syllables": ["Id", "li"]},
+        {"english": "Chutney", "mundariRoman": "Catni", "mundariDevanagari": "चाटनी", "meaning": "Tasty sauce made from herbs or coconut.", "pronunciation": "chut-nee", "emoji": "🥣", "syllables": ["Chut", "ney"]},
+        {"english": "Paratha", "mundariRoman": "Paratha", "mundariDevanagari": "पराठा", "meaning": "Layered flatbread cooked with ghee.", "pronunciation": "puh-rah-thuh", "emoji": "🥞", "syllables": ["Pa", "ra", "tha"]},
+        {"english": "Milk", "mundariRoman": "Toa", "mundariDevanagari": "तोआ", "meaning": "White liquid rich in calcium.", "pronunciation": "milk", "emoji": "🥛", "syllables": ["Milk"]}
+      ]
+    }
+  }
+}

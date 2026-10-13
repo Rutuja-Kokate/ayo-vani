@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.11.1
+  sdk: ^3.13.2
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -38,21 +38,29 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   flutter_tts: ^4.2.0
-  just_audio: ^0.9.34
   path_provider: ^2.0.15
-  crypto: ^3.0.2
   google_fonts: ^8.2.1
   dio: ^5.7.0
   audioplayers: ^6.8.1
   provider: ^6.1.5+1
-  sherpa_onnx: ^1.13.8
+  sherpa_onnx: 1.13.6
+  onnxruntime: ^1.4.1
+  dart_sentencepiece_tokenizer: ^1.3.2
   record: ^7.1.1
   pdf: ^3.13.0
   printing: ^5.15.0
   video_player: ^2.9.2
+  connectivity_plus: ^7.3.1
+  battery_plus: ^7.1.2
+  uuid: ^4.6.0
+  sqflite: ^2.4.4
+  sqflite_common_ffi: ^2.4.3
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -75,14 +83,19 @@ flutter:
     - assets/images/
     - assets/images/warli_background.png
     - assets/textbook_assets/
-    - assets/demo_corpus_100_sentences.json
-    - assets/demo_audio/
+    - assets/content/
     - assets/models/
+    - assets/models/asr_mundari/
     - assets/models/mt/
     - assets/models/tts/
+    - assets/models/tts/espeak-ng-data/
+    - assets/models/tts/espeak-ng-data/voices/
+    - assets/models/tts/espeak-ng-data/voices/!v/
+    - assets/models/tts/espeak-ng-data/lang/
+    - assets/models/tts/espeak-ng-data/lang/inc/
     - assets/resources/
-    - assets/resources/first standard/english/chapter 1/
     - assets/resources/first_standard/english/chapter_1/
+    - test/fixtures/
 
   fonts:
     - family: NotoSansOriya

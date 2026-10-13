@@ -81,7 +81,7 @@ class AyoTopHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.sm),
                 ],
-                if (actions != null) ...actions!,
+                ...?actions,
                 // Teacher Profile / Settings Button in Top-Right
                 _buildSettingsButton(context),
               ],

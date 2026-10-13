@@ -1,0 +1,61 @@
+{
+  "source": "curated",
+  "version": "1.0",
+  "language": "Mundari",
+  "targetLanguageCode": "unr",
+  "precedenceRule": "1. Curated Content (assets/content/ & curated data models) -> 2. Local Cached Generated Content (app_rag_cache) -> 3. Realtime Pipeline Generation (RAG / RealMtStage)",
+  "rhymes": [
+    {
+      "id": "rhyme_1",
+      "nameEnglish": "Chanda Mama Door Ke",
+      "nameHindi": "चंदा मामा दूर के",
+      "nameTribalRoman": "Chandu Chanda",
+      "nameTribalNative": "चांदु चांदा",
+      "emoji": "🌙",
+      "extraDetail": "Traditional Moon Rhyme"
+    },
+    {
+      "id": "rhyme_2",
+      "nameEnglish": "Machhli Jal Ki Rani Hai",
+      "nameHindi": "मछली जल की रानी है",
+      "nameTribalRoman": "Hai Dah Ren Rani",
+      "nameTribalNative": "हाइ दअः रेन रानी",
+      "emoji": "🐟",
+      "extraDetail": "Fish & Water Rhyme"
+    }
+  ],
+  "pictureWords": [
+    {
+      "id": "pw_1",
+      "nameEnglish": "Tree",
+      "nameHindi": "पेड़",
+      "nameTribalRoman": "Daru",
+      "nameTribalNative": "दारु",
+      "emoji": "🌳"
+    },
+    {
+      "id": "pw_2",
+      "nameEnglish": "Sun",
+      "nameHindi": "सूरज",
+      "nameTribalRoman": "Singi",
+      "nameTribalNative": "सिंगी",
+      "emoji": "☀️"
+    },
+    {
+      "id": "pw_3",
+      "nameEnglish": "Water",
+      "nameHindi": "पानी",
+      "nameTribalRoman": "Dah",
+      "nameTribalNative": "दअः",
+      "emoji": "💧"
+    },
+    {
+      "id": "pw_4",
+      "nameEnglish": "Bird",
+      "nameHindi": "चिड़िया",
+      "nameTribalRoman": "Cene",
+      "nameTribalNative": "चेने",
+      "emoji": "🐦"
+    }
+  ]
+}

@@ -35,7 +35,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String _selectedMedium = 'Hindi';
-  String _selectedMotherTongue = 'Gondi';
+  String _selectedMotherTongue = 'Mundari';
   bool _requireHumanVerification = true;
   bool _offlineAutoSync = true;
 
@@ -234,7 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               label: 'Mother Tongue / Regional Dialect',
                               value: _selectedMotherTongue,
                               items: const [
-                                DropdownMenuItem(value: 'Gondi', child: Text('Gondi (कोयतूर)')),
+                                DropdownMenuItem(value: 'Mundari', child: Text('Mundari (मुण्डारी)')),
                                 DropdownMenuItem(value: 'Santhali', child: Text('Santhali (ᱥᱟᱱᱛᱟᱲᱤ)')),
                                 DropdownMenuItem(value: 'Bhil', child: Text('Bhili (भीली)')),
                                 DropdownMenuItem(value: 'Halbi', child: Text('Halbi (हल्बी)')),

@@ -77,7 +77,7 @@ class FlaggedTranslation {
   final String id;
   final String sourceText;
   final String targetText;
-  final double confidence;
+  final double? confidence;
   final LanguagePairEnum languagePair;
   final String modelVersion;
   final DateTime timestamp;
@@ -87,7 +87,7 @@ class FlaggedTranslation {
     required this.id,
     required this.sourceText,
     required this.targetText,
-    required this.confidence,
+    this.confidence,
     required this.languagePair,
     this.modelVersion = 'v1.0.0_int8',
     required this.timestamp,
@@ -98,7 +98,7 @@ class FlaggedTranslation {
         'id': id,
         'sourceText': sourceText,
         'targetText': targetText,
-        'confidence': confidence,
+        if (confidence != null) 'confidence': confidence,
         'languagePair': languagePair.toShortString(),
         'modelVersion': modelVersion,
         'timestamp': timestamp.toIso8601String(),
@@ -109,7 +109,7 @@ class FlaggedTranslation {
         id: json['id'] as String,
         sourceText: json['sourceText'] as String,
         targetText: json['targetText'] as String,
-        confidence: (json['confidence'] as num).toDouble(),
+        confidence: (json['confidence'] as num?)?.toDouble(),
         languagePair: LanguagePairExtension.fromString(json['languagePair'] as String),
         modelVersion: json['modelVersion'] as String? ?? 'v1.0.0_int8',
         timestamp: DateTime.parse(json['timestamp'] as String),

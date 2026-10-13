@@ -8,6 +8,7 @@ import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
 import '../../services/tts_service.dart';
+import '../../services/activity_database_service.dart';
 
 /// Supported Question Types in the Teacher Practice Phase.
 enum TeacherPracticeQuestionType {
@@ -117,6 +118,7 @@ class _TeacherPracticeScreenState extends State<TeacherPracticeScreen> {
 
   bool _isChecked = false;
   bool _isCorrect = false;
+  final Set<int> _correctQuestionIndices = {};
 
   @override
   void initState() {
@@ -393,6 +395,9 @@ class _TeacherPracticeScreenState extends State<TeacherPracticeScreen> {
       setState(() {
         _isChecked = true;
         _isCorrect = allCorrect;
+        if (allCorrect) {
+          _correctQuestionIndices.add(_currentQuestionIndex);
+        }
       });
     } else {
       // Validate MCQ selection
@@ -426,6 +431,9 @@ class _TeacherPracticeScreenState extends State<TeacherPracticeScreen> {
       setState(() {
         _isChecked = true;
         _isCorrect = isAnswerCorrect;
+        if (isAnswerCorrect) {
+          _correctQuestionIndices.add(_currentQuestionIndex);
+        }
       });
     }
   }
@@ -447,6 +455,12 @@ class _TeacherPracticeScreenState extends State<TeacherPracticeScreen> {
   }
 
   void _finishPhase() {
+    ActivityDatabaseService.instance.recordEvent(
+      chapter: 'Level ${widget.levelNumber} Practice',
+      activityType: 'practice',
+      correct: _correctQuestionIndices.length,
+      total: _questions.length,
+    );
     widget.onFinish?.call();
     Navigator.of(context).pop(true);
   }

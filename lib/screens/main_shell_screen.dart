@@ -141,6 +141,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
       ),
       LiveTranslateScreen(
         isShellTab: true,
+        isActive: _selectedIndex == 2,
         onNavigateTab: _onDestinationSelected,
       ),
       ProfileScreen(

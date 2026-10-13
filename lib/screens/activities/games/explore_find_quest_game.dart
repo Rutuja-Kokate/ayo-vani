@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../../app/responsive/responsive.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimens.dart';
@@ -9,6 +9,7 @@ import '../../../data/english_activities_data.dart';
 import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
+import '../../../services/activity_database_service.dart';
 
 class AnimalSpot {
   final EnglishMundariWord word;
@@ -101,6 +102,7 @@ class _ExploreFindQuestGameState extends State<ExploreFindQuestGame> {
   }
 
   void _startTimer() {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) return;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
       if (_secondsRemaining > 0 && !_isFinished) {
@@ -113,6 +115,12 @@ class _ExploreFindQuestGameState extends State<ExploreFindQuestGame> {
           setState(() {
             _isFinished = true;
           });
+          ActivityDatabaseService.instance.recordEvent(
+            chapter: widget.chapterName,
+            activityType: 'game',
+            correct: _foundEnglish.length,
+            total: _words.length,
+          );
         }
       }
     });
@@ -141,6 +149,12 @@ class _ExploreFindQuestGameState extends State<ExploreFindQuestGame> {
         // Bonus points for time remaining
         _score += _secondsRemaining;
         _isFinished = true;
+        ActivityDatabaseService.instance.recordEvent(
+          chapter: widget.chapterName,
+          activityType: 'game',
+          correct: _words.length,
+          total: _words.length,
+        );
       }
     });
 

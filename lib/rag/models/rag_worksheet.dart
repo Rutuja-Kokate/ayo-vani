@@ -8,6 +8,7 @@ class RagFillInTheBlankItem {
   final String answerMundari;
   final List<String> wordBankHindi;
   final List<String> wordBankMundari;
+  final String source; // curated | gemini | nmt | glossary
 
   RagFillInTheBlankItem({
     required this.id,
@@ -17,6 +18,7 @@ class RagFillInTheBlankItem {
     required this.answerMundari,
     required this.wordBankHindi,
     required this.wordBankMundari,
+    this.source = 'gemini',
   });
 
   factory RagFillInTheBlankItem.fromJson(Map<String, dynamic> json) =>
@@ -29,6 +31,7 @@ class RagFillInTheBlankItem {
         wordBankHindi: (json['wordBank'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
         wordBankMundari: (json['wordBank_mundari'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
             (json['wordBank'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+        source: json['source'] as String? ?? 'gemini',
       );
 
   Map<String, dynamic> toJson() => {
@@ -39,6 +42,7 @@ class RagFillInTheBlankItem {
         'answer_mundari': answerMundari,
         'wordBank': wordBankHindi,
         'wordBank_mundari': wordBankMundari,
+        'source': source,
       };
 }
 
@@ -48,6 +52,7 @@ class RagMatchPairItem {
   final String columnAMundari;
   final String columnBHindi;
   final String columnBMundari;
+  final String source; // curated | gemini | nmt | glossary
 
   RagMatchPairItem({
     required this.id,
@@ -55,6 +60,7 @@ class RagMatchPairItem {
     required this.columnAMundari,
     required this.columnBHindi,
     required this.columnBMundari,
+    this.source = 'gemini',
   });
 
   factory RagMatchPairItem.fromJson(Map<String, dynamic> json) =>
@@ -64,6 +70,7 @@ class RagMatchPairItem {
         columnAMundari: json['columnA_mundari'] as String? ?? json['columnA'] as String? ?? '',
         columnBHindi: json['columnB'] as String? ?? '',
         columnBMundari: json['columnB_mundari'] as String? ?? json['columnB'] as String? ?? '',
+        source: json['source'] as String? ?? 'gemini',
       );
 
   Map<String, dynamic> toJson() => {
@@ -72,6 +79,7 @@ class RagMatchPairItem {
         'columnA_mundari': columnAMundari,
         'columnB': columnBHindi,
         'columnB_mundari': columnBMundari,
+        'source': source,
       };
 }
 
@@ -82,6 +90,7 @@ class RagShortAnswerItem {
   final String sampleAnswerHindi;
   final String sampleAnswerMundari;
   final int maxMarks;
+  final String source; // curated | gemini | nmt | glossary
 
   RagShortAnswerItem({
     required this.id,
@@ -90,6 +99,7 @@ class RagShortAnswerItem {
     required this.sampleAnswerHindi,
     required this.sampleAnswerMundari,
     this.maxMarks = 2,
+    this.source = 'gemini',
   });
 
   factory RagShortAnswerItem.fromJson(Map<String, dynamic> json) =>
@@ -100,6 +110,7 @@ class RagShortAnswerItem {
         sampleAnswerHindi: json['sampleAnswer'] as String? ?? '',
         sampleAnswerMundari: json['sampleAnswer_mundari'] as String? ?? json['sampleAnswer'] as String? ?? '',
         maxMarks: json['maxMarks'] as int? ?? 2,
+        source: json['source'] as String? ?? 'gemini',
       );
 
   Map<String, dynamic> toJson() => {
@@ -109,6 +120,7 @@ class RagShortAnswerItem {
         'sampleAnswer': sampleAnswerHindi,
         'sampleAnswer_mundari': sampleAnswerMundari,
         'maxMarks': maxMarks,
+        'source': source,
       };
 }
 

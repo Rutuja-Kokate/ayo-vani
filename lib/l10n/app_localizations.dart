@@ -1715,7 +1715,7 @@ abstract class AppLocalizations {
   /// No description provided for @toolsReviewNoticeMsg.
   ///
   /// In en, this message translates to:
-  /// **'2 AI-suggested Gondi translations require teacher confirmation before printing.'**
+  /// **'2 AI-suggested Mundari translations require teacher confirmation before printing.'**
   String get toolsReviewNoticeMsg;
 
   /// No description provided for @studentLevelsTitle.

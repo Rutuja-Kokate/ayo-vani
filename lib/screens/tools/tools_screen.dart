@@ -26,7 +26,7 @@ class ToolsScreen extends StatefulWidget {
 
 class _ToolsScreenState extends State<ToolsScreen> {
   String _sourceLang = 'Hindi';
-  String _targetLang = 'Gondi';
+  String _targetLang = 'Mundari';
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +66,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
 
                   AyoReviewBanner(
                     title: l10n?.toolsReviewTitle ?? 'Human-in-the-Loop Translation Notice',
-                    message: l10n?.toolsReviewNoticeMsg ?? '2 AI-suggested Gondi translations require teacher confirmation before printing.',
+                    message: l10n?.toolsReviewNoticeMsg ?? '2 AI-suggested Mundari translations require teacher confirmation before printing.',
                     pendingCount: 2,
                     onReviewTap: () {},
                   ),

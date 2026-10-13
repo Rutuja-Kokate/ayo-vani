@@ -1,25 +1,79 @@
-import 'dart:convert';
-import 'package:dio/dio.dart';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
-import '../config/rag_config.dart';
-import '../models/hitl_validation_models.dart';
-import 'hitl_validation_service.dart';
+import 'package:ayo_vani/engine/loanwords.dart';
+import 'package:ayo_vani/engine/mt_stage.dart';
+import 'package:ayo_vani/engine/pipeline.dart'
+    show kDefaultMtThreads, TranslationDirection;
 
-/// Service managing MT (Machine Translation) Hindi/English -> Mundari Devanagari.
-/// Supports thread-controlled loading (2 threads) and explicit unloading to conserve RAM.
+/// Origin of a translation result.
+enum MtResultSource {
+  glossary,
+  nmt,
+}
+
+/// Represents the output of a machine translation request.
+class MtTranslationResult {
+  final String text;
+  final MtResultSource source;
+  final double? confidence;
+
+  const MtTranslationResult({
+    required this.text,
+    required this.source,
+    this.confidence,
+  });
+
+  @override
+  String toString() =>
+      'MtTranslationResult(text: "$text", source: $source, confidence: $confidence)';
+
+  Map<String, dynamic> toJson() => {
+        'text': text,
+        'source': source.name,
+        if (confidence != null) 'confidence': confidence,
+      };
+}
+
+/// Typed exception thrown when attempting MT translation while the live speech pipeline is active.
+class MtLivePipelineActiveException implements Exception {
+  final String message;
+  const MtLivePipelineActiveException([
+    this.message =
+        'Cannot run MT translation while the live speech pipeline is active.',
+  ]);
+
+  @override
+  String toString() => 'MtLivePipelineActiveException: $message';
+}
+
+/// Service managing on-device MT (Machine Translation) Hindi -> Mundari.
+/// Acts as a thin adapter over [RealMtStage] with single-word curated glossary overrides,
+/// English loanword protection ({ENG:term}), and live-pipeline concurrency safety.
 class MtTranslationService {
-  static final MtTranslationService _instance = MtTranslationService._internal();
-  factory MtTranslationService() => _instance;
-  MtTranslationService._internal();
+  static final MtTranslationService instance =
+      MtTranslationService._internal();
+  factory MtTranslationService() => instance;
 
-  final Dio _dio = Dio();
+  final MtStage _mtStage;
   bool _isModelLoaded = false;
-  int _activeThreads = 2;
+  bool _isTranslating = false;
+
+  /// Global flag set by [SpeechPipeline] while live streaming pipeline is running.
+  static bool isLivePipelineActive = false;
+
+  MtTranslationService._internal({MtStage? mtStage})
+      : _mtStage = mtStage ?? RealMtStage(threads: kDefaultMtThreads);
+
+  /// Visible for testing to inject mock MT stages.
+  @visibleForTesting
+  MtTranslationService.withStage(MtStage mtStage) : _mtStage = mtStage;
 
   bool get isModelLoaded => _isModelLoaded;
 
-  /// Comprehensive direct dictionary for body parts, classroom objects, and common terms
-  static final Map<String, String> _mundariDict = {
+  /// Small curated glossary of body parts and classroom words.
+  /// Used EXCLUSIVELY as an explicit lexicon override for SINGLE-WORD inputs.
+  static const Map<String, String> curatedGlossary = {
+    // English body parts
     'feet': 'कटा',
     'foot': 'कटा',
     'leg': 'कटा',
@@ -44,152 +98,200 @@ class MtTranslationService {
     'cheek': 'जोबा',
     'cheeks': 'जोबा',
     'tongue': 'आलांग',
-    'lion': 'कुला',
-    'monkey': 'गड़ि',
-    'fish': 'हाइ',
-    'elephant': 'हाति',
-    'frog': 'चोके',
-    'rabbit': 'कुलइ',
-    'roti': 'लाद',
-    'milk': 'तोआ',
-    'honey': 'निलि दः',
-    'cow': 'गाइ',
-    'curd': 'दहि',
-    'butter': 'गोतोम',
-    'farmer': 'चाषी होड़ो',
-    'carrot': 'गाजरा',
-    'mango': 'उलि',
-    'fruit': 'जो',
-    'fruits': 'जो',
-    'pari': 'परी',
-    'water': 'दाः',
-    'sun': 'सिंगी',
-    'moon': 'चंडूः',
-    'tree': 'दारू',
+    // Hindi body parts
+    'पैर': 'कटा',
+    'हाथ': 'तिः',
+    'सिर': 'बोहः',
+    'आँख': 'मेडः',
+    'आंख': 'मेडः',
+    'कान': 'लुतुर',
+    'नाक': 'मुं',
+    'मुँह': 'चाबे',
+    'मुंह': 'चाबे',
+    'त्वचा': 'उरु',
+    'कंधा': 'तारन',
+    'घुटना': 'मुकुनी',
+    'गाल': 'जोबा',
+    'जीभ': 'आलांग',
+    // Classroom words
+    'किताब': 'पुथी',
+    'book': 'पुथी',
+    'कलम': 'कलम',
+    'स्कूल': 'स्कूल',
+    'school': 'स्कूल',
+    'कक्षा': 'श्रेणी',
+    'class': 'श्रेणी',
+    'शिक्षक': 'मास्तर',
+    'teacher': 'मास्तर',
   };
 
-  /// Loads MT model resources on specified CPU threads (default: 2 threads).
-  Future<void> loadModel({int numThreads = 2}) async {
-    _activeThreads = numThreads;
-    debugPrint('[MT] Loading MT translation model session on $_activeThreads threads...');
-    await Future.delayed(const Duration(milliseconds: 50));
+  /// Explicitly initializes the resident [RealMtStage] if not already loaded.
+  Future<void> loadModel() async {
+    if (_isModelLoaded) return;
+    await _mtStage.initModel();
     _isModelLoaded = true;
-    debugPrint('[MT] MT model session ready ✓');
   }
 
-  /// Unloads MT model resources to free RAM and prevent device slowdowns / app crashes.
+  /// Explicitly unloads the resident [RealMtStage] ONLY under memory pressure.
+  /// Never called automatically per batch.
   Future<void> unloadModel() async {
     if (!_isModelLoaded) return;
-    debugPrint('[MT] Unloading MT model session and freeing RAM...');
+    _mtStage.dispose();
     _isModelLoaded = false;
-    debugPrint('[MT] MT model unloaded ✓');
   }
 
-  /// Translates a single text string to 100% Devanagari Mundari without [मुंडारी] tags.
-  Future<String> translateToMundari(String text) async {
-    final results = await translateBatch([text]);
-    return results.isNotEmpty ? results.first : text;
+  /// Translates a single text sentence, checking single-word glossary overrides and
+  /// protected {ENG:term} loanwords.
+  Future<MtTranslationResult> translateSentence(String text) async {
+    if (isLivePipelineActive) {
+      throw const MtLivePipelineActiveException();
+    }
+    if (_isTranslating) {
+      throw StateError(
+          'Another MT translation is already in progress.');
+    }
+    _isTranslating = true;
+    try {
+      return await _translateSentenceInternal(text);
+    } finally {
+      _isTranslating = false;
+    }
   }
 
-  /// Batch translates a list of Hindi/English strings into Devanagari Mundari script.
-  Future<List<String>> translateBatch(List<String> texts) async {
+  Future<MtTranslationResult> _translateSentenceInternal(String text) async {
+    final clean = text.trim();
+    if (clean.isEmpty) {
+      return const MtTranslationResult(
+        text: '',
+        source: MtResultSource.nmt,
+        confidence: 1.0,
+      );
+    }
+
+    // 1. Guard against concurrency with active live speech pipeline
+    if (isLivePipelineActive) {
+      throw const MtLivePipelineActiveException();
+    }
+
+    // 2. Explicit lexicon override for SINGLE-WORD inputs only
+    final isSingleWord = !clean.contains(RegExp(r'\s+'));
+    if (isSingleWord) {
+      final lower = clean.toLowerCase();
+      final override = curatedGlossary[lower] ?? curatedGlossary[clean];
+      if (override != null) {
+        return MtTranslationResult(
+          text: override,
+          source: MtResultSource.glossary,
+          confidence: 1.0,
+        );
+      }
+    }
+
+    // Ensure model is loaded
+    await loadModel();
+
+    // 3. Loanword protection: check for {ENG:term} markers
+    final engPattern = RegExp(r'\{ENG:([^}]+)\}');
+    final matches = engPattern.allMatches(text).toList();
+
+    if (matches.isEmpty) {
+      // Standard NMT translation
+      final result = await _mtStage.translate(
+        clean,
+        direction: TranslationDirection.hindiToMundari,
+      );
+      return MtTranslationResult(
+        text: result.displayText,
+        source: MtResultSource.nmt,
+        confidence: result.confidence,
+      );
+    }
+
+    // 4. Split around {ENG:term} markers, translate non-loanword segments,
+    // and join with Devanagari transliteration of loanword.
+    final chunks = <String>[];
+    int lastIndex = 0;
+
+    for (final match in matches) {
+      final preSegment = text.substring(lastIndex, match.start);
+      if (preSegment.isNotEmpty) {
+        if (preSegment.trim().isEmpty) {
+          chunks.add(preSegment);
+        } else {
+          final leading = preSegment.substring(
+              0, preSegment.length - preSegment.trimLeft().length);
+          final trailing =
+              preSegment.substring(preSegment.trimRight().length);
+          final res = await _mtStage.translate(
+            preSegment.trim(),
+            direction: TranslationDirection.hindiToMundari,
+          );
+          chunks.add('$leading${res.displayText}$trailing');
+        }
+      }
+
+      final term = match.group(1)!;
+      final devanagariTerm = getLoanwordDevanagari(term);
+      chunks.add(devanagariTerm);
+      lastIndex = match.end;
+    }
+
+    if (lastIndex < text.length) {
+      final tailSegment = text.substring(lastIndex);
+      if (tailSegment.isNotEmpty) {
+        if (tailSegment.trim().isEmpty) {
+          chunks.add(tailSegment);
+        } else {
+          final leading = tailSegment.substring(
+              0, tailSegment.length - tailSegment.trimLeft().length);
+          final trailing =
+              tailSegment.substring(tailSegment.trimRight().length);
+          final res = await _mtStage.translate(
+            tailSegment.trim(),
+            direction: TranslationDirection.hindiToMundari,
+          );
+          chunks.add('$leading${res.displayText}$trailing');
+        }
+      }
+    }
+
+    return MtTranslationResult(
+      text: chunks.join(),
+      source: MtResultSource.nmt,
+      confidence: 0.9,
+    );
+  }
+
+  /// Translates a batch of texts sequentially without unloading/reloading models.
+  Future<List<MtTranslationResult>> translateBatch(List<String> texts) async {
     if (texts.isEmpty) return [];
 
-    final results = <String>[];
-    final unmappedIndices = <int>[];
-    final unmappedTexts = <String>[];
-
-    for (int i = 0; i < texts.length; i++) {
-      String clean = texts[i].trim();
-      // Remove any leftover [मुंडारी] or [Mundari] tags
-      clean = clean.replaceAll(RegExp(r'\[मुंडारी\]|\[Mundari\]', caseSensitive: false), '').trim();
-
-      final lower = clean.toLowerCase();
-      if (_mundariDict.containsKey(lower)) {
-        results.add(_mundariDict[lower]!);
-      } else if (clean.isEmpty) {
-        results.add('');
-      } else {
-        results.add(''); // Placeholder for NMT
-        unmappedIndices.add(i);
-        unmappedTexts.add(clean);
-      }
+    if (isLivePipelineActive) {
+      throw const MtLivePipelineActiveException();
     }
 
-    if (unmappedTexts.isEmpty) return results;
-
-    // Use Gemini API for dynamic 100% Devanagari Mundari translation
-    if (kGeminiApiKey.isNotEmpty && kGeminiApiKey != 'YOUR_GEMINI_API_KEY_HERE') {
-      try {
-        final url =
-            'https://generativelanguage.googleapis.com/v1beta/models/$kGeminiModel:generateContent?key=$kGeminiApiKey';
-        final prompt = '''
-Translate the following English or Hindi educational terms/sentences into authentic Mundari language written ONLY in Devanagari script.
-Do NOT include any prefix like "[मुंडारी]" or English text. Return ONLY a JSON list of strings in the exact same order as input.
-
-Input list: ${jsonEncode(unmappedTexts)}
-
-JSON Output format:
-["मुंडारी अनुवाद 1", "मुंडारी अनुवाद 2"]
-''';
-
-        final response = await _dio.post(
-          url,
-          data: {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ],
-            'generationConfig': {
-              'temperature': 0.1,
-              'responseMimeType': 'application/json',
-            },
-          },
-          options: Options(
-            headers: {'Content-Type': 'application/json'},
-            sendTimeout: const Duration(seconds: 15),
-            receiveTimeout: const Duration(seconds: 15),
-          ),
-        );
-
-        final candidates = response.data['candidates'] as List<dynamic>?;
-        if (candidates != null && candidates.isNotEmpty) {
-          final rawText = candidates.first['content']['parts'][0]['text'] as String;
-          final jsonList = jsonDecode(rawText) as List<dynamic>;
-          for (int j = 0; j < unmappedIndices.length && j < jsonList.length; j++) {
-            final translatedText = jsonList[j].toString().replaceAll(RegExp(r'\[मुंडारी\]|\[Mundari\]'), '').trim();
-            results[unmappedIndices[j]] = translatedText;
-            
-            // Auto-check and flag via HITL Validation Service for unmapped dynamic items
-            final src = unmappedTexts[j];
-            if (src.isNotEmpty && translatedText.isNotEmpty) {
-              HitlValidationService().checkAndFlag(
-                sourceText: src,
-                targetText: translatedText,
-                confidence: 0.68, // Dynamic NMT estimated confidence
-                languagePair: LanguagePairEnum.hindiToMundari,
-              );
-            }
-          }
-        }
-      } catch (e) {
-        debugPrint('[MT] Gemini batch translation error: $e');
-      }
+    if (_isTranslating) {
+      throw StateError(
+          'Another MT translation batch is already in progress.');
     }
 
-    // Fallback for any unmapped items remaining
-    for (int i = 0; i < results.length; i++) {
-      if (results[i].isEmpty) {
-        final orig = texts[i].replaceAll(RegExp(r'\[मुंडारी\]|\[Mundari\]'), '').trim();
-        final lower = orig.toLowerCase();
-        results[i] = _mundariDict[lower] ?? orig;
+    _isTranslating = true;
+    try {
+      await loadModel();
+      final results = <MtTranslationResult>[];
+      for (final text in texts) {
+        final res = await _translateSentenceInternal(text);
+        results.add(res);
       }
+      return results;
+    } finally {
+      _isTranslating = false;
     }
+  }
 
-    return results;
+  /// Translates a single text and returns raw translated String.
+  Future<String> translateToMundari(String text) async {
+    final result = await translateSentence(text);
+    return result.text;
   }
 }

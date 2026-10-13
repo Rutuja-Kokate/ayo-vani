@@ -1,3 +1,12 @@
+/// Curated Balvatika pre-school module topics, rhymes, and items (source: curated).
+///
+/// CONTENT RESOLUTION PRECEDENCE RULE:
+/// 1. CURATED CONTENT (assets/content/curated_balvatika.json & BalvatikaContentRepository):
+///    Primary verified foundational pre-school items in Mundari.
+/// 2. CACHED GENERATED CONTENT (RAG cache): Secondary dynamic stories and rhymes.
+/// 3. RUNTIME GENERATION: Dynamic generative fallback for customized classroom modules.
+library;
+
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 
@@ -231,7 +240,6 @@ class BalvatikaContentRepository {
           nameTribalNative: 'ଚାନ୍ଦୁ ଚାନ୍ଦା',
           emoji: '🌙',
           extraDetail: 'Traditional Moon Rhyme',
-          audioPathPlaceholder: 'assets/demo_audio/rhyme_chanda.wav',
         ),
         BalvatikaItem(
           id: 'rhyme_2',
@@ -241,7 +249,6 @@ class BalvatikaContentRepository {
           nameTribalNative: 'ହାଇ ଦାଃ ରେନ୍ ରାଣୀ',
           emoji: '🐟',
           extraDetail: 'Fish & Water Rhyme',
-          audioPathPlaceholder: 'assets/demo_audio/rhyme_fish.wav',
         ),
       ],
       stories: [
@@ -254,7 +261,6 @@ class BalvatikaContentRepository {
           textHindi: 'एक घने जंगल में एक चतुर छोटे खरगोश ने एक गहरे कुएं में अपनी ही परछाई दिखाकर एक भयंकर शेर को हरा दिया।',
           moral: 'Wisdom is stronger than physical strength.',
           emoji: '🐰🦁',
-          audioPathPlaceholder: 'assets/demo_audio/story_rabbit.wav',
         ),
       ],
     ),

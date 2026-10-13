@@ -9,6 +9,7 @@ class RagFlashcardItem {
   final String meaningMundari;
   final String emoji;
   final String? imageAsset;
+  final String source; // curated | gemini | nmt | glossary
 
   RagFlashcardItem({
     required this.id,
@@ -18,6 +19,7 @@ class RagFlashcardItem {
     required this.meaningMundari,
     required this.emoji,
     this.imageAsset,
+    this.source = 'gemini',
   });
 
   factory RagFlashcardItem.fromJson(Map<String, dynamic> json) =>
@@ -29,6 +31,7 @@ class RagFlashcardItem {
         meaningMundari: json['meaning_mundari'] as String? ?? json['meaning'] as String? ?? '',
         emoji: json['emoji'] as String? ?? '✨',
         imageAsset: json['imageAsset'] as String? ?? json['image_path'] as String?,
+        source: json['source'] as String? ?? 'gemini',
       );
 
   Map<String, dynamic> toJson() => {
@@ -39,6 +42,7 @@ class RagFlashcardItem {
         'meaning_mundari': meaningMundari,
         'emoji': emoji,
         if (imageAsset != null) 'imageAsset': imageAsset,
+        'source': source,
       };
 }
 

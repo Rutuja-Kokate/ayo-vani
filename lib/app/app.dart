@@ -15,7 +15,7 @@ class AyoVaaniApp extends StatelessWidget {
       title: 'AYOVAANI',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      locale: context.watch<LocaleProvider>().locale,
+      locale: Provider.of<LocaleProvider?>(context)?.locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const SplashScreen(),

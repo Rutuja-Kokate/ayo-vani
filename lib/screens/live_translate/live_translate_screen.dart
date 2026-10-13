@@ -1,39 +1,30 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:record/record.dart';
 
 import '../../app/responsive/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_typography.dart';
+import '../../engine/mt_stage.dart';
+import '../../engine/pipeline.dart';
 import '../../l10n/app_localizations.dart';
-import '../../pipeline/demo_cache_manager.dart';
-import '../../pipeline/fuzzy_matcher.dart';
-import '../../pipeline/hindi_stt_service.dart';
-import '../../services/audio_player_service.dart';
-import '../../services/speech_to_speech_service.dart';
-import '../../services/tts_service.dart';
 import '../../widgets/ayo_badges.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
 import '../../widgets/ayo_screen_background.dart';
 import '../../widgets/mundari_audio_text.dart';
 
-enum TranslationDirection {
-  hindiToMundari,
-  mundariToHindi,
-}
-
 class _RecentTranslationItem {
-  final String hindi;
-  final String mundari;
+  final String source;
+  final String target;
   final DateTime timestamp;
 
   const _RecentTranslationItem({
-    required this.hindi,
-    required this.mundari,
+    required this.source,
+    required this.target,
     required this.timestamp,
   });
 }
@@ -45,12 +36,14 @@ class LiveTranslateScreen extends StatefulWidget {
     this.onBack,
     this.onNavigateTab,
     this.isShellTab = false,
+    this.isActive = true,
   });
 
   final String? initialText;
   final VoidCallback? onBack;
   final ValueChanged<int>? onNavigateTab;
   final bool isShellTab;
+  final bool isActive;
 
   @override
   State<LiveTranslateScreen> createState() => _LiveTranslateScreenState();
@@ -60,48 +53,35 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
   int _navIndex = 2;
   TranslationDirection _direction = TranslationDirection.hindiToMundari;
   bool _isListening = false;
+  bool _isPlaying = false;
   bool _isProcessing = false;
-  bool _isModelLoading = true;
-  bool _isContinuousLoop = false;
+  bool _isModelLoading = false;
+  bool _hasInitialized = false;
+  String? _errorMessage;
 
   String _sourceText = '';
-  String _translatedMundariText = '';
+  String _translatedTargetText = '';
 
-  StreamSubscription<Amplitude>? _amplitudeSub;
-  int _silenceMs = 0;
-  Timer? _maxRecordingTimer;
+  StreamSubscription<LivePipelineEvent>? _liveEventsSub;
+  SpeechPipeline? _pipelineRef;
 
   final List<_RecentTranslationItem> _recentHistory = [];
 
-  final List<Map<String, String>> _quickPhrases = const [
-    {'hindi': 'कक्षा शुरू करें', 'mundari': 'श्रेणी एतोहोब पे'},
-    {'hindi': 'ध्यान दें', 'mundari': 'ध्यान इम पे'},
-    {'hindi': 'अच्छा काम', 'mundari': 'बेस कजि'},
-    {'hindi': 'किताब खोलें', 'mundari': 'पुथी ओलोल पे'},
-    {'hindi': 'बैठ जाएं', 'mundari': 'दुब पे'},
+  final List<String> _quickPhrasesHindi = const [
+    'कक्षा शुरू करें',
+    'ध्यान दें',
+    'अच्छा काम',
+    'किताब खोलें',
+    'बैठ जाएं',
   ];
 
-  final Map<String, String> _sampleHindiToMundari = {
-    'यह एक सेब है।': 'नेया मिद सेब तना।',
-    'यह एक सेब है': 'नेया मिद सेब तना।',
-    'आप कैसे हैं?': 'चेतना मेना?',
-    'मेरा नाम ____ है।': 'इंग नाम ____ तना।',
-    'धन्यवाद।': 'जोहार!',
-    'धन्यवाद!': 'जोहार!',
-    'नमस्ते': 'जोहार',
-    'किताब खोलो': 'पुथी ओलोल पे',
-    'यहाँ आओ': 'नेनता हिजू मे',
-    'चुप रहो': 'थिर कोपे',
-    'शाबाश': 'बेस कजि',
-    'कक्षा शुरू करें': 'श्रेणी एतोहोब पे',
-    'ध्यान दें': 'ध्यान इम पे',
-    'अच्छा काम': 'बेस कजि',
-    'किताब खोलें': 'पुथी ओलोल पे',
-    'बैठ जाएं': 'दुब पे',
-  };
-
-  final _audioRecorder = AudioRecorder();
-  String? _audioPath;
+  final List<String> _quickPhrasesMundari = const [
+    'श्रेणी एतोहोब पे',
+    'ध्यान इम पे',
+    'बेस कजि',
+    'पुथी ओलोल पे',
+    'दुब पे',
+  ];
 
   void _handleBack() {
     if (widget.onBack != null) {
@@ -128,297 +108,278 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initModel();
-    });
-  }
-
-  Future<void> _initModel() async {
-    final stt = context.read<HindiSttService>();
-    final s2st = context.read<SpeechToSpeechService>();
-
-    if (!stt.isInitialized) {
-      await stt.initialize();
-    }
-    await s2st.initialize();
-
-    if (mounted) {
-      setState(() {
-        _isModelLoading = false;
+    if (!widget.isShellTab || widget.isActive) {
+      _hasInitialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initPipeline();
       });
     }
   }
 
   @override
+  void didUpdateWidget(covariant LiveTranslateScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive && !_hasInitialized) {
+      _hasInitialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initPipeline();
+      });
+    }
+  }
+
+  Future<void> _initPipeline() async {
+    final pipeline = Provider.of<SpeechPipeline?>(context, listen: false);
+    if (pipeline == null) {
+      if (mounted) {
+        setState(() {
+          _isModelLoading = false;
+        });
+      }
+      return;
+    }
+    _pipelineRef = pipeline;
+
+    await _liveEventsSub?.cancel();
+    _liveEventsSub = pipeline.liveEvents.listen(
+      _handleLiveEvent,
+      onError: (err) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'पाइपलाइन त्रुटि: $err';
+            _isListening = false;
+            _isPlaying = false;
+            _isProcessing = false;
+          });
+        }
+      },
+    );
+
+    if (mounted) {
+      setState(() {
+        _isModelLoading = true;
+        _errorMessage = null;
+      });
+    }
+
+    try {
+      await pipeline.init();
+      await pipeline.setDirection(_direction);
+      if (mounted) {
+        setState(() {
+          _isModelLoading = false;
+          _errorMessage = null;
+        });
+
+        if (widget.initialText != null && widget.initialText!.trim().isNotEmpty) {
+          _translateTypedText(widget.initialText!);
+        }
+      }
+    } catch (e) {
+      debugPrint('[LiveTranslate] SpeechPipeline init error: $e');
+      if (mounted) {
+        setState(() {
+          _isModelLoading = false;
+          _errorMessage = 'मॉडल लोड करने में त्रुटि: $e';
+        });
+      }
+    }
+  }
+
+  void _handleLiveEvent(LivePipelineEvent event) {
+    if (!mounted) return;
+
+    switch (event.type) {
+      case LiveEventType.sttClause:
+        setState(() {
+          _sourceText = event.text;
+          _isProcessing = true;
+        });
+        break;
+      case LiveEventType.mtClause:
+        setState(() {
+          _translatedTargetText = event.text;
+          _isProcessing = false;
+        });
+        final source = event.timing.sourceText.isNotEmpty
+            ? event.timing.sourceText
+            : _sourceText;
+        _addTranslationToHistory(source, event.text);
+        break;
+      case LiveEventType.playbackStarted:
+        setState(() {
+          _isPlaying = true;
+        });
+        break;
+      case LiveEventType.ttsClause:
+        break;
+      case LiveEventType.finished:
+        setState(() {
+          _isPlaying = false;
+          _isListening = false;
+          _isProcessing = false;
+          if (event.clauseIndex == -1 && event.text.startsWith('Pipeline error:')) {
+            _errorMessage = event.text;
+          }
+        });
+        break;
+    }
+  }
+
+  @override
   void dispose() {
-    _isContinuousLoop = false;
-    _amplitudeSub?.cancel();
-    _maxRecordingTimer?.cancel();
-    _audioRecorder.dispose();
+    _liveEventsSub?.cancel();
+    _pipelineRef?.stopLivePipeline();
     super.dispose();
   }
 
-  Future<void> _playMundariAudio(String arg1, String arg2) async {
-    if (arg1.isEmpty || arg2.isEmpty) return;
+  Future<void> _playTranslationAudio(String text, {TranslationDirection? direction}) async {
+    if (text.trim().isEmpty) return;
+    final pipeline = Provider.of<SpeechPipeline?>(context, listen: false);
+    if (pipeline == null) return;
+    final dir = direction ?? _direction;
 
-    if (_direction == TranslationDirection.mundariToHindi) {
-      debugPrint('[LiveTranslate] Mundari->Hindi TTS speaking Hindi output: $arg2');
-      await TtsService().speakHindi(arg2);
-      return;
-    }
-
-    final hindi = arg1;
-    final mundari = arg2;
     try {
-      final cacheManager = context.read<DemoCacheManager>();
-      await cacheManager.initialize();
-      if (!mounted) return;
+      await pipeline.ensureTtsLoaded();
+      await pipeline.ensurePlayerLoaded();
 
-      final match = FuzzyMatcher.findBestMatch(hindi, cacheManager, threshold: 0.3);
-      String? audioPath;
-      if (match.entry != null) {
-        audioPath = cacheManager.getAudioAssetPath(match.entry!);
-      }
-
-      if (audioPath != null) {
-        debugPrint('[LiveTranslate] Playing audio asset from demo cache: $audioPath');
-        await context.read<S2SAudioPlayerService>().playTranslationResult(
-          S2STranslationResult(
-            hindiText: hindi,
-            mundariText: mundari,
-            audioBytes: null,
-            audioPath: audioPath,
-            source: TranslationSource.demoCache,
-            latencyMs: 0,
-          ),
+      final ttsResult = await pipeline.ttsStage.synthesize(text, direction: dir);
+      if (ttsResult.audioBytes.isNotEmpty) {
+        await pipeline.audioPlayer.reset();
+        await pipeline.audioPlayer.queueClauseAudio(
+          0,
+          ttsResult.audioBytes,
+          sampleRate: ttsResult.sampleRate,
         );
-      } else {
-        debugPrint('[LiveTranslate] No asset in demo cache for "$hindi", synthesizing via TTS for: $mundari');
-        await TtsService().speakCodeMixedClassroomScript(mundari);
       }
     } catch (e) {
-      debugPrint('[LiveTranslate] Error playing audio: $e');
-      await TtsService().speakCodeMixedClassroomScript(mundari);
+      debugPrint('[LiveTranslate] Error playing translation audio: $e');
     }
   }
 
-  void _addTranslationToHistory(String hindi, String mundari, {bool playAudio = true}) {
-    final cleanHindi = hindi.trim();
-    final cleanMundari = mundari.trim();
-    if (cleanHindi.isEmpty || cleanMundari.isEmpty) return;
+  void _addTranslationToHistory(String source, String target) {
+    final cleanSource = source.trim();
+    final cleanTarget = target.trim();
+    if (cleanSource.isEmpty || cleanTarget.isEmpty) return;
 
     if (!mounted) return;
     setState(() {
-      _sourceText = cleanHindi;
-      _translatedMundariText = cleanMundari;
+      _sourceText = cleanSource;
+      _translatedTargetText = cleanTarget;
 
-      _recentHistory.removeWhere((item) => item.hindi == cleanHindi);
+      _recentHistory.removeWhere((item) => item.source == cleanSource);
       _recentHistory.insert(
         0,
         _RecentTranslationItem(
-          hindi: cleanHindi,
-          mundari: cleanMundari,
+          source: cleanSource,
+          target: cleanTarget,
           timestamp: DateTime.now(),
         ),
       );
 
-      if (_recentHistory.length > 3) {
+      if (_recentHistory.length > 5) {
         _recentHistory.removeLast();
       }
     });
-
-    if (playAudio) {
-      _playMundariAudio(cleanHindi, cleanMundari);
-    }
   }
 
   Future<void> _toggleListening() async {
-    if (_isModelLoading || _isProcessing) return;
+    if (_isModelLoading) return;
+    final pipeline = Provider.of<SpeechPipeline?>(context, listen: false);
+    if (pipeline == null) return;
 
-    if (_direction == TranslationDirection.mundariToHindi) {
-      _isContinuousLoop = false;
-      if (_isListening) {
-        await _stopListeningAndProcess(cancelOnly: true);
-      } else {
-        await _startListening();
-      }
-      return;
-    }
-
-    if (_isListening || _isContinuousLoop) {
-      _isContinuousLoop = false;
-      await _stopListeningAndProcess(cancelOnly: true);
-    } else {
-      _isContinuousLoop = true;
-      await _startListening();
-    }
-  }
-
-  Future<void> _startListening() async {
-    if (!mounted) return;
-    if (_direction == TranslationDirection.hindiToMundari && !_isContinuousLoop) return;
-
-    if (await _audioRecorder.hasPermission()) {
-      final tempDir = await getTemporaryDirectory();
-      _audioPath = '${tempDir.path}/live_record_${DateTime.now().millisecondsSinceEpoch}.wav';
-
-      await _audioRecorder.start(
-        const RecordConfig(
-          encoder: AudioEncoder.wav,
-          sampleRate: 16000,
-          numChannels: 1,
-        ),
-        path: _audioPath!,
-      );
-
-      if (!mounted) return;
-      setState(() {
-        _isListening = true;
-        _isProcessing = false;
-        _sourceText = _direction == TranslationDirection.mundariToHindi
-            ? 'मुंडारी में सुन रहा है...'
-            : 'सुन रहा है...';
-        _translatedMundariText = '';
-      });
-
-      _silenceMs = 0;
-      _amplitudeSub?.cancel();
-      _amplitudeSub = null;
-      _maxRecordingTimer?.cancel();
-      _maxRecordingTimer = null;
-
-      _amplitudeSub = _audioRecorder.onAmplitudeChanged(const Duration(milliseconds: 100)).listen((amp) {
-        if (!_isListening || _isProcessing) return;
-
-        if (amp.current < -35.0) {
-          _silenceMs += 100;
-          if (_silenceMs >= 1500 && _isListening && !_isProcessing) {
-            _amplitudeSub?.cancel();
-            _amplitudeSub = null;
-            _maxRecordingTimer?.cancel();
-            _maxRecordingTimer = null;
-            _stopListeningAndProcess();
-          }
-        } else {
-          _silenceMs = 0;
-        }
-      });
-
-      _maxRecordingTimer = Timer(const Duration(seconds: 4), () {
-        if (_isListening && !_isProcessing) {
-          _amplitudeSub?.cancel();
-          _amplitudeSub = null;
-          _maxRecordingTimer?.cancel();
-          _maxRecordingTimer = null;
-          _stopListeningAndProcess();
-        }
-      });
-    }
-  }
-
-  Future<void> _stopListeningAndProcess({bool cancelOnly = false}) async {
-    _amplitudeSub?.cancel();
-    _amplitudeSub = null;
-    _maxRecordingTimer?.cancel();
-    _maxRecordingTimer = null;
-    _silenceMs = 0;
-
-    if (!_isListening && !_isProcessing && !cancelOnly) return;
-
-    if (cancelOnly) {
-      if (!mounted) return;
+    if (pipeline.isLiveActive) {
       setState(() {
         _isListening = false;
+        _isPlaying = false;
         _isProcessing = false;
-        _sourceText = 'अनुवाद रोका गया';
       });
+      await pipeline.stopLivePipeline();
+    } else {
+      setState(() {
+        _errorMessage = null;
+        _isListening = true;
+        _isProcessing = false;
+        _sourceText = _direction == TranslationDirection.hindiToMundari
+            ? 'सुन रहा है... (बोलिए)'
+            : 'मुंडारी में सुन रहा है... (कजि पे)';
+        _translatedTargetText = '';
+      });
+
       try {
-        await _audioRecorder.stop();
+        await pipeline.setDirection(_direction);
+        await pipeline.startLivePipeline();
       } catch (e) {
-        debugPrint('Audio recorder stop error: $e');
+        debugPrint('[LiveTranslate] Error starting live pipeline: $e');
+        if (mounted) {
+          setState(() {
+            _isListening = false;
+            _errorMessage = 'माइक्रोफ़ोन या पाइपलाइन शुरू करने में त्रुटि: $e';
+          });
+        }
       }
-      return;
     }
+  }
 
-    if (_isProcessing) return;
+  Future<void> _translateTypedText(String typed) async {
+    final text = typed.trim();
+    if (text.isEmpty) return;
 
-    if (!mounted) return;
+    final pipeline = Provider.of<SpeechPipeline?>(context, listen: false);
+    if (pipeline == null) return;
     setState(() {
-      _isListening = false;
+      _sourceText = text;
+      _translatedTargetText = 'अनुवाद हो रहा है...';
       _isProcessing = true;
-      _sourceText = 'प्रोसेस हो रहा है...';
+      _errorMessage = null;
     });
 
     try {
-      final path = await _audioRecorder.stop();
-      if (path != null && mounted) {
-        if (_direction == TranslationDirection.mundariToHindi) {
-          final mockMundari = 'मैडम, इंग नेया काजी रुआड़ सनाइंग तना।';
-          final mockHindi = 'मैडम, मैं इसका जवाब देना चाहता हूँ।';
+      await pipeline.ensureMtLoaded();
+      await pipeline.ensureTtsLoaded();
+      await pipeline.ensurePlayerLoaded();
 
-          if (mounted) {
-            _addTranslationToHistory(mockMundari, mockHindi, playAudio: false);
-            await TtsService().speakHindi(mockHindi);
-          }
-        } else {
-          final hindiStt = context.read<HindiSttService>();
-          final cacheManager = context.read<DemoCacheManager>();
-          final transcribedHindi = await hindiStt.transcribe(path);
-          final trimmedText = transcribedHindi.trim();
+      final mtResult = await pipeline.mtStage.translate(text, direction: _direction);
 
-          if (trimmedText.isEmpty) {
-            if (mounted) {
-              setState(() {
-                _isProcessing = false;
-                _sourceText = 'बोली नहीं सुनाई दी। फिर कोशिश करें।';
-                _translatedMundariText = '';
-              });
-            }
-            if (_isContinuousLoop && mounted) {
-              _scheduleNextContinuousListen();
-            }
-            return;
-          }
-
-          final match = FuzzyMatcher.findBestMatch(trimmedText, cacheManager, threshold: 0.4);
-          final finalHindi = match.entry?.hindi ?? trimmedText;
-          final resultMundari = match.entry?.mundariDevanagari ??
-              _sampleHindiToMundari[trimmedText] ??
-              'जोहार $trimmedText';
-
-          if (mounted) {
-            _addTranslationToHistory(finalHindi, resultMundari, playAudio: false);
-            await _playMundariAudio(finalHindi, resultMundari);
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('STT Processing Error: $e');
-      if (mounted) {
-        setState(() {
-          _sourceText = 'त्रुटि हुई। फिर कोशिश करें।';
-          _translatedMundariText = '';
-        });
-      }
-    } finally {
       if (mounted) {
         setState(() {
           _isProcessing = false;
+          _translatedTargetText = mtResult.displayText;
+        });
+        _addTranslationToHistory(text, mtResult.displayText);
+      }
+
+      final ttsResult = await pipeline.ttsStage.synthesize(
+        mtResult.synthesizeText,
+        direction: _direction,
+      );
+
+      if (ttsResult.audioBytes.isNotEmpty) {
+        await pipeline.audioPlayer.reset();
+        await pipeline.audioPlayer.queueClauseAudio(
+          0,
+          ttsResult.audioBytes,
+          sampleRate: ttsResult.sampleRate,
+        );
+      }
+    } on MtException catch (e) {
+      debugPrint('[LiveTranslate] MtException: $e');
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _translatedTargetText = 'अनुवाद त्रुटि';
+          _errorMessage = 'अनुवाद मॉडल त्रुटि: ${e.message}';
         });
       }
-      if (_direction == TranslationDirection.hindiToMundari && _isContinuousLoop && mounted) {
-        _scheduleNextContinuousListen();
+    } catch (e) {
+      debugPrint('[LiveTranslate] Translation error: $e');
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _translatedTargetText = 'त्रुटि हुई';
+          _errorMessage = 'अनुवाद विफल: $e';
+        });
       }
     }
-  }
-
-  void _scheduleNextContinuousListen() {
-    if (_direction == TranslationDirection.mundariToHindi) return;
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (_isContinuousLoop && mounted && !_isListening && !_isProcessing) {
-        _startListening();
-      }
-    });
   }
 
   void _showTypeDialog(BuildContext context) {
@@ -429,9 +390,13 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFDFBF7),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18.0),
+        ),
         title: Text(
-          l10n?.typeDialogTitle ?? 'हिंदी वाक्यांश टाइप करें',
+          _direction == TranslationDirection.hindiToMundari
+              ? (l10n?.typeDialogTitle ?? 'हिंदी वाक्यांश टाइप करें')
+              : 'मुंडारी वाक्यांश टाइप करें',
           style: TextStyle(
             fontFamily: AppTypography.headingFontFamily,
             fontSize: 18.0,
@@ -443,7 +408,10 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
           autofocus: true,
           decoration: InputDecoration(
             hintText: l10n?.typeDialogHint ?? 'यहां टेक्स्ट दर्ज करें...',
-            hintStyle: const TextStyle(fontFamily: 'Inter', color: AppColors.textMuted),
+            hintStyle: const TextStyle(
+              fontFamily: 'Inter',
+              color: AppColors.textMuted,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
               borderSide: const BorderSide(color: Color(0xFFE8DECF)),
@@ -455,7 +423,10 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               l10n?.btnCancel ?? 'रद्द करें',
-              style: const TextStyle(fontFamily: 'Inter', color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           ElevatedButton(
@@ -463,13 +434,14 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
               final typed = controller.text.trim();
               if (typed.isNotEmpty) {
                 Navigator.of(context).pop();
-                final mundari = _sampleHindiToMundari[typed] ?? 'जोहार $typed';
-                _addTranslationToHistory(typed, mundari);
+                _translateTypedText(typed);
               }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBurgundy,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
             ),
             child: Text(
               l10n?.btnSubmit ?? 'जमा करें',
@@ -525,7 +497,11 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.chevron_left_rounded, size: 30, color: AppColors.textPrimary),
+            icon: const Icon(
+              Icons.chevron_left_rounded,
+              size: 30,
+              color: AppColors.textPrimary,
+            ),
             onPressed: _handleBack,
           ),
           title: AyoLogo(
@@ -536,15 +512,28 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: isTablet ? 800.0 : double.infinity),
+                constraints: BoxConstraints(
+                  maxWidth: isTablet ? 800.0 : double.infinity,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildLanguageSelector(),
                     const SizedBox(height: 12.0),
+                    if (_errorMessage != null) ...[
+                      _buildErrorBanner(),
+                      const SizedBox(height: 10.0),
+                    ],
+                    if (_isModelLoading) ...[
+                      _buildModelLoadingBanner(),
+                      const SizedBox(height: 10.0),
+                    ],
                     _buildQuickPhraseChips(),
                     const SizedBox(height: 14.0),
                     _buildSourceCard(isTablet),
@@ -570,6 +559,80 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
     );
   }
 
+  Widget _buildErrorBanner() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFEBEE),
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: const Color(0xFFEF9A9A), width: 1.0),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.error_outline_rounded,
+            color: Color(0xFFC62828),
+            size: 22.0,
+          ),
+          const SizedBox(width: 10.0),
+          Expanded(
+            child: Text(
+              _errorMessage!,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFFB71C1C),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, color: Color(0xFFC62828)),
+            iconSize: 20.0,
+            onPressed: _initPipeline,
+            tooltip: 'पुनः प्रयास करें',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelLoadingBanner() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: const Color(0xFFFFE082), width: 1.0),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 18.0,
+            height: 18.0,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.2,
+              color: AppColors.primaryBurgundy,
+              value: Platform.environment.containsKey('FLUTTER_TEST') ? 0.7 : null,
+            ),
+          ),
+          SizedBox(width: 12.0),
+          Expanded(
+            child: Text(
+              'ऑफलाइन एआई मॉडल लोड हो रहे हैं...',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF795548),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLanguageSelector() {
     return Container(
       width: double.infinity,
@@ -583,7 +646,10 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
         child: DropdownButton<TranslationDirection>(
           value: _direction,
           isExpanded: true,
-          icon: const Icon(Icons.swap_horiz_rounded, color: AppColors.primaryBurgundy),
+          icon: const Icon(
+            Icons.swap_horiz_rounded,
+            color: AppColors.primaryBurgundy,
+          ),
           style: const TextStyle(
             fontFamily: 'Inter',
             fontWeight: FontWeight.bold,
@@ -600,13 +666,16 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
               child: Text('Mundari → Hindi'),
             ),
           ],
-          onChanged: (val) {
-            if (val != null) {
+          onChanged: (val) async {
+            if (val != null && val != _direction) {
               setState(() {
                 _direction = val;
                 _sourceText = '';
-                _translatedMundariText = '';
+                _translatedTargetText = '';
+                _errorMessage = null;
               });
+              final pipeline = Provider.of<SpeechPipeline?>(context, listen: false);
+              await pipeline?.setDirection(val);
             }
           },
         ),
@@ -615,17 +684,21 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
   }
 
   Widget _buildQuickPhraseChips() {
+    final phrases = _direction == TranslationDirection.hindiToMundari
+        ? _quickPhrasesHindi
+        : _quickPhrasesMundari;
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
         children: [
-          for (final phrase in _quickPhrases) ...[
+          for (final phrase in phrases) ...[
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: ActionChip(
                 label: Text(
-                  phrase['hindi']!,
+                  phrase,
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 12.5,
@@ -635,11 +708,10 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                 ),
                 backgroundColor: const Color(0xFFFDFBF7),
                 side: const BorderSide(color: Color(0xFFE8DECF), width: 1.0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                onPressed: () => _addTranslationToHistory(
-                  phrase['hindi']!,
-                  phrase['mundari']!,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
                 ),
+                onPressed: () => _translateTypedText(phrase),
               ),
             ),
           ],
@@ -684,7 +756,10 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
           ),
           const SizedBox(height: 6.0),
           Text(
-            hasText ? _sourceText : (l10n?.translateSourcePlaceholder ?? 'बोलकर या टाइप करके शुरू करें'),
+            hasText
+                ? _sourceText
+                : (l10n?.translateSourcePlaceholder ??
+                      'बोलकर या टाइप करके शुरू करें'),
             style: TextStyle(
               fontFamily: AppTypography.bodyFontFamily,
               fontSize: isTablet ? 18.0 : 15.0,
@@ -700,7 +775,7 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
 
   Widget _buildTargetCard(bool isTablet) {
     final l10n = AppLocalizations.of(context);
-    final hasText = _translatedMundariText.isNotEmpty;
+    final hasText = _translatedTargetText.isNotEmpty;
 
     return Container(
       width: double.infinity,
@@ -722,18 +797,22 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                _direction == TranslationDirection.hindiToMundari
-                    ? 'Mundari'
-                    : (l10n?.hindi ?? 'Hindi'),
-                style: const TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFE2D4C0),
-                  letterSpacing: 0.5,
+              Expanded(
+                child: Text(
+                  _direction == TranslationDirection.hindiToMundari
+                      ? 'Mundari'
+                      : (l10n?.hindi ?? 'Hindi'),
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFE2D4C0),
+                    letterSpacing: 0.5,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 8.0),
               AyoBadge(
                 label: l10n?.tagOfflineTranslation ?? 'ऑफ़लाइन अनुवाद',
                 variant: AyoBadgeVariant.verified,
@@ -748,7 +827,10 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
             children: [
               Expanded(
                 child: Text(
-                  hasText ? _translatedMundariText : (l10n?.translateTargetPlaceholder ?? 'अनुवाद यहां दिखेगा'),
+                  hasText
+                      ? _translatedTargetText
+                      : (l10n?.translateTargetPlaceholder ??
+                            'अनुवाद यहां दिखेगा'),
                   style: TextStyle(
                     fontFamily: AppTypography.headingFontFamily,
                     fontSize: isTablet ? 22.0 : 18.0,
@@ -761,15 +843,14 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
               if (hasText) ...[
                 const SizedBox(width: 8.0),
                 MundariAudioButton(
-                  text: _translatedMundariText,
+                  text: _translatedTargetText,
                   color: const Color(0xFFFFD700),
                   iconSize: 26.0,
-                  onTap: () => _playMundariAudio(_sourceText, _translatedMundariText),
+                  onTap: () => _playTranslationAudio(_translatedTargetText),
                 ),
               ],
             ],
           ),
-
           if (hasText) ...[
             const SizedBox(height: 12.0),
             const Divider(color: Color(0xFF8B3A3E), thickness: 0.8),
@@ -778,14 +859,21 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 InkWell(
-                  onTap: () => _playMundariAudio(_sourceText, _translatedMundariText),
+                  onTap: () => _playTranslationAudio(_translatedTargetText),
                   borderRadius: BorderRadius.circular(8.0),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Icon(Icons.volume_up_rounded, size: 16.0, color: Color(0xFFFFD700)),
+                        Icon(
+                          Icons.volume_up_rounded,
+                          size: 16.0,
+                          color: Color(0xFFFFD700),
+                        ),
                         SizedBox(width: 4.0),
                         Text(
                           'सुनें',
@@ -802,14 +890,21 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                 ),
                 const SizedBox(width: 14.0),
                 InkWell(
-                  onTap: () => _copyToClipboard(context, _translatedMundariText),
+                  onTap: () => _copyToClipboard(context, _translatedTargetText),
                   borderRadius: BorderRadius.circular(8.0),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.copy_rounded, size: 14.0, color: Colors.white),
+                        const Icon(
+                          Icons.copy_rounded,
+                          size: 14.0,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 4.0),
                         Text(
                           l10n?.btnCopy ?? 'कॉपी करें',
@@ -826,14 +921,25 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                 ),
                 const SizedBox(width: 14.0),
                 InkWell(
-                  onTap: () => _shareTranslation(context, _sourceText, _translatedMundariText),
+                  onTap: () => _shareTranslation(
+                    context,
+                    _sourceText,
+                    _translatedTargetText,
+                  ),
                   borderRadius: BorderRadius.circular(8.0),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.share_rounded, size: 14.0, color: Colors.white),
+                        const Icon(
+                          Icons.share_rounded,
+                          size: 14.0,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 4.0),
                         Text(
                           l10n?.btnShare ?? 'साझा करें',
@@ -859,34 +965,15 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
   Widget _buildMicAndTypeArea() {
     final l10n = AppLocalizations.of(context);
 
-    if (_isModelLoading || _isProcessing) {
-      return SizedBox(
-        height: 120.0,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(color: AppColors.primaryBurgundy),
-            const SizedBox(height: 10.0),
-            Text(
-              _isProcessing ? 'प्रोसेस हो रहा है...' : 'मॉडल लोड हो रहा है...',
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 13.0,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return Column(
       children: [
-        if (_isContinuousLoop)
+        if (_isListening)
           Container(
             margin: const EdgeInsets.only(bottom: 12.0),
-            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: 6.0,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFFE8F5E9),
               borderRadius: BorderRadius.circular(20.0),
@@ -904,9 +991,13 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                   ),
                 ),
                 const SizedBox(width: 8.0),
-                const Text(
-                  'सतत अनुवाद सक्रिय (Continuous Listen & Play)',
-                  style: TextStyle(
+                Text(
+                  _isPlaying
+                      ? 'अनुवादित ऑडियो बज रहा है...'
+                      : (_isProcessing
+                          ? 'ऑडियो प्रोसेस हो रहा है...'
+                          : 'लाइव सुन रहा है...'),
+                  style: const TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 12.0,
                     fontWeight: FontWeight.w600,
@@ -954,12 +1045,14 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
             ),
           ),
         ),
-
         const SizedBox(height: 10.0),
-
         OutlinedButton.icon(
           onPressed: () => _showTypeDialog(context),
-          icon: const Icon(Icons.keyboard_outlined, size: 18.0, color: AppColors.primaryBurgundy),
+          icon: const Icon(
+            Icons.keyboard_outlined,
+            size: 18.0,
+            color: AppColors.primaryBurgundy,
+          ),
           label: Text(
             l10n?.btnTypeInstead ?? 'टाइप करें',
             style: const TextStyle(
@@ -971,8 +1064,13 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
           ),
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: Color(0xFFE8DECF), width: 1.0),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
           ),
         ),
       ],
@@ -995,11 +1093,13 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
           ),
         ),
         const SizedBox(height: 8.0),
-
         if (_recentHistory.isEmpty)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: 12.0,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFFFDFBF7),
               borderRadius: BorderRadius.circular(12.0),
@@ -1026,17 +1126,23 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                   child: InkWell(
                     onTap: () {
                       setState(() {
-                        _sourceText = _recentHistory[i].hindi;
-                        _translatedMundariText = _recentHistory[i].mundari;
+                        _sourceText = _recentHistory[i].source;
+                        _translatedTargetText = _recentHistory[i].target;
                       });
-                      _playMundariAudio(_recentHistory[i].hindi, _recentHistory[i].mundari);
+                      _playTranslationAudio(_recentHistory[i].target);
                     },
                     borderRadius: BorderRadius.circular(12.0),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 10.0,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12.0),
-                        border: Border.all(color: const Color(0xFFE8DECF), width: 1.0),
+                        border: Border.all(
+                          color: const Color(0xFFE8DECF),
+                          width: 1.0,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -1051,7 +1157,7 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  _recentHistory[i].hindi,
+                                  _recentHistory[i].source,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -1062,7 +1168,7 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                                   ),
                                 ),
                                 Text(
-                                  _recentHistory[i].mundari,
+                                  _recentHistory[i].target,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -1076,10 +1182,12 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                           ),
                           const SizedBox(width: 8.0),
                           MundariAudioButton(
-                            text: _recentHistory[i].mundari,
+                            text: _recentHistory[i].target,
                             color: AppColors.primaryBurgundy,
                             iconSize: 22.0,
-                            onTap: () => _playMundariAudio(_recentHistory[i].hindi, _recentHistory[i].mundari),
+                            onTap: () => _playTranslationAudio(
+                              _recentHistory[i].target,
+                            ),
                           ),
                         ],
                       ),

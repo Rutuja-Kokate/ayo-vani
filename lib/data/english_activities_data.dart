@@ -1,5 +1,13 @@
-/// Hardcoded English-Mundari vocabulary and quiz data for Class 1 English prototype.
-/// Devanagari script for Mundari language.
+/// Curated English-Mundari vocabulary and activity data for Class 1 English.
+/// Devanagari script for Mundari language (source: curated).
+///
+/// CONTENT RESOLUTION PRECEDENCE RULE:
+/// 1. CURATED CONTENT (source: curated): Primary source of truth for standard textbook
+///    chapters. Handcrafted and verified by native speakers and educators.
+/// 2. CACHED GENERATED CONTENT (RAG / NMT cache in app_rag_cache): Secondary, cached
+///    responses for generated worksheets, dynamic quizzes, and extra chapter practice.
+/// 3. RUNTIME PIPELINE (RAG / RealMtStage): On-demand translation and question synthesis
+///    triggered when curated content is absent or when teacher requests regeneration.
 library;
 
 const Map<String, String> worksheetLabels = {

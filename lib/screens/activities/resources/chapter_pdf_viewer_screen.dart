@@ -32,7 +32,6 @@ class _ChapterPdfViewerScreenState extends State<ChapterPdfViewerScreen> {
 
   static const List<String> _pdfAssetCandidates = [
     'assets/resources/first_standard/english/chapter_1/two-little-hands.pdf',
-    'assets/resources/first standard/english/chapter 1/two-little-hands.pdf',
   ];
 
   Future<Uint8List> _loadPdfBytes() async {

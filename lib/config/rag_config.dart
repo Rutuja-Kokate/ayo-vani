@@ -1,16 +1,37 @@
-/// RAG Pipeline Configuration for Ayo-Vani.
+/// Configuration for Ayo-Vani external services and RAG.
 ///
-/// ⚠️  IMPORTANT: Add `lib/config/rag_config.dart` to your .gitignore
-/// before committing. This file contains your API key.
+/// Secrets are injected at build/run time via `--dart-define`, never hardcoded.
+///
+/// ⚠️ This file must NOT contain real API keys or secrets.
 library;
 
-/// Your Google Gemini API key.
-/// Get one at: https://aistudio.google.com/app/apikey
-const String kGeminiApiKey = 'REMOVED_GEMINI_KEY';
+/// Gemini API key, injected at compile/run time via `--dart-define=GEMINI_API_KEY=<key>`.
+const String kGeminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
 
 /// Gemini model to use for content generation.
-const String kGeminiModel = 'gemini-2.5-flash';
+const String kGeminiModel = String.fromEnvironment(
+  'GEMINI_MODEL',
+  defaultValue: 'gemini-2.5-flash',
+);
 
-/// Your fine-tuned Mundari MT endpoint URL.
-/// Leave empty ('') to use MockMTService (prefixes [MUNDARI] for testing).
-const String kMtEndpointUrl = '';
+/// Backend base URL injected at compile/run time via `--dart-define=BACKEND_BASE_URL=<url>`.
+const String kBackendBaseUrl = String.fromEnvironment(
+  'BACKEND_BASE_URL',
+  defaultValue: '',
+);
+
+/// Returns true if a valid Gemini API key is configured.
+bool get hasGeminiKey => kGeminiApiKey.isNotEmpty;
+
+/// Typed exception thrown when a feature requires the Gemini API key but none is configured.
+class MissingApiKeyException implements Exception {
+  final String message;
+
+  const MissingApiKeyException([
+    this.message =
+        'Gemini API key is required but missing. Pass --dart-define=GEMINI_API_KEY=<key> at runtime.',
+  ]);
+
+  @override
+  String toString() => 'MissingApiKeyException: $message';
+}

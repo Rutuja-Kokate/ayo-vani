@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/hitl_validation_models.dart';
+import 'teacher_profile_service.dart';
 
 class HitlValidationService {
-  static final HitlValidationService _instance = HitlValidationService._internal();
+  static final HitlValidationService _instance =
+      HitlValidationService._internal();
   factory HitlValidationService() => _instance;
   HitlValidationService._internal();
 
@@ -19,11 +21,24 @@ class HitlValidationService {
     pendingSyncCount: 0,
   );
 
-  double hindiToMundariThreshold = 0.75;
-  double mundariToHindiThreshold = 0.70;
+  /// Default confidence threshold for Hindi -> Mundari translation.
+  /// Note: The IndicTrans2 Hindi->Mundari BLEU is low (hin->mun ~10.7),
+  /// so conservative flagging (0.75 threshold) is intentionally chosen to route
+  /// uncertain sentences to Human-In-The-Loop teacher review.
+  static const double kDefaultHindiToMundariThreshold = 0.75;
 
-  List<FlaggedTranslation> get flaggedTranslations => List.unmodifiable(_flaggedTranslations);
-  List<TeacherCorrection> get teacherCorrections => List.unmodifiable(_teacherCorrections);
+  /// Default confidence threshold for Mundari -> Hindi translation.
+  /// Note: Model quality is constrained by low-resource training data in the
+  /// Mundari direction, requiring conservative flagging (0.70 threshold) to catch errors.
+  static const double kDefaultMundariToHindiThreshold = 0.70;
+
+  double hindiToMundariThreshold = kDefaultHindiToMundariThreshold;
+  double mundariToHindiThreshold = kDefaultMundariToHindiThreshold;
+
+  List<FlaggedTranslation> get flaggedTranslations =>
+      List.unmodifiable(_flaggedTranslations);
+  List<TeacherCorrection> get teacherCorrections =>
+      List.unmodifiable(_teacherCorrections);
   SyncMetadata get metadata => _metadata;
 
   Future<void> init() async {
@@ -36,164 +51,39 @@ class HitlValidationService {
         final raw = await _storageFile!.readAsString();
         if (raw.isNotEmpty) {
           final data = jsonDecode(raw) as Map<String, dynamic>;
-          
+
           if (data['flagged'] != null) {
             final list = data['flagged'] as List<dynamic>;
             _flaggedTranslations.clear();
-            _flaggedTranslations.addAll(list.map((e) => FlaggedTranslation.fromJson(e as Map<String, dynamic>)));
+            _flaggedTranslations.addAll(list.map(
+                (e) => FlaggedTranslation.fromJson(e as Map<String, dynamic>)));
           }
 
           if (data['corrections'] != null) {
             final list = data['corrections'] as List<dynamic>;
             _teacherCorrections.clear();
-            _teacherCorrections.addAll(list.map((e) => TeacherCorrection.fromJson(e as Map<String, dynamic>)));
+            _teacherCorrections.addAll(list.map(
+                (e) => TeacherCorrection.fromJson(e as Map<String, dynamic>)));
           }
 
           if (data['metadata'] != null) {
-            _metadata = SyncMetadata.fromJson(data['metadata'] as Map<String, dynamic>);
+            _metadata = SyncMetadata.fromJson(
+                data['metadata'] as Map<String, dynamic>);
           }
         }
       }
-      _seedDefaultItems();
-      await _saveToDisk();
     } catch (e) {
       debugPrint('[HITL] Initialization error: $e');
-      _seedDefaultItems();
     }
     _initialized = true;
-  }
-
-  void _seedDefaultItems() {
-    final defaultList = [
-      // Hindi -> Mundari
-      FlaggedTranslation(
-        id: 'flag_001',
-        sourceText: 'आज बहुत गर्मी है।',
-        targetText: 'तेञ़ गारी तानाः।',
-        confidence: 0.62,
-        languagePair: LanguagePairEnum.hindiToMundari,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 45)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_002',
-        sourceText: 'बच्चे मैदान में खेल रहे हैं।',
-        targetText: 'होनको पीड़ी रे एनओ तना।',
-        confidence: 0.58,
-        languagePair: LanguagePairEnum.hindiToMundari,
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_004',
-        sourceText: 'अपनी किताब खोलो और पाठ तीन पढ़ो।',
-        targetText: 'अमाः पुथी उइड़मे आड़ो पाठ आपी पढ़ावमे।',
-        confidence: 0.64,
-        languagePair: LanguagePairEnum.hindiToMundari,
-        timestamp: DateTime.now().subtract(const Duration(hours: 4)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_005',
-        sourceText: 'कल स्कूल में छुट्टी रहेगी।',
-        targetText: 'गापा इशकुल रे छुटी ताइना।',
-        confidence: 0.69,
-        languagePair: LanguagePairEnum.hindiToMundari,
-        timestamp: DateTime.now().subtract(const Duration(hours: 5)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_006',
-        sourceText: 'गुरुजी ने बच्चों को कहानी सुनाई।',
-        targetText: 'माहातोय होनकोके कहानी काजी आद्या।',
-        confidence: 0.55,
-        languagePair: LanguagePairEnum.hindiToMundari,
-        timestamp: DateTime.now().subtract(const Duration(hours: 6)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_007',
-        sourceText: 'पेड़ पर मीठे आम लगे हैं।',
-        targetText: 'दारू रे शिबिल उली जोअ काना।',
-        confidence: 0.67,
-        languagePair: LanguagePairEnum.hindiToMundari,
-        timestamp: DateTime.now().subtract(const Duration(hours: 8)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_008',
-        sourceText: 'सभी बच्चे मिलकर गाना गाओ।',
-        targetText: 'सोबेन होनको मीसाकाते दुरं दुरं पे।',
-        confidence: 0.60,
-        languagePair: LanguagePairEnum.hindiToMundari,
-        timestamp: DateTime.now().subtract(const Duration(hours: 10)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_009',
-        sourceText: 'नदी का पानी बहुत साफ है।',
-        targetText: 'गाड़ा राः दाः खूबे फुरछा गेया।',
-        confidence: 0.53,
-        languagePair: LanguagePairEnum.hindiToMundari,
-        timestamp: DateTime.now().subtract(const Duration(hours: 12)),
-      ),
-
-      // Mundari -> Hindi
-      FlaggedTranslation(
-        id: 'flag_003',
-        sourceText: 'कटा रे मेडः',
-        targetText: 'पैरों में आँखें',
-        confidence: 0.65,
-        languagePair: LanguagePairEnum.mundariToHindi,
-        timestamp: DateTime.now().subtract(const Duration(hours: 3)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_010',
-        sourceText: 'तेञ़ इशकुल रे होनको मंडी जोोम तना।',
-        targetText: 'आज स्कूल में बच्चे खाना खा रहे हैं।',
-        confidence: 0.61,
-        languagePair: LanguagePairEnum.mundariToHindi,
-        timestamp: DateTime.now().subtract(const Duration(hours: 7)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_011',
-        sourceText: 'अइंयाः नुतूम रमेश तना।',
-        targetText: 'मेरा नाम रमेश है।',
-        confidence: 0.68,
-        languagePair: LanguagePairEnum.mundariToHindi,
-        timestamp: DateTime.now().subtract(const Duration(hours: 9)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_012',
-        sourceText: 'दाः जाड़ी तना, ओड़ाः रे ताइनपे।',
-        targetText: 'बारिश हो रही है, घर में रहो।',
-        confidence: 0.57,
-        languagePair: LanguagePairEnum.mundariToHindi,
-        timestamp: DateTime.now().subtract(const Duration(hours: 11)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_013',
-        sourceText: 'मारंग माहातोय होनकोके पढ़ाव तादकोआ।',
-        targetText: 'मुख्य शिक्षक ने बच्चों को पढ़ाया।',
-        confidence: 0.63,
-        languagePair: LanguagePairEnum.mundariToHindi,
-        timestamp: DateTime.now().subtract(const Duration(hours: 14)),
-      ),
-      FlaggedTranslation(
-        id: 'flag_014',
-        sourceText: 'सोबेन को मीसाकाते रोपोड़ पे।',
-        targetText: 'सब मिलकर बातचीत करो।',
-        confidence: 0.59,
-        languagePair: LanguagePairEnum.mundariToHindi,
-        timestamp: DateTime.now().subtract(const Duration(hours: 16)),
-      ),
-    ];
-
-    for (final item in defaultList) {
-      final exists = _flaggedTranslations.any((e) => e.id == item.id || e.sourceText.trim() == item.sourceText.trim());
-      if (!exists) {
-        _flaggedTranslations.add(item);
-      }
-    }
   }
 
   Future<void> _saveToDisk() async {
     if (_storageFile == null) return;
     try {
-      final pendingCount = _teacherCorrections.where((c) => c.syncState == HitlSyncStateEnum.pending).length;
+      final pendingCount = _teacherCorrections
+          .where((c) => c.syncState == HitlSyncStateEnum.pending)
+          .length;
       _metadata = SyncMetadata(
         lastSyncedAt: _metadata.lastSyncedAt,
         activeModelVersion: _metadata.activeModelVersion,
@@ -212,15 +102,22 @@ class HitlValidationService {
     }
   }
 
-  bool isLowConfidence(double confidence, LanguagePairEnum pair) {
-    final threshold = pair == LanguagePairEnum.hindiToMundari ? hindiToMundariThreshold : mundariToHindiThreshold;
+  /// Evaluates whether a translation has low confidence or unknown quality.
+  /// When [confidence] is null, ALWAYS returns true to flag the item for teacher review.
+  bool isLowConfidence(double? confidence, LanguagePairEnum pair) {
+    if (confidence == null) return true;
+    final threshold = pair == LanguagePairEnum.hindiToMundari
+        ? hindiToMundariThreshold
+        : mundariToHindiThreshold;
     return confidence < threshold;
   }
 
+  /// Checks translation confidence against thresholds. If low or null, records
+  /// the item for Human-In-The-Loop teacher review.
   Future<FlaggedTranslation?> checkAndFlag({
     required String sourceText,
     required String targetText,
-    required double confidence,
+    required double? confidence,
     required LanguagePairEnum languagePair,
     String modelVersion = 'v1.0.0_int8',
   }) async {
@@ -228,7 +125,9 @@ class HitlValidationService {
     if (!isLowConfidence(confidence, languagePair)) return null;
 
     final existing = _flaggedTranslations.firstWhere(
-      (item) => item.sourceText.trim() == sourceText.trim() && item.status == HitlStatusEnum.flagged,
+      (item) =>
+          item.sourceText.trim() == sourceText.trim() &&
+          item.status == HitlStatusEnum.flagged,
       orElse: () => FlaggedTranslation(
         id: 'flag_${DateTime.now().millisecondsSinceEpoch}',
         sourceText: sourceText,
@@ -243,25 +142,32 @@ class HitlValidationService {
     if (!_flaggedTranslations.contains(existing)) {
       _flaggedTranslations.insert(0, existing);
       await _saveToDisk();
-      debugPrint('[HITL] Flagged low-confidence translation (${(confidence * 100).toStringAsFixed(1)}%): "$sourceText"');
+      final confStr = confidence != null
+          ? '${(confidence * 100).toStringAsFixed(1)}%'
+          : 'null (unknown quality)';
+      debugPrint(
+          '[HITL] Flagged translation ($confStr): "$sourceText"');
     }
     return existing;
   }
 
   List<FlaggedTranslation> getPendingByPair(LanguagePairEnum pair) {
     return _flaggedTranslations
-        .where((item) => item.languagePair == pair && item.status == HitlStatusEnum.flagged)
+        .where((item) =>
+            item.languagePair == pair && item.status == HitlStatusEnum.flagged)
         .toList();
   }
 
-  Future<void> acceptTranslation(String flaggedId, {String teacherId = 'teacher_01'}) async {
+  Future<void> acceptTranslation(String flaggedId, {String? teacherId}) async {
     await init();
+    final actualTeacherId =
+        teacherId ?? await TeacherProfileService.instance.getTeacherId();
     final index = _flaggedTranslations.indexWhere((e) => e.id == flaggedId);
     if (index != -1) {
       _flaggedTranslations[index].status = HitlStatusEnum.approved;
       _recordCorrection(
         flaggedId: flaggedId,
-        teacherId: teacherId,
+        teacherId: actualTeacherId,
         teacherEdit: null,
         isApproved: true,
       );
@@ -269,14 +175,16 @@ class HitlValidationService {
     }
   }
 
-  Future<void> rejectTranslation(String flaggedId, {String teacherId = 'teacher_01'}) async {
+  Future<void> rejectTranslation(String flaggedId, {String? teacherId}) async {
     await init();
+    final actualTeacherId =
+        teacherId ?? await TeacherProfileService.instance.getTeacherId();
     final index = _flaggedTranslations.indexWhere((e) => e.id == flaggedId);
     if (index != -1) {
       _flaggedTranslations[index].status = HitlStatusEnum.rejected;
       _recordCorrection(
         flaggedId: flaggedId,
-        teacherId: teacherId,
+        teacherId: actualTeacherId,
         teacherEdit: null,
         isApproved: false,
       );
@@ -287,15 +195,17 @@ class HitlValidationService {
   Future<void> editAndSaveTranslation({
     required String flaggedId,
     required String editedText,
-    String teacherId = 'teacher_01',
+    String? teacherId,
   }) async {
     await init();
+    final actualTeacherId =
+        teacherId ?? await TeacherProfileService.instance.getTeacherId();
     final index = _flaggedTranslations.indexWhere((e) => e.id == flaggedId);
     if (index != -1) {
       _flaggedTranslations[index].status = HitlStatusEnum.edited;
       _recordCorrection(
         flaggedId: flaggedId,
-        teacherId: teacherId,
+        teacherId: actualTeacherId,
         teacherEdit: editedText,
         isApproved: true,
       );
@@ -324,7 +234,9 @@ class HitlValidationService {
   }
 
   List<TeacherCorrection> getPendingSyncCorrections() {
-    return _teacherCorrections.where((c) => c.syncState == HitlSyncStateEnum.pending).toList();
+    return _teacherCorrections
+        .where((c) => c.syncState == HitlSyncStateEnum.pending)
+        .toList();
   }
 
   Future<void> markCorrectionsSynced(List<String> ids) async {

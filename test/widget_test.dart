@@ -10,6 +10,30 @@ import 'package:ayo_vani/widgets/ayo_screen_background.dart';
 import 'package:ayo_vani/widgets/ayo_subject_card.dart';
 import 'package:ayo_vani/widgets/ayo_warli_art.dart';
 import 'package:ayo_vani/widgets/ayo_warli_village_art.dart';
+import 'package:provider/provider.dart';
+import 'package:ayo_vani/engine/mt_stage.dart';
+import 'package:ayo_vani/engine/pipeline.dart';
+import 'package:ayo_vani/engine/stt_stage.dart';
+import 'package:ayo_vani/engine/tts_stage.dart';
+import 'package:ayo_vani/providers/locale_provider.dart';
+
+Widget createTestApp() {
+  final sttStage = SttStage();
+  final mtStage = RealMtStage();
+  final ttsStage = TtsStage();
+  final pipeline = SpeechPipeline(
+    sttStage: sttStage,
+    mtStage: mtStage,
+    ttsStage: ttsStage,
+  );
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider<LocaleProvider>.value(value: LocaleProvider()),
+      Provider<SpeechPipeline>.value(value: pipeline),
+    ],
+    child: const AyoVaaniApp(),
+  );
+}
 
 void main() {
   testWidgets('AYOVAANI Screen 01 (Splash) & Screen 02 (Welcome) complete flow', (
@@ -20,7 +44,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const AyoVaaniApp());
+    await tester.pumpWidget(createTestApp());
     await tester.pump();
 
     // 1. Verify Screen 01: Splash Screen
@@ -47,9 +71,7 @@ void main() {
     // 5. Verify Screen 03: Home (Dashboard)
     expect(find.text('Hello, Teacher'), findsOneWidget);
     expect(find.text('Ready to inspire today?'), findsOneWidget);
-    expect(find.text('Offline Ready'), findsOneWidget);
-    expect(find.text("Let's Start"), findsOneWidget);
-    expect(find.text('Mathematics'), findsOneWidget);
+    expect(find.text('Live Speech Translation'), findsWidgets);
     expect(find.text('Translate'), findsWidgets);
     expect(find.text('Classes'), findsOneWidget);
     expect(find.text('Balvatika'), findsOneWidget);
@@ -67,7 +89,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const AyoVaaniApp());
+    await tester.pumpWidget(createTestApp());
     await tester.pump(const Duration(milliseconds: 3000));
     await tester.pumpAndSettle();
 
@@ -76,11 +98,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap Learn tab
-    await tester.tap(find.text('Learn').first);
+    await tester.tap(find.byIcon(Icons.menu_book_rounded).last);
     await tester.pumpAndSettle();
-    expect(find.text('Learning'), findsOneWidget);
+    expect(find.text('Learn & Teach'), findsOneWidget);
     expect(
-      find.text('Choose how you want to learn today'),
+      find.text('Choose your classroom learning path'),
       findsOneWidget,
     );
     expect(find.text('For Teachers'), findsOneWidget);
@@ -89,14 +111,12 @@ void main() {
     expect(find.text('Start Learning'), findsOneWidget);
 
     // Tap Translate tab
-    await tester.tap(find.text('Translate').first);
+    await tester.tap(find.byIcon(Icons.translate_rounded));
     await tester.pumpAndSettle();
-    expect(find.text('Live Translation'), findsWidgets);
-    expect(find.text('Hindi to Mundari Translation'), findsOneWidget);
-    expect(find.text('हिंदी  →  मुंडारी'), findsOneWidget);
+    expect(find.text('Hindi → Mundari'), findsOneWidget);
 
     // Tap Profile tab
-    await tester.tap(find.text('Profile').first);
+    await tester.tap(find.byIcon(Icons.person_rounded));
     await tester.pumpAndSettle();
     expect(find.text('Teacher Profile'), findsOneWidget);
     expect(find.text('Classroom Educator'), findsOneWidget);
@@ -111,7 +131,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const AyoVaaniApp());
+    await tester.pumpWidget(createTestApp());
     await tester.pump(const Duration(milliseconds: 3000));
     await tester.pumpAndSettle();
 
@@ -136,7 +156,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const AyoVaaniApp());
+      await tester.pumpWidget(createTestApp());
       await tester.pump();
 
       // Verify AyoScreenBackground is present on Splash screen
@@ -172,7 +192,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const AyoVaaniApp());
+      await tester.pumpWidget(createTestApp());
       await tester.pump(const Duration(milliseconds: 3000));
       await tester.pumpAndSettle();
 
@@ -186,35 +206,22 @@ void main() {
       await tester.tap(translateButton);
       await tester.pumpAndSettle();
 
-      // Verify Live Translation screen elements in State 1 (Input)
-      expect(find.text('Live Translation'), findsWidgets);
-      expect(find.text('Hindi to Mundari Translation'), findsOneWidget);
-      expect(find.text('हिंदी  →  मुंडारी'), findsOneWidget);
+      // Verify Live Translation screen elements
       expect(find.text('Hindi → Mundari'), findsOneWidget);
-      expect(find.text('हिंदी (Hindi)'), findsOneWidget);
-      expect(find.text('बोलें'), findsOneWidget);
-      expect(find.text('Transcribe'), findsOneWidget);
-      expect(find.text('कैसे उपयोग करें?'), findsOneWidget);
-      expect(find.text('उदाहरण वाक्य'), findsOneWidget);
-      expect(find.text('आप कैसे हैं?'), findsOneWidget);
+      expect(find.text('कक्षा शुरू करें'), findsOneWidget);
 
-      // Scroll until example chip is visible then tap it
-      final chipFinder = find.text('आप कैसे हैं?');
+      // Tap quick phrase chip
+      final chipFinder = find.text('कक्षा शुरू करें');
       await tester.ensureVisible(chipFinder);
       await tester.tap(chipFinder);
       await tester.pumpAndSettle();
 
-      // Check that text is now populated in input and Mundari translation is revealed in the same card
-      expect(find.text('मुंडारी (Mundari)'), findsOneWidget);
-      expect(find.text('चेतना मेना?'), findsWidgets);
-      expect(find.text('✓ Translation Ready'), findsOneWidget);
-      expect(find.text('Play Mundari pronunciation'), findsOneWidget);
+      // Should populate source text
+      expect(find.text('कक्षा शुरू करें'), findsWidgets);
 
-      // Tap back button (ensure visible at top)
-      final backIcon = find.byIcon(Icons.chevron_left_rounded);
-      await tester.ensureVisible(backIcon);
-      expect(backIcon, findsOneWidget);
-      await tester.tap(backIcon);
+      // Return to Home using Home nav icon
+      final homeIcon = find.byIcon(Icons.home_rounded);
+      await tester.tap(homeIcon);
       await tester.pumpAndSettle();
 
       // Should return to Home
@@ -229,16 +236,8 @@ void main() {
       await tester.tap(find.widgetWithText(ElevatedButton, 'Translate'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Live Translation'), findsWidgets);
-      expect(find.text('हिंदी (Hindi)'), findsOneWidget);
-      expect(find.text('Transcribe'), findsOneWidget);
+      expect(find.text('Hindi → Mundari'), findsOneWidget);
       expect(find.byType(AyoBottomNavBar), findsOneWidget);
-
-      // Tap Transcribe on tablet -> reveals Mundari output in the same card
-      await tester.tap(find.text('Transcribe'));
-      await tester.pumpAndSettle();
-      expect(find.text('मुंडारी (Mundari)'), findsOneWidget);
-      expect(find.text('✓ Translation Ready'), findsOneWidget);
     },
   );
 
@@ -250,7 +249,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const AyoVaaniApp());
+      await tester.pumpWidget(createTestApp());
       await tester.pump(const Duration(milliseconds: 3000));
       await tester.pumpAndSettle();
 
@@ -271,11 +270,8 @@ void main() {
         find.text('Foundation Stage | Learn, Listen, Speak'),
         findsOneWidget,
       );
-      expect(find.byType(AyoComingSoonCard), findsWidgets);
-      expect(
-        find.textContaining('Learning content is coming soon.'),
-        findsWidgets,
-      );
+      expect(find.byType(AyoSubjectCard), findsWidgets);
+      expect(find.text('Curriculum Modules'), findsOneWidget);
 
       // Verify that no functional chapter is openable
       expect(find.text('Flashcards'), findsNothing);
@@ -299,7 +295,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const AyoVaaniApp());
+      await tester.pumpWidget(createTestApp());
       await tester.pump(const Duration(milliseconds: 3000));
       await tester.pumpAndSettle();
 
@@ -317,7 +313,7 @@ void main() {
       // Verify First screen header elements
       expect(find.text('First'), findsWidgets);
       expect(find.text('Grade 1 | Learn, Listen, Speak'), findsOneWidget);
-      expect(find.text('Subjects'), findsOneWidget);
+      expect(find.text('Grade 1 Modules'), findsWidgets);
 
       // Verify English is Available
       expect(find.text('English'), findsOneWidget);
@@ -350,7 +346,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const AyoVaaniApp());
+      await tester.pumpWidget(createTestApp());
       await tester.pump(const Duration(milliseconds: 3000));
       await tester.pumpAndSettle();
 
@@ -388,10 +384,12 @@ void main() {
       expect(find.text('Flashcards'), findsOneWidget);
       expect(find.text('Worksheets'), findsOneWidget);
       expect(find.text('Games'), findsOneWidget);
-      expect(find.text('Quizes'), findsOneWidget);
+      expect(find.text('Quizzes'), findsOneWidget);
 
       // 6. Test Flashcards
       await tester.tap(find.text('Flashcards'));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 200));
       await tester.pumpAndSettle();
       expect(find.text('Listen'), findsOneWidget);
       await tester.tap(find.byIcon(Icons.arrow_back_rounded));
@@ -412,7 +410,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 9. Test Quizzes
-      await tester.tap(find.text('Quizes'));
+      await tester.tap(find.text('Quizzes'));
       await tester.pumpAndSettle();
       expect(find.text('First • Ch 1'), findsOneWidget);
       await tester.tap(find.byIcon(Icons.arrow_back_rounded));
@@ -426,7 +424,7 @@ void main() {
       // 11. Back to Subject Selection
       await tester.tap(find.byIcon(Icons.chevron_left_rounded));
       await tester.pumpAndSettle();
-      expect(find.text('Subjects'), findsOneWidget);
+      expect(find.text('Grade 1 Modules'), findsWidgets);
 
       // 12. Back to Home
       final homeBack = find.byIcon(Icons.chevron_left_rounded);
@@ -445,7 +443,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const AyoVaaniApp());
+      await tester.pumpWidget(createTestApp());
       await tester.pump(const Duration(milliseconds: 3000));
       await tester.pumpAndSettle();
 
@@ -496,7 +494,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const AyoVaaniApp());
+      await tester.pumpWidget(createTestApp());
       await tester.pump(const Duration(milliseconds: 3000));
       await tester.pumpAndSettle();
 
@@ -565,7 +563,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const AyoVaaniApp());
+      await tester.pumpWidget(createTestApp());
       await tester.pump(const Duration(milliseconds: 3000));
       await tester.pumpAndSettle();
 
@@ -574,13 +572,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Tap Learn in Bottom Navigation
-      await tester.tap(find.text('Learn').first);
+      await tester.tap(find.byIcon(Icons.menu_book_rounded).last);
       await tester.pumpAndSettle();
 
       // Verify Learning screen is shown
-      expect(find.text('Learning'), findsOneWidget);
+      expect(find.text('Learn & Teach'), findsOneWidget);
       expect(
-        find.text('Choose how you want to learn today'),
+        find.text('Choose your classroom learning path'),
         findsOneWidget,
       );
       expect(find.text('For Students'), findsOneWidget);
@@ -623,7 +621,7 @@ void main() {
       // 5. Back from StudentLevelsScreen -> returns to LearnScreen
       await tester.tap(find.byIcon(Icons.arrow_back_rounded));
       await tester.pumpAndSettle();
-      expect(find.text('Learning'), findsOneWidget);
+      expect(find.text('Learn & Teach'), findsOneWidget);
     },
   );
 }

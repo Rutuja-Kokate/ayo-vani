@@ -10,6 +10,7 @@ import '../../../widgets/ayo_bottom_nav_bar.dart';
 import '../../../widgets/ayo_logo.dart';
 import '../../../widgets/ayo_screen_background.dart';
 import '../../../widgets/mundari_audio_text.dart';
+import '../../../services/activity_database_service.dart';
 
 /// Game 1: "Handy Actions Match Game" for Chapter "Two Little Hands"
 class HandyActionsMatchGame extends StatefulWidget {
@@ -99,6 +100,12 @@ class _HandyActionsMatchGameState extends State<HandyActionsMatchGame> {
             _loadCurrentRound();
           } else {
             _isFinished = true;
+            ActivityDatabaseService.instance.recordEvent(
+              chapter: widget.chapterName,
+              activityType: 'game',
+              correct: _words.isNotEmpty ? (_score ~/ 10).clamp(0, _words.length) : 0,
+              total: _words.length,
+            );
           }
         });
       });

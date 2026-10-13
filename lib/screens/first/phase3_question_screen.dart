@@ -333,61 +333,6 @@ class _Phase3QuestionScreenState extends State<Phase3QuestionScreen> {
     );
   }
 
-  void _showPhaseCompletionDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: const Color(0xFFFCFAF6),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          side: const BorderSide(color: Color(0xFFE5D7C3), width: 1.2),
-        ),
-        title: Row(
-          children: const [
-            Icon(Icons.emoji_events_rounded,
-                color: Color(0xFFC0882A), size: 28.0),
-            SizedBox(width: 10.0),
-            Flexible(
-              child: Text(
-                'Phase 3 Completed!',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF251E11),
-                  fontSize: 18.0,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: const Text(
-          'शानदार! आपने Phase 3 के सभी 5 वाक्य-निर्माण प्रश्नों को सफलतापूर्वक पूरा कर लिया है!\n'
-          '(Congratulations! You completed all 5 sentence-building questions of Phase 3.)',
-          style: TextStyle(
-            fontFamilyFallback: ['Noto Sans Devanagari', 'Mangal', 'sans-serif'],
-            fontSize: 14.0,
-            color: Color(0xFF4A3B32),
-            height: 1.4,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogCtx).pop();
-              Navigator.of(context).maybePop();
-            },
-            child: const Text(
-              'FINISH',
-              style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF671D21)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
