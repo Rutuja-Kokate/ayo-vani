@@ -90,12 +90,11 @@ flutter:
     - assets/models/tts/
     - assets/models/tts/espeak-ng-data/
     - assets/models/tts/espeak-ng-data/voices/
-    - assets/models/tts/espeak-ng-data/voices/!v/
     - assets/models/tts/espeak-ng-data/lang/
     - assets/models/tts/espeak-ng-data/lang/inc/
     - assets/resources/
     - assets/resources/first_standard/english/chapter_1/
-    - test/fixtures/
+
 
   fonts:
     - family: NotoSansOriya

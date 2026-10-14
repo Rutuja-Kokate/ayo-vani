@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,19 +28,17 @@ void main() {
       final Directory tempDir = await getTemporaryDirectory();
       final File targetWav = File('${tempDir.path}/short_7s.wav');
 
-      try {
-        final byteData = await rootBundle.load('test/fixtures/short_7s.wav');
-        await targetWav.writeAsBytes(
-          byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-          flush: true,
-        );
-      } catch (e) {
-        // Fallback: check local relative path
-        final localFile = File('test/fixtures/short_7s.wav');
-        if (await localFile.exists()) {
-          await localFile.copy(targetWav.path);
+      const fixtureDir = String.fromEnvironment('FIXTURE_DIR', defaultValue: 'test/fixtures');
+      final fixtureWav = File('$fixtureDir/short_7s.wav');
+      if (await fixtureWav.exists()) {
+        await fixtureWav.copy(targetWav.path);
+      } else {
+        final fallback = File('test/fixtures/short_7s.wav');
+        if (await fallback.exists()) {
+          await fallback.copy(targetWav.path);
         } else {
-          fail('Could not locate short_7s.wav fixture in rootBundle or filesystem: $e');
+          fail('Could not locate short_7s.wav fixture at "$fixtureDir". '
+              'Push fixtures via adb and pass --dart-define=FIXTURE_DIR=<dir>');
         }
       }
 

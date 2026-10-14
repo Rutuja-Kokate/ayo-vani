@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
@@ -35,14 +34,17 @@ void main() {
 
       // 2. Load demo corpus fixture
       String jsonContent;
-      try {
-        jsonContent = await rootBundle.loadString('test/fixtures/demo_corpus_100_sentences.json');
-      } catch (e) {
-        final localFile = File('test/fixtures/demo_corpus_100_sentences.json');
-        if (await localFile.exists()) {
-          jsonContent = await localFile.readAsString();
+      const fixtureDir = String.fromEnvironment('FIXTURE_DIR', defaultValue: 'test/fixtures');
+      final fixtureFile = File('$fixtureDir/demo_corpus_100_sentences.json');
+      if (await fixtureFile.exists()) {
+        jsonContent = await fixtureFile.readAsString();
+      } else {
+        final fallback = File('test/fixtures/demo_corpus_100_sentences.json');
+        if (await fallback.exists()) {
+          jsonContent = await fallback.readAsString();
         } else {
-          fail('Could not locate demo_corpus_100_sentences.json in rootBundle or local filesystem: $e');
+          fail('Could not locate demo_corpus_100_sentences.json at "$fixtureDir". '
+              'Push fixtures via adb and pass --dart-define=FIXTURE_DIR=<dir>');
         }
       }
 

@@ -11,6 +11,9 @@ import '../../app/theme/app_typography.dart';
 import '../../engine/mt_stage.dart';
 import '../../engine/pipeline.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/hitl_validation_models.dart';
+import '../../services/hitl_validation_service.dart';
+import '../../services/teacher_profile_service.dart';
 import '../../widgets/ayo_badges.dart';
 import '../../widgets/ayo_bottom_nav_bar.dart';
 import '../../widgets/ayo_logo.dart';
@@ -61,6 +64,7 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
 
   String _sourceText = '';
   String _translatedTargetText = '';
+  bool _isCurrentTranslationFlagged = false;
 
   StreamSubscription<LivePipelineEvent>? _liveEventsSub;
   SpeechPipeline? _pipelineRef;
@@ -193,6 +197,7 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
         setState(() {
           _sourceText = event.text;
           _isProcessing = true;
+          _isCurrentTranslationFlagged = false;
         });
         break;
       case LiveEventType.mtClause:
@@ -204,6 +209,11 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
             ? event.timing.sourceText
             : _sourceText;
         _addTranslationToHistory(source, event.text);
+        _evaluateAndFlag(
+          source: source,
+          target: event.text,
+          confidence: event.confidence,
+        );
         break;
       case LiveEventType.playbackStarted:
         setState(() {
@@ -235,7 +245,17 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
   Future<void> _playTranslationAudio(String text, {TranslationDirection? direction}) async {
     if (text.trim().isEmpty) return;
     final pipeline = Provider.of<SpeechPipeline?>(context, listen: false);
-    if (pipeline == null) return;
+    if (pipeline == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ऑडियो प्लेबैक सेवा उपलब्ध नहीं है'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
     final dir = direction ?? _direction;
 
     try {
@@ -250,9 +270,49 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
           ttsResult.audioBytes,
           sampleRate: ttsResult.sampleRate,
         );
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('ऑडियो उत्पन्न करने में असमर्थ'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
     } catch (e) {
       debugPrint('[LiveTranslate] Error playing translation audio: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('ऑडियो प्लेबैक विफल: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _evaluateAndFlag({
+    required String source,
+    required String target,
+    required double? confidence,
+  }) async {
+    final pair = _direction == TranslationDirection.hindiToMundari
+        ? LanguagePairEnum.hindiToMundari
+        : LanguagePairEnum.mundariToHindi;
+    final teacherId = await TeacherProfileService.instance.getTeacherId();
+    final flagged = await HitlValidationService.instance.checkAndFlag(
+      sourceText: source,
+      targetText: target,
+      confidence: confidence,
+      languagePair: pair,
+      teacherId: teacherId,
+    );
+    if (mounted) {
+      setState(() {
+        _isCurrentTranslationFlagged = flagged != null;
+      });
     }
   }
 
@@ -331,6 +391,7 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
       _translatedTargetText = 'अनुवाद हो रहा है...';
       _isProcessing = true;
       _errorMessage = null;
+      _isCurrentTranslationFlagged = false;
     });
 
     try {
@@ -346,6 +407,11 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
           _translatedTargetText = mtResult.displayText;
         });
         _addTranslationToHistory(text, mtResult.displayText);
+        _evaluateAndFlag(
+          source: text,
+          target: mtResult.displayText,
+          confidence: mtResult.confidence,
+        );
       }
 
       final ttsResult = await pipeline.ttsStage.synthesize(
@@ -672,6 +738,7 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                 _direction = val;
                 _sourceText = '';
                 _translatedTargetText = '';
+                _isCurrentTranslationFlagged = false;
                 _errorMessage = null;
               });
               final pipeline = Provider.of<SpeechPipeline?>(context, listen: false);
@@ -813,6 +880,14 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                 ),
               ),
               const SizedBox(width: 8.0),
+              if (_isCurrentTranslationFlagged) ...[
+                const AyoBadge(
+                  label: 'समीक्षा हेतु चिह्नित',
+                  variant: AyoBadgeVariant.reviewNeeded,
+                  icon: Icons.flag_rounded,
+                ),
+                const SizedBox(width: 6.0),
+              ],
               AyoBadge(
                 label: l10n?.tagOfflineTranslation ?? 'ऑफ़लाइन अनुवाद',
                 variant: AyoBadgeVariant.verified,
@@ -1129,6 +1204,11 @@ class _LiveTranslateScreenState extends State<LiveTranslateScreen> {
                         _sourceText = _recentHistory[i].source;
                         _translatedTargetText = _recentHistory[i].target;
                       });
+                      _evaluateAndFlag(
+                        source: _recentHistory[i].source,
+                        target: _recentHistory[i].target,
+                        confidence: null,
+                      );
                       _playTranslationAudio(_recentHistory[i].target);
                     },
                     borderRadius: BorderRadius.circular(12.0),

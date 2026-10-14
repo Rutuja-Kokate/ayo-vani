@@ -8,6 +8,7 @@ import 'teacher_profile_service.dart';
 class HitlValidationService {
   static final HitlValidationService _instance =
       HitlValidationService._internal();
+  static HitlValidationService get instance => _instance;
   factory HitlValidationService() => _instance;
   HitlValidationService._internal();
 
@@ -119,10 +120,14 @@ class HitlValidationService {
     required String targetText,
     required double? confidence,
     required LanguagePairEnum languagePair,
+    String? teacherId,
     String modelVersion = 'v1.0.0_int8',
   }) async {
     await init();
     if (!isLowConfidence(confidence, languagePair)) return null;
+
+    final resolvedTeacherId =
+        teacherId ?? await TeacherProfileService.instance.getTeacherId();
 
     final existing = _flaggedTranslations.firstWhere(
       (item) =>
@@ -136,6 +141,7 @@ class HitlValidationService {
         languagePair: languagePair,
         modelVersion: modelVersion,
         timestamp: DateTime.now(),
+        teacherId: resolvedTeacherId,
       ),
     );
 

@@ -50,3 +50,7 @@ lib/config/rag_config.dart.local
 *.keystore
 key.properties
 local.properties
+
+# Full espeak-ng-data backup (stored outside repository)
+tools/espeak-ng-data-full-backup/
+espeak-ng-data-full-backup/

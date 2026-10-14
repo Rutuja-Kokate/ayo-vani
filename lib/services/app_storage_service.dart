@@ -39,22 +39,22 @@ class AppStorageService {
     int lessonCount = 24;
     int totalBytes = 0;
 
-    // 1. Count textbook chapter indexes from manifest if available
-    try {
-      final manifestRaw =
-          await rootBundle.loadString('assets/textbook_assets/manifest.json');
-      final manifest = jsonDecode(manifestRaw) as Map<String, dynamic>;
-      final distinctFiles = manifest.values.toSet();
-      if (distinctFiles.length > 24) {
-        lessonCount = distinctFiles.length;
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      // 1. Count textbook chapter indexes from manifest if available
+      try {
+        final manifestRaw =
+            await rootBundle.loadString('assets/textbook_assets/manifest.json');
+        final manifest = jsonDecode(manifestRaw) as Map<String, dynamic>;
+        final distinctFiles = manifest.values.toSet();
+        if (distinctFiles.length > 24) {
+          lessonCount = distinctFiles.length;
+        }
+      } catch (e) {
+        debugPrint('[AppStorage] Failed to read manifest: $e');
       }
-    } catch (e) {
-      debugPrint('[AppStorage] Failed to read manifest: $e');
-    }
 
-    // 2. Count cached generated items and measure cache directory
-    try {
-      if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      // 2. Count cached generated items and measure cache directory
+      try {
         final docDir = await getApplicationDocumentsDirectory();
         
         // RAG cache directory
@@ -96,9 +96,9 @@ class AppStorageService {
             }
           }
         }
+      } catch (e) {
+        debugPrint('[AppStorage] Storage computation note: $e');
       }
-    } catch (e) {
-      debugPrint('[AppStorage] Storage computation note: $e');
     }
 
     // If storage is unmeasured (e.g., assets packaged in bundle), default to 128 MB baseline

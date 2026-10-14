@@ -81,6 +81,7 @@ class FlaggedTranslation {
   final LanguagePairEnum languagePair;
   final String modelVersion;
   final DateTime timestamp;
+  final String? teacherId;
   HitlStatusEnum status;
 
   FlaggedTranslation({
@@ -91,6 +92,7 @@ class FlaggedTranslation {
     required this.languagePair,
     this.modelVersion = 'v1.0.0_int8',
     required this.timestamp,
+    this.teacherId,
     this.status = HitlStatusEnum.flagged,
   });
 
@@ -102,6 +104,7 @@ class FlaggedTranslation {
         'languagePair': languagePair.toShortString(),
         'modelVersion': modelVersion,
         'timestamp': timestamp.toIso8601String(),
+        if (teacherId != null) 'teacherId': teacherId,
         'status': status.toShortString(),
       };
 
@@ -113,6 +116,7 @@ class FlaggedTranslation {
         languagePair: LanguagePairExtension.fromString(json['languagePair'] as String),
         modelVersion: json['modelVersion'] as String? ?? 'v1.0.0_int8',
         timestamp: DateTime.parse(json['timestamp'] as String),
+        teacherId: json['teacherId'] as String?,
         status: HitlStatusExtension.fromString(json['status'] as String? ?? 'FLAGGED'),
       );
 }

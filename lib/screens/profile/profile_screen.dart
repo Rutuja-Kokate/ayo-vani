@@ -30,9 +30,10 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   TeacherProfile? _profile;
+  bool _isLoadingStats = true;
   AppStorageStats _storageStats = const AppStorageStats(
-    offlineLessonCount: 24,
-    storageUsedBytes: 128 * 1024 * 1024,
+    offlineLessonCount: 0,
+    storageUsedBytes: 0,
   );
 
   @override
@@ -49,10 +50,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _profile = profile;
           _storageStats = stats;
+          _isLoadingStats = false;
         });
       }
     } catch (e) {
       debugPrint('[ProfileScreen] Error loading profile: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingStats = false;
+        });
+      }
     }
   }
 
@@ -581,7 +588,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Text(
-                        '$count lessons',
+                        _isLoadingStats ? '...' : '$count lessons',
                         style: TextStyle(
                           fontFamily: AppTypography.bodyFontFamily,
                           fontSize: 10.5,
@@ -604,7 +611,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  '$count lessons available offline',
+                  _isLoadingStats
+                      ? '...'
+                      : '$count lessons available offline',
                   style: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11.5,
@@ -922,7 +931,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 2.0),
                     Text(
-                      '$count lessons available offline',
+                      _isLoadingStats
+                          ? '...'
+                          : '$count lessons available offline',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -950,7 +961,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 2.0),
                   Text(
-                    storageStr,
+                    _isLoadingStats ? '...' : storageStr,
                     style: TextStyle(
                       fontFamily: AppTypography.headingFontFamily,
                       fontSize: 14.0,

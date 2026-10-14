@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -81,37 +82,51 @@ class TeacherProfileService {
   TeacherProfile? _currentProfile;
 
   Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    // 1. Per-install UUID persisted in shared_preferences
-    _deviceId = prefs.getString(_kDeviceIdKey);
-    if (_deviceId == null || _deviceId!.isEmpty) {
-      _deviceId = const Uuid().v4();
-      await prefs.setString(_kDeviceIdKey, _deviceId!);
+      // 1. Per-install UUID persisted in shared_preferences
+      _deviceId = prefs.getString(_kDeviceIdKey);
+      if (_deviceId == null || _deviceId!.isEmpty) {
+        _deviceId = const Uuid().v4();
+        await prefs.setString(_kDeviceIdKey, _deviceId!);
+      }
+
+      // 2. Teacher identity from persistent profile store
+      var teacherId = prefs.getString(_kTeacherIdKey);
+      if (teacherId == null || teacherId.isEmpty) {
+        teacherId = 'teacher_${_deviceId!.substring(0, 8)}';
+        await prefs.setString(_kTeacherIdKey, teacherId);
+      }
+      final teacherName = prefs.getString(_kTeacherNameKey) ?? 'Teacher';
+      final role = prefs.getString(_kTeacherRoleKey) ?? 'Classroom Educator';
+      final className = prefs.getString(_kTeacherClassKey) ?? 'Class 1';
+      final focus = prefs.getString(_kTeacherFocusKey) ?? 'Primary Section • Tribal Language Focus';
+      final schoolId = prefs.getString(_kSchoolIdKey) ?? 'school_primary_01';
+      final studentsCount = prefs.getInt(_kStudentsCountKey) ?? 32;
+
+      _currentProfile = TeacherProfile(
+        teacherId: teacherId,
+        name: teacherName,
+        role: role,
+        className: className,
+        focus: focus,
+        schoolId: schoolId,
+        studentsCount: studentsCount,
+      );
+    } catch (e) {
+      debugPrint('[TeacherProfile] Fallback init due to: $e');
+      _deviceId ??= 'device_fallback_01';
+      _currentProfile ??= const TeacherProfile(
+        teacherId: 'teacher_01',
+        name: 'Teacher',
+        role: 'Classroom Educator',
+        className: 'Class 1',
+        focus: 'Primary Section • Tribal Language Focus',
+        schoolId: 'school_primary_01',
+        studentsCount: 32,
+      );
     }
-
-    // 2. Teacher identity from persistent profile store
-    var teacherId = prefs.getString(_kTeacherIdKey);
-    if (teacherId == null || teacherId.isEmpty) {
-      teacherId = 'teacher_${_deviceId!.substring(0, 8)}';
-      await prefs.setString(_kTeacherIdKey, teacherId);
-    }
-    final teacherName = prefs.getString(_kTeacherNameKey) ?? 'Teacher';
-    final role = prefs.getString(_kTeacherRoleKey) ?? 'Classroom Educator';
-    final className = prefs.getString(_kTeacherClassKey) ?? 'Class 1';
-    final focus = prefs.getString(_kTeacherFocusKey) ?? 'Primary Section • Tribal Language Focus';
-    final schoolId = prefs.getString(_kSchoolIdKey) ?? 'school_primary_01';
-    final studentsCount = prefs.getInt(_kStudentsCountKey) ?? 32;
-
-    _currentProfile = TeacherProfile(
-      teacherId: teacherId,
-      name: teacherName,
-      role: role,
-      className: className,
-      focus: focus,
-      schoolId: schoolId,
-      studentsCount: studentsCount,
-    );
   }
 
   /// Returns the per-install device UUID.
@@ -136,14 +151,18 @@ class TeacherProfileService {
 
   /// Updates and persists the teacher profile.
   Future<void> saveProfile(TeacherProfile profile) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kTeacherIdKey, profile.teacherId);
-    await prefs.setString(_kTeacherNameKey, profile.name);
-    await prefs.setString(_kTeacherRoleKey, profile.role);
-    await prefs.setString(_kTeacherClassKey, profile.className);
-    await prefs.setString(_kTeacherFocusKey, profile.focus);
-    await prefs.setString(_kSchoolIdKey, profile.schoolId);
-    await prefs.setInt(_kStudentsCountKey, profile.studentsCount);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kTeacherIdKey, profile.teacherId);
+      await prefs.setString(_kTeacherNameKey, profile.name);
+      await prefs.setString(_kTeacherRoleKey, profile.role);
+      await prefs.setString(_kTeacherClassKey, profile.className);
+      await prefs.setString(_kTeacherFocusKey, profile.focus);
+      await prefs.setString(_kSchoolIdKey, profile.schoolId);
+      await prefs.setInt(_kStudentsCountKey, profile.studentsCount);
+    } catch (e) {
+      debugPrint('[TeacherProfile] Save note: $e');
+    }
     _currentProfile = profile;
   }
 }

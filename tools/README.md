@@ -32,3 +32,32 @@ To regenerate `decoder_model_int8_argmax.onnx`:
 
 3. Deploy the resulting file to `assets/models/mt/decoder_model_int8_argmax.onnx`. When loaded in Dart, `RealMtStage` will automatically detect the second output and compute sequence confidence as:
    $$\text{confidence} = \exp\left(\frac{1}{T}\sum_{t=1}^T \text{max\_logprob}_t\right)$$
+
+## On-Device Integration Tests & Fixture Setup
+
+Test fixtures (`demo_corpus_100_sentences.json` and `short_7s.wav`) are kept out of production assets to keep APK size minimal.
+
+### Pushing Fixtures to Device via ADB
+
+1. Connect your Android device or start an emulator with `adb` available:
+   ```bash
+   adb devices
+   ```
+
+2. Create a temporary fixture folder on the device and push the fixtures:
+   ```bash
+   adb shell mkdir -p /data/local/tmp/fixtures/
+   adb push test/fixtures/demo_corpus_100_sentences.json /data/local/tmp/fixtures/
+   adb push test/fixtures/short_7s.wav /data/local/tmp/fixtures/
+   ```
+
+3. Run integration tests targeting the pushed fixture path:
+   ```bash
+   # MT Evaluation Test (generates MT evaluation CSV)
+   flutter test integration_test/mt_eval_test.dart \
+     --dart-define=FIXTURE_DIR=/data/local/tmp/fixtures
+
+   # STT Smoke Test (verifies Hindi speech transcription)
+   flutter test integration_test/stt_smoke_test.dart \
+     --dart-define=FIXTURE_DIR=/data/local/tmp/fixtures
+   ```

@@ -11,6 +11,7 @@ import 'package:ayo_vani/widgets/ayo_subject_card.dart';
 import 'package:ayo_vani/widgets/ayo_warli_art.dart';
 import 'package:ayo_vani/widgets/ayo_warli_village_art.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ayo_vani/engine/mt_stage.dart';
 import 'package:ayo_vani/engine/pipeline.dart';
 import 'package:ayo_vani/engine/stt_stage.dart';
@@ -36,6 +37,9 @@ Widget createTestApp() {
 }
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
   testWidgets('AYOVAANI Screen 01 (Splash) & Screen 02 (Welcome) complete flow', (
     WidgetTester tester,
   ) async {
@@ -505,6 +509,10 @@ void main() {
       // Tap Profile in bottom navigation
       await tester.tap(find.text('Profile'));
       await tester.pumpAndSettle();
+      for (int i = 0; i < 20; i++) {
+        if (find.text('24 lessons available offline').evaluate().isNotEmpty) break;
+        await tester.pump(const Duration(milliseconds: 100));
+      }
 
       // 1. Teacher Profile Header
       expect(find.text('Teacher Profile'), findsOneWidget);

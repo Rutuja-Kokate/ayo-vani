@@ -142,6 +142,7 @@ class LivePipelineEvent {
   final String text;
   final LiveClauseTiming timing;
   final Uint8List? audioBytes;
+  final double? confidence;
 
   LivePipelineEvent({
     required this.type,
@@ -149,6 +150,7 @@ class LivePipelineEvent {
     required this.text,
     required this.timing,
     this.audioBytes,
+    this.confidence,
   });
 }
 
@@ -442,6 +444,7 @@ class SpeechPipeline {
           clauseIndex: clauseIdx,
           text: mtResult.displayText,
           timing: timing,
+          confidence: mtResult.confidence,
         ));
 
         // Step 3: TTS Synthesis
